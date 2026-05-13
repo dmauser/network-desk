@@ -34,11 +34,11 @@ That's it. Launch Copilot CLI with experimental mode (`copilot --experimental`) 
 
 ## What is Cloud Networking?
 
-Cloud Networking gives you a coordinated team of network specialist agents through [GitHub Copilot CLI](https://docs.github.com/copilot/concepts/agents/about-copilot-cli). Describe what you need — VNet design, firewall rules, DNS troubleshooting, hybrid connectivity — and the coordinator routes your request to the right specialist automatically.
+Cloud Networking gives you a coordinated team of network specialist agents through [GitHub Copilot CLI](https://docs.github.com/copilot/concepts/agents/about-copilot-cli). Describe what you need — VNet design, firewall rules, DNS troubleshooting, hybrid connectivity, IaC generation, container networking, SASE architecture — and the coordinator routes your request to the right specialist automatically.
 
 Each specialist runs with its own domain expertise, guardrails, and workflow. The coordinator handles routing and multi-domain orchestration so you don't have to remember which tools to call.
 
-> **Analysis only** — Cloud Networking produces designs, configurations, and analysis for human review. It does not deploy infrastructure, modify live firewalls, or make changes to production networks.
+> **Analysis only** — Cloud Networking produces designs, configurations, IaC templates, and analysis for human review. It generates deployment code but does not execute deployments, modify live firewalls, or make changes to production networks.
 
 ## The Team
 
@@ -92,7 +92,7 @@ copilot --experimental
 
 This will:
 1. Create `~/.copilot/extensions/cloud-networking/` if it doesn't exist
-2. Copy the extension router and all 12 specialists
+2. Copy the extension router and all 19 specialists
 3. Remove any conflicting individual specialist extensions
 4. Display a summary of what was installed
 
@@ -116,7 +116,7 @@ copilot
 
 This will:
 1. Create `.github/extensions/cloud-networking/` in the current repo
-2. Copy the extension router and all 12 specialists
+2. Copy the extension router and all 19 specialists
 3. Add the extension directory to `.gitignore` (each developer runs init themselves)
 
 ### Option C — Global install via npm
@@ -210,7 +210,7 @@ copilot
 > show me the cloud-networking capabilities
 ```
 
-You should see all 12 specialists listed with their tools.
+You should see all 19 specialists listed with their tools.
 
 ### Updating
 
@@ -256,12 +256,13 @@ Cloud Networking Extension (~/.copilot/extensions/cloud-networking/extension.mjs
     ├─ Auto-routing hook detects networking keywords
     │   └─ Injects routing context → "use fw_* tools for firewall config"
     │
-    ├─ cn_capabilities → full map of all 12 specialists
+    ├─ cn_capabilities → full map of all 19 specialists
     ├─ cn_route → explicit routing for any query
     │
     └─ Specialist extensions provide the actual tools
         ├─ vnet_role, vnet_orchestrate, vnet_skill_hub_spoke_design, ...
         ├─ fw_role, fw_orchestrate, fw_skill_config_gen, ...
+        ├─ iac_role, iac_orchestrate, iac_skill_bicep_gen, ...
         └─ ntsh_role, ntsh_orchestrate, ntsh_skill_packet_capture, ...
 ```
 
@@ -421,6 +422,90 @@ Compare VPN gateway costs across Azure, AWS, and GCP for 500 Mbps.
 ```
 ```
 Should I use ExpressRoute or S2S VPN for 2 Gbps sustained? Show me the break-even.
+```
+
+### 📐 IaC Generator
+
+```
+Generate a Bicep template for a hub-spoke VNet with Azure Firewall and VPN Gateway.
+```
+```
+Create Terraform modules for a multi-region AWS VPC with Transit Gateway.
+```
+```
+Write an Ansible playbook to deploy NSGs and route tables for my Azure network.
+```
+
+### 🐳 Container Networking
+
+```
+Which CNI plugin should I use for my AKS cluster — Azure CNI Overlay or Cilium?
+```
+```
+Design Kubernetes network policies to isolate namespaces while allowing shared services.
+```
+```
+Compare Istio vs Linkerd for my service mesh — we need mTLS and traffic splitting.
+```
+
+### 🌐 CDN & Edge Networking
+
+```
+Design an Azure Front Door configuration with multi-origin failover and caching.
+```
+```
+Optimize cache hit ratio for my API responses — what cache key strategy should I use?
+```
+```
+Configure WAF rules at the edge to block bot traffic while allowing legitimate API calls.
+```
+
+### 🔄 Network Automation & GitOps
+
+```
+Design a GitHub Actions pipeline for deploying Terraform network changes with approval gates.
+```
+```
+Set up drift detection to alert when someone makes out-of-band changes to my NSGs.
+```
+```
+What policy-as-code rules should I enforce to prevent public IP creation in production?
+```
+
+### 🛡️ SASE / SSE
+
+```
+Design a SASE architecture to replace our legacy VPN for 5,000 remote users.
+```
+```
+Compare Zscaler ZPA vs Microsoft Entra Private Access for our ZTNA implementation.
+```
+```
+How should I integrate SD-WAN with our SASE platform for branch office connectivity?
+```
+
+### 📏 Network Capacity Planning
+
+```
+What VPN Gateway SKU do I need for 800 Mbps sustained throughput with 15 tunnels?
+```
+```
+Forecast our ExpressRoute bandwidth needs — we're growing 30% per quarter.
+```
+```
+Calculate maximum single-flow TCP throughput for a 50ms RTT link with 64KB window.
+```
+
+### 🔢 IPv6 Migration
+
+```
+Design a dual-stack VNet configuration for my Azure workloads.
+```
+```
+Plan an IPv6 migration for our Azure environment — which services support IPv6 today?
+```
+```
+Set up NAT64/DNS64 so my IPv6-only VMs can reach IPv4-only external services.
 ```
 
 ### 🔀 Multi-Domain (cross-specialist workflows)
@@ -632,6 +717,105 @@ cloud-networking/
                     │   └── SKILL.md
                     └── transit-design/
                         └── SKILL.md
+            ├── pricing-analyst/         # (structure follows same pattern)
+            ├── iac-generator/
+            │   ├── agents/
+            │   │   └── iac-generator.md
+            │   └── skills/
+            │       ├── bicep-gen/
+            │       │   └── SKILL.md
+            │       ├── terraform-gen/
+            │       │   └── SKILL.md
+            │       ├── ansible-gen/
+            │       │   └── SKILL.md
+            │       └── arm-gen/
+            │           └── SKILL.md
+            ├── container-networking/
+            │   ├── agents/
+            │   │   └── container-networking.md
+            │   └── skills/
+            │       ├── cni-selection/
+            │       │   └── SKILL.md
+            │       ├── network-policy/
+            │       │   └── SKILL.md
+            │       ├── service-mesh/
+            │       │   └── SKILL.md
+            │       ├── ingress-design/
+            │       │   └── SKILL.md
+            │       ├── cross-cluster/
+            │       │   └── SKILL.md
+            │       └── troubleshoot/
+            │           └── SKILL.md
+            ├── cdn-edge/
+            │   ├── agents/
+            │   │   └── cdn-edge.md
+            │   └── skills/
+            │       ├── cdn-design/
+            │       │   └── SKILL.md
+            │       ├── edge-routing/
+            │       │   └── SKILL.md
+            │       ├── cache-optimization/
+            │       │   └── SKILL.md
+            │       ├── waf-edge/
+            │       │   └── SKILL.md
+            │       └── troubleshoot/
+            │           └── SKILL.md
+            ├── network-automation/
+            │   ├── agents/
+            │   │   └── network-automation.md
+            │   └── skills/
+            │       ├── pipeline-design/
+            │       │   └── SKILL.md
+            │       ├── drift-detection/
+            │       │   └── SKILL.md
+            │       ├── policy-as-code/
+            │       │   └── SKILL.md
+            │       ├── testing/
+            │       │   └── SKILL.md
+            │       └── rollback/
+            │           └── SKILL.md
+            ├── sase-sse/
+            │   ├── agents/
+            │   │   └── sase-sse.md
+            │   └── skills/
+            │       ├── architecture/
+            │       │   └── SKILL.md
+            │       ├── ztna-design/
+            │       │   └── SKILL.md
+            │       ├── swg-casb/
+            │       │   └── SKILL.md
+            │       ├── sdwan-integration/
+            │       │   └── SKILL.md
+            │       └── vendor-compare/
+            │           └── SKILL.md
+            ├── capacity-planner/
+            │   ├── agents/
+            │   │   └── capacity-planner.md
+            │   └── skills/
+            │       ├── bandwidth-forecast/
+            │       │   └── SKILL.md
+            │       ├── gateway-sizing/
+            │       │   └── SKILL.md
+            │       ├── throughput-calc/
+            │       │   └── SKILL.md
+            │       ├── scalability-design/
+            │       │   └── SKILL.md
+            │       └── growth-model/
+            │           └── SKILL.md
+            └── ipv6-migration/
+                ├── agents/
+                │   └── ipv6-migration.md
+                └── skills/
+                    ├── dual-stack/
+                    │   └── SKILL.md
+                    ├── transition-plan/
+                    │   └── SKILL.md
+                    ├── addressing/
+                    │   └── SKILL.md
+                    ├── compatibility/
+                    │   └── SKILL.md
+                    └── troubleshoot/
+                        └── SKILL.md
 ```
 
 ### Installed extension structure
@@ -641,7 +825,7 @@ After running `cloud-networking init`, the installed layout mirrors the `extensi
 ```
 ~/.copilot/extensions/cloud-networking/
 ├── extension.mjs                          # Router + auto-routing hook
-└── specialists/                           # All 12 specialist directories
+└── specialists/                           # All 19 specialist directories
     └── (same structure as above)
 ```
 
@@ -667,7 +851,7 @@ specialist-name/
 | Extensions not loading (`/env` shows "Extensions: none") | Enable experimental mode: `copilot --experimental` — or use project-level install: `cloud-networking init --project` |
 | Tools not appearing after install | Restart Copilot CLI to reload extensions |
 | `cn_capabilities` not found | Verify `~/.copilot/extensions/cloud-networking/extension.mjs` exists |
-| Specialist tools missing | Run `cloud-networking status` to check — should list all 12 specialists |
+| Specialist tools missing | Run `cloud-networking status` to check — should list all 19 specialists |
 | Conflicting individual extensions | Run `cloud-networking init` — it removes old standalone specialist installs |
 | `npx` hangs or fails | Use Option E (manual install) — clone the repo and copy files directly |
 | Firewall config for unsupported vendor | Check the [14 supported vendors](#firewall-vendors-14) list |
