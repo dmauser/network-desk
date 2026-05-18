@@ -4,5 +4,9 @@ node_modules/
 out/
 .github/extensions/cloud-networking/
 
+# Per-install runtime metadata written by the extension/CLI
+.install-meta.json
+.update-check.json
+
 # Finance Desk extension (installed per-developer)
 .github/extensions/finance-desk/

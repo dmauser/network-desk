@@ -36,6 +36,30 @@ async function exists(path) {
     try { await access(path); return true; } catch { return false; }
 }
 
+async function writeInstallMeta(destDir, installType) {
+    try {
+        const pkgPath = join(PKG_ROOT, "package.json");
+        const pkg = JSON.parse(await readFile(pkgPath, "utf8"));
+        const meta = {
+            version: pkg.version,
+            installType,
+            installedAt: new Date().toISOString(),
+            source: "github:dmauser/cloud-networking",
+        };
+        await writeFile(join(destDir, ".install-meta.json"), JSON.stringify(meta, null, 2) + "\n");
+    } catch {
+        // best-effort; install must not fail because of metadata
+    }
+}
+
+async function readInstallMeta(destDir) {
+    try {
+        return JSON.parse(await readFile(join(destDir, ".install-meta.json"), "utf8"));
+    } catch {
+        return null;
+    }
+}
+
 // ── Commands ──────────────────────────────────────────────────────────
 
 function findGitRoot() {
@@ -82,6 +106,7 @@ async function initProject() {
 
     await mkdir(join(projectRoot, ".github", "extensions"), { recursive: true });
     await cp(EXTENSION_SRC, projectDest, { recursive: true });
+    await writeInstallMeta(projectDest, "project");
     ok("Extension installed to .github/extensions/cloud-networking/");
 
     await addToGitignore(projectRoot);
@@ -131,6 +156,7 @@ async function init() {
     }
 
     await cp(EXTENSION_SRC, EXT_DEST, { recursive: true });
+    await writeInstallMeta(EXT_DEST, "user");
     ok("Extension installed to ~/.copilot/extensions/cloud-networking/");
 
     const specialistsDir = join(EXT_DEST, "specialists");
@@ -204,6 +230,11 @@ async function status() {
         ok("User-level: installed at ~/.copilot/extensions/cloud-networking/");
         info("  Requires: copilot --experimental");
 
+        const meta = await readInstallMeta(EXT_DEST);
+        if (meta) {
+            info(`  Installed version: ${meta.version} (${meta.installedAt})`);
+        }
+
         const specialistsDir = join(EXT_DEST, "specialists");
         if (await exists(specialistsDir)) {
             const specialists = (await readdir(specialistsDir, { withFileTypes: true }))
@@ -232,6 +263,11 @@ async function status() {
             ok(`Project-level: installed at .github/extensions/cloud-networking/`);
             info("  Works without experimental mode");
 
+            const projMeta = await readInstallMeta(projectDest);
+            if (projMeta) {
+                info(`  Installed version: ${projMeta.version} (${projMeta.installedAt})`);
+            }
+
             const specialistsDir = join(projectDest, "specialists");
             if (await exists(specialistsDir)) {
                 const specialists = (await readdir(specialistsDir, { withFileTypes: true }))
@@ -249,6 +285,48 @@ async function status() {
     log("");
 }
 
+async function update() {
+    log("");
+    log(`${CYAN}Cloud Networking${RESET} — checking for installations to update`);
+    log("");
+
+    let updated = false;
+
+    if (await exists(EXT_DEST)) {
+        info("User-level installation detected — updating...");
+        log("");
+        await init();
+        updated = true;
+    }
+
+    const repoRoot = findGitRoot();
+    if (repoRoot) {
+        const projectDest = join(repoRoot, ".github", "extensions", "cloud-networking");
+        if (await exists(projectDest)) {
+            info("Project-level installation detected — updating...");
+            log("");
+            await initProject();
+            updated = true;
+        }
+    }
+
+    if (!updated) {
+        err("Nothing to update — extension is not installed.");
+        info("  User-level:    cloud-networking init");
+        info("  Project-level: cloud-networking init --project");
+        log("");
+    }
+}
+
+async function showVersion() {
+    try {
+        const pkg = JSON.parse(await readFile(join(PKG_ROOT, "package.json"), "utf8"));
+        log(pkg.version);
+    } catch {
+        log("unknown");
+    }
+}
+
 function showHelp() {
     log("");
     log(`${CYAN}Cloud Networking${RESET} — your cloud networking AI team`);
@@ -258,9 +336,11 @@ function showHelp() {
     log("Commands:");
     log("  init              Install extensions to ~/.copilot/extensions/ (requires experimental mode)");
     log("  init --project    Install extensions to .github/extensions/ in current repo (no experimental mode needed)");
+    log("  update            Re-install over any existing user-level and/or project-level install (pulls latest)");
     log("  uninstall         Remove user-level extensions");
     log("  uninstall --project  Remove project-level extensions from current repo");
     log("  status            Check installation status (both user-level and project-level)");
+    log("  --version, -v     Print the installed CLI version");
     log("  help              Show this help");
     log("");
 }
@@ -279,12 +359,21 @@ switch (command) {
             await init();
         }
         break;
+    case "update":
+    case "upgrade":
+        await update();
+        break;
     case "uninstall":
     case "remove":
         await uninstall();
         break;
     case "status":
         await status();
+        break;
+    case "--version":
+    case "-v":
+    case "version":
+        await showVersion();
         break;
     case "help":
     case "--help":

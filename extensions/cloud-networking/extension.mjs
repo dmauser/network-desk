@@ -9,12 +9,75 @@
 // network-automation, sase-sse, capacity-planner, ipv6-migration
 
 import { joinSession } from "@github/copilot-sdk/extension";
-import { readFile } from "node:fs/promises";
+import { readFile, writeFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const SPECIALISTS = join(HERE, "specialists");
+
+// ── Update check ───────────────────────────────────────────────────────
+// Lightweight, async, throttled check against the GitHub repo for a newer
+// version. Runs at most once every 24h, fully non-blocking, fails silently.
+// Opt out via env var CLOUD_NETWORKING_NO_UPDATE_CHECK=1.
+
+const UPDATE_CHECK_INTERVAL_MS = 24 * 60 * 60 * 1000; // 24h
+const UPDATE_MANIFEST_URL = "https://raw.githubusercontent.com/dmauser/cloud-networking/master/package.json";
+const INSTALL_META_PATH = join(HERE, ".install-meta.json");
+const UPDATE_STATE_PATH = join(HERE, ".update-check.json");
+
+function semverGt(a, b) {
+    const pa = String(a).split(".").map((n) => parseInt(n, 10) || 0);
+    const pb = String(b).split(".").map((n) => parseInt(n, 10) || 0);
+    for (let i = 0; i < 3; i++) {
+        if ((pa[i] || 0) > (pb[i] || 0)) return true;
+        if ((pa[i] || 0) < (pb[i] || 0)) return false;
+    }
+    return false;
+}
+
+async function readJsonSafe(path) {
+    try { return JSON.parse(await readFile(path, "utf8")); } catch { return null; }
+}
+
+async function checkForUpdate(session) {
+    if (process.env.CLOUD_NETWORKING_NO_UPDATE_CHECK === "1") return;
+
+    try {
+        const meta = await readJsonSafe(INSTALL_META_PATH);
+        const installed = meta?.version;
+        if (!installed) return; // no recorded version; nothing to compare against
+
+        const state = (await readJsonSafe(UPDATE_STATE_PATH)) || {};
+        if (state.lastCheck && Date.now() - state.lastCheck < UPDATE_CHECK_INTERVAL_MS) return;
+
+        const ac = new AbortController();
+        const timer = setTimeout(() => ac.abort(), 4000);
+        const res = await fetch(UPDATE_MANIFEST_URL, { signal: ac.signal, headers: { "user-agent": "cloud-networking-extension" } });
+        clearTimeout(timer);
+        if (!res.ok) return;
+        const remote = await res.json();
+        const latest = remote?.version;
+        if (!latest) return;
+
+        const newState = { lastCheck: Date.now(), latest, installed };
+        await writeFile(UPDATE_STATE_PATH, JSON.stringify(newState, null, 2) + "\n").catch(() => {});
+
+        if (semverGt(latest, installed)) {
+            const installType = meta.installType || "user";
+            const cmd = installType === "project"
+                ? "npx github:dmauser/cloud-networking update"
+                : "npx github:dmauser/cloud-networking update";
+            await session.log(
+                `cloud-networking: update available — installed ${installed}, latest ${latest}. ` +
+                `Run \`${cmd}\` to upgrade. See CHANGELOG.md for details. ` +
+                `(Disable this check with CLOUD_NETWORKING_NO_UPDATE_CHECK=1.)`
+            );
+        }
+    } catch {
+        // never crash the extension because of an update check
+    }
+}
 
 // ── File loaders ───────────────────────────────────────────────────────
 
@@ -52,19 +115,20 @@ function skillTool(name, description, loader) {
 
 const ORCHESTRATORS = {
     vnet: `You are now operating as the **vnet-architect** agent.
-Call \`vnet_role\` first, then use: vnet_skill_address_planner, vnet_skill_hub_spoke_design, vnet_skill_peering_advisor, vnet_skill_subnet_calculator, vnet_skill_network_diagram, vnet_skill_migration_planner.
-Cover Azure VNets, AWS VPCs, and GCP VPCs. Cite cloud provider documentation.`,
+Call \`vnet_role\` first, then use: vnet_skill_address_planner, vnet_skill_hub_spoke_design, vnet_skill_peering_advisor, vnet_skill_subnet_calculator, vnet_skill_network_diagram, vnet_skill_excalidraw_diagram, vnet_skill_drawio_diagram, vnet_skill_migration_planner.
+Cover Azure VNets, AWS VPCs, and GCP VPCs. Cite cloud provider documentation.
+**Diagram policy:** Mermaid (\`vnet_skill_network_diagram\`) is the default — always include one for every design, preferring official cloud-provider icons (Iconify refs like \`logos:microsoft-azure\`, \`logos:aws\`, \`logos:google-cloud\`) and falling back to emojis (🛡️ firewall, 🔐 VPN gateway, ⚖️ load balancer, 🌐 VNet, 🏢 on-prem) when no icon is available. After delivering the Mermaid diagram, offer to also generate Excalidraw (\`vnet_skill_excalidraw_diagram\`) or draw.io (\`vnet_skill_drawio_diagram\`) versions on request — do not generate them by default.`,
 
     fw: `You are now operating as the **firewall-engineer** agent.
-Call \`fw_role\` first, then use: fw_skill_rule_audit, fw_skill_policy_design, fw_skill_vendor_migrate, fw_skill_config_gen, fw_skill_hardening_check, fw_skill_ha_design, fw_skill_log_analysis, fw_skill_troubleshoot.
+Call \`fw_role\` first, then use: fw_skill_rule_audit, fw_skill_policy_design, fw_skill_policy_test, fw_skill_vendor_migrate, fw_skill_config_gen, fw_skill_hardening_check, fw_skill_ha_design, fw_skill_log_analysis, fw_skill_troubleshoot.
 Covers 14 vendor platforms: Azure Firewall, AWS Network Firewall, GCP Cloud Firewall, Palo Alto, FortiGate, Check Point, Cisco ASA/FTD, Juniper SRX, Zscaler, Sophos XG, OPNsense, pfSense, VyOS, iptables/nftables. Analysis only — never apply changes without confirmation.`,
 
     lb: `You are now operating as the **load-balancer** agent.
-Call \`lb_role\` first, then use: lb_skill_lb_selector, lb_skill_health_probe_design, lb_skill_ssl_offload, lb_skill_waf_rules, lb_skill_traffic_routing, lb_skill_troubleshoot.
+Call \`lb_role\` first, then use: lb_skill_lb_selector, lb_skill_health_probe_design, lb_skill_ssl_offload, lb_skill_tls_cert_mgmt, lb_skill_waf_rules, lb_skill_traffic_routing, lb_skill_troubleshoot.
 Covers Azure LB/App Gateway/Front Door, AWS ALB/NLB/GLB, GCP LB.`,
 
     dns: `You are now operating as the **dns-specialist** agent.
-Call \`dns_role\` first, then use: dns_skill_zone_design, dns_skill_resolver_design, dns_skill_record_audit, dns_skill_migration_plan, dns_skill_troubleshoot.
+Call \`dns_role\` first, then use: dns_skill_zone_design, dns_skill_resolver_design, dns_skill_record_audit, dns_skill_dnssec_design, dns_skill_migration_plan, dns_skill_troubleshoot.
 Covers Azure DNS, AWS Route 53, GCP Cloud DNS, and hybrid DNS resolution.`,
 
     pl: `You are now operating as the **private-link** agent.
@@ -72,23 +136,24 @@ Call \`pl_role\` first, then use: pl_skill_endpoint_design, pl_skill_dns_integra
 Covers Azure Private Link/Endpoints, AWS PrivateLink, GCP Private Service Connect.`,
 
     hyb: `You are now operating as the **hybrid-connectivity** agent.
-Call \`hyb_role\` first, then use: hyb_skill_vpn_design, hyb_skill_expressroute_design, hyb_skill_bandwidth_calc, hyb_skill_routing_design, hyb_skill_failover_design, hyb_skill_troubleshoot.
+Call \`hyb_role\` first, then use: hyb_skill_vpn_design, hyb_skill_expressroute_design, hyb_skill_bgp_design, hyb_skill_bandwidth_calc, hyb_skill_routing_design, hyb_skill_failover_design, hyb_skill_troubleshoot.
 Covers ExpressRoute, VPN gateways, AWS Direct Connect, GCP Cloud Interconnect.`,
 
     nsec: `You are now operating as the **network-security** agent.
-Call \`nsec_role\` first, then use: nsec_skill_nsg_audit, nsec_skill_segmentation_design, nsec_skill_ddos_design, nsec_skill_flow_analysis, nsec_skill_compliance_check, nsec_skill_troubleshoot.
+Call \`nsec_role\` first, then use: nsec_skill_nsg_audit, nsec_skill_segmentation_design, nsec_skill_zero_trust_architecture, nsec_skill_waf_policy_design, nsec_skill_ddos_design, nsec_skill_flow_analysis, nsec_skill_compliance_check, nsec_skill_troubleshoot.
 Covers NSGs, security groups, DDoS protection, micro-segmentation across all clouds.`,
 
     ntsh: `You are now operating as the **network-troubleshooter** agent.
-Call \`ntsh_role\` first, then use: ntsh_skill_connectivity_test, ntsh_skill_packet_capture, ntsh_skill_latency_analysis, ntsh_skill_routing_debug, ntsh_skill_nat_debug, ntsh_skill_mtu_path_discovery.
-Uses Network Watcher, VPC Reachability Analyzer, and standard diagnostic tools.`,
+Call \`ntsh_role\` first, then use: ntsh_skill_connectivity_test, ntsh_skill_packet_capture, ntsh_skill_pcap_analysis, ntsh_skill_tls_handshake_debug, ntsh_skill_latency_analysis, ntsh_skill_routing_debug, ntsh_skill_nat_debug, ntsh_skill_mtu_path_discovery.
+Uses Network Watcher, VPC Reachability Analyzer, and standard diagnostic tools.
+For packet-level investigations: pair \`ntsh_skill_packet_capture\` (capture mechanics — where/how/what to filter) with \`ntsh_skill_pcap_analysis\` (deep analysis of the resulting .pcap/.pcapng using tshark, Wireshark Statistics/Expert Info, decryption, and cloud-source gotchas).`,
 
     vwan: `You are now operating as the **vwan-sdwan** agent.
-Call \`vwan_role\` first, then use: vwan_skill_vwan_design, vwan_skill_routing_intent, vwan_skill_nva_integration, vwan_skill_branch_connectivity, vwan_skill_troubleshoot.
+Call \`vwan_role\` first, then use: vwan_skill_vwan_design, vwan_skill_secured_vhub_design, vwan_skill_routing_intent, vwan_skill_nva_integration, vwan_skill_branch_connectivity, vwan_skill_troubleshoot.
 Covers Azure Virtual WAN hubs, routing intent, and SD-WAN partner integrations.`,
 
     nmon: `You are now operating as the **network-monitor** agent.
-Call \`nmon_role\` first, then use: nmon_skill_flow_log_setup, nmon_skill_traffic_analytics, nmon_skill_connection_monitor, nmon_skill_alert_design, nmon_skill_dashboard_build, nmon_skill_baseline_analysis.
+Call \`nmon_role\` first, then use: nmon_skill_flow_log_setup, nmon_skill_traffic_analytics, nmon_skill_connection_monitor, nmon_skill_synthetic_monitoring, nmon_skill_alert_design, nmon_skill_dashboard_build, nmon_skill_baseline_analysis.
 Covers flow logs, traffic analytics, connection monitors, and alerting across all clouds.`,
 
     mcn: `You are now operating as the **multi-cloud-net** agent.
@@ -96,7 +161,7 @@ Call \`mcn_role\` first, then use: mcn_skill_transit_design, mcn_skill_addressin
 Covers cross-cloud connectivity architectures, service equivalency mapping, and cost analysis.`,
 
     price: `You are now operating as the **pricing-analyst** agent.
-Call \`price_role\` first, then use: price_skill_egress_calc, price_skill_vpn_pricing, price_skill_circuit_pricing, price_skill_lb_pricing, price_skill_firewall_pricing, price_skill_cost_optimizer, price_skill_price_compare.
+Call \`price_role\` first, then use: price_skill_egress_calc, price_skill_egress_architecture, price_skill_vpn_pricing, price_skill_circuit_pricing, price_skill_lb_pricing, price_skill_firewall_pricing, price_skill_cost_optimizer, price_skill_price_compare.
 Covers Azure, AWS, and GCP networking costs. Prices are indicative — always verify against current vendor pricing pages.`,
 
     iac: `You are now operating as the **iac-generator** agent.
@@ -246,8 +311,12 @@ const tools = [
         skillLoader("vnet-architect", "peering-advisor")),
     skillTool("vnet_skill_subnet_calculator", "Skill: Subnet math — CIDR splits, available IPs, reserved addresses per cloud provider.",
         skillLoader("vnet-architect", "subnet-calculator")),
-    skillTool("vnet_skill_network_diagram", "Skill: Generate Mermaid network topology diagrams from infrastructure descriptions.",
+    skillTool("vnet_skill_network_diagram", "Skill: Generate Mermaid network topology diagrams from infrastructure descriptions. Always prefers official cloud-provider icons.",
         skillLoader("vnet-architect", "network-diagram")),
+    skillTool("vnet_skill_excalidraw_diagram", "Skill: Generate Excalidraw (.excalidraw JSON) network topology diagrams from infrastructure descriptions. Always prefers official Azure/AWS/GCP icon libraries from libraries.excalidraw.com.",
+        skillLoader("vnet-architect", "excalidraw-diagram")),
+    skillTool("vnet_skill_drawio_diagram", "Skill: Generate draw.io (.drawio XML) network topology diagrams from infrastructure descriptions. Always prefers native cloud-provider stencils (mxgraph.azure2, mxgraph.aws4, mxgraph.gcp2).",
+        skillLoader("vnet-architect", "drawio-diagram")),
     skillTool("vnet_skill_migration_planner", "Skill: Plan network migrations — on-prem to cloud, cloud-to-cloud address space.",
         skillLoader("vnet-architect", "migration-planner")),
 
@@ -274,6 +343,8 @@ const tools = [
         skillLoader("firewall-engineer", "log-analysis")),
     skillTool("fw_skill_troubleshoot", "Skill: Troubleshoot firewall connectivity — packet flow, NAT, routing, policy lookup. Multi-vendor.",
         skillLoader("firewall-engineer", "troubleshoot")),
+    skillTool("fw_skill_policy_test", "Skill: Validate firewall rules before/after deploy — vendor simulators (Azure FW Policy Analyzer, AWS NFW log test, PAN test-security-policy-match, FortiGate policy lookup, Cisco packet-tracer, Check Point fw monitor), log-driven shadow testing, automated rule-coverage test cases, pre-deployment checklist.",
+        skillLoader("firewall-engineer", "policy-test")),
 
     // ── 3. Load Balancer ──
     roleTool("lb_role",
@@ -294,6 +365,8 @@ const tools = [
         skillLoader("load-balancer", "traffic-routing")),
     skillTool("lb_skill_troubleshoot", "Skill: Troubleshoot LB issues — backend health, asymmetric routing, SNAT exhaustion, 502/504 errors.",
         skillLoader("load-balancer", "troubleshoot")),
+    skillTool("lb_skill_tls_cert_mgmt", "Skill: TLS certificate lifecycle for load balancers — cert sources (managed, ACME, public/private CA), storage (Key Vault / ACM / Secret Manager / cert-manager), per-LB deployment, SNI/ALPN strategy, rotation, monitoring, emergency revocation.",
+        skillLoader("load-balancer", "tls-cert-mgmt")),
 
     // ── 4. DNS Specialist ──
     roleTool("dns_role",
@@ -312,6 +385,8 @@ const tools = [
         skillLoader("dns-specialist", "migration-plan")),
     skillTool("dns_skill_troubleshoot", "Skill: Troubleshoot DNS resolution — nslookup/dig analysis, forwarding chain tracing.",
         skillLoader("dns-specialist", "troubleshoot")),
+    skillTool("dns_skill_dnssec_design", "Skill: DNSSEC end-to-end design — algorithm selection (ECDSA P-256), KSK/ZSK/CSK, signing automation, DS-record delegation, NSEC3 parameters, key rollover (pre-publish and double-DS), monitoring, emergency rollback. Covers Azure DNS, Route 53, Cloud DNS, BIND.",
+        skillLoader("dns-specialist", "dnssec-design")),
 
     // ── 5. Private Link Engineer ──
     roleTool("pl_role",
@@ -350,6 +425,8 @@ const tools = [
         skillLoader("hybrid-connectivity", "failover-design")),
     skillTool("hyb_skill_troubleshoot", "Skill: Troubleshoot hybrid connectivity — BGP neighbor state, tunnel status, MTU issues, asymmetric routing.",
         skillLoader("hybrid-connectivity", "troubleshoot")),
+    skillTool("hyb_skill_bgp_design", "Skill: Dedicated BGP design for cloud hybrid — ASN allocation, prefix/AS-PATH filters, attribute manipulation (Local-Pref, prepend, MED, communities), multi-circuit active/active and active/passive, BFD, convergence tuning, cloud-specific gotchas (Azure ExpressRoute/VPN, AWS DX/VPN, GCP Cloud Router).",
+        skillLoader("hybrid-connectivity", "bgp-design")),
 
     // ── 7. Network Security ──
     roleTool("nsec_role",
@@ -370,6 +447,10 @@ const tools = [
         skillLoader("network-security", "compliance-check")),
     skillTool("nsec_skill_troubleshoot", "Skill: Troubleshoot network security — blocked traffic, effective rules, IP flow verify.",
         skillLoader("network-security", "troubleshoot")),
+    skillTool("nsec_skill_zero_trust_architecture", "Skill: Zero Trust networking architecture — NIST 800-207 / CISA ZTMM alignment, seven pillars, PEP/PDP placement, identity-aware access, microsegmentation, east-west encryption, egress control, continuous verification, workload identity (SPIFFE), threat model, anti-patterns.",
+        skillLoader("network-security", "zero-trust-architecture")),
+    skillTool("nsec_skill_waf_policy_design", "Skill: Cross-cloud WAF policy design — five-layer model (managed rules, custom rules, rate limits, bot management, geo/IP filters), Detect→Prevent rollout, OWASP CRS tuning, false-positive exclusions, integration with CDN/DDoS/API gateway. Covers Azure WAF, AWS WAFv2, GCP Cloud Armor, Cloudflare, F5, Imperva.",
+        skillLoader("network-security", "waf-policy-design")),
 
     // ── 8. Network Troubleshooter ──
     roleTool("ntsh_role",
@@ -380,8 +461,10 @@ const tools = [
         ORCHESTRATORS.ntsh),
     skillTool("ntsh_skill_connectivity_test", "Skill: Connectivity testing strategy — TCP/ICMP probes, traceroute, Network Watcher tools.",
         skillLoader("network-troubleshooter", "connectivity-test")),
-    skillTool("ntsh_skill_packet_capture", "Skill: Packet capture analysis — capture setup, Wireshark filter generation, protocol analysis.",
+    skillTool("ntsh_skill_packet_capture", "Skill: Packet capture mechanics — how to capture (Azure Network Watcher, AWS VPC Traffic Mirroring, GCP Packet Mirroring, tcpdump), capture filters, where to tap, dual-point captures. Pair with ntsh_skill_pcap_analysis for analysis of the resulting file.",
         skillLoader("network-troubleshooter", "packet-capture")),
+    skillTool("ntsh_skill_pcap_analysis", "Skill: Deep PCAP analysis with Wireshark and tshark — tshark cheatsheet, Statistics & Expert Info workflows, TCP/TLS/DNS/HTTP diagnostic playbooks, dual-point merging, decryption (TLS keylog, IPsec, WireGuard), anonymization, cloud-source gotchas (Azure NW, AWS VPC Mirroring, GCP Mirroring, container netns).",
+        skillLoader("network-troubleshooter", "pcap-analysis")),
     skillTool("ntsh_skill_latency_analysis", "Skill: Latency troubleshooting — hop-by-hop analysis, RTT baselines, jitter measurement.",
         skillLoader("network-troubleshooter", "latency-analysis")),
     skillTool("ntsh_skill_routing_debug", "Skill: Routing table analysis — effective routes, UDR conflicts, BGP route propagation.",
@@ -390,6 +473,8 @@ const tools = [
         skillLoader("network-troubleshooter", "nat-debug")),
     skillTool("ntsh_skill_mtu_path_discovery", "Skill: MTU/MSS troubleshooting — path MTU discovery, fragmentation, jumbo frames.",
         skillLoader("network-troubleshooter", "mtu-path-discovery")),
+    skillTool("ntsh_skill_tls_handshake_debug", "Skill: TLS handshake debugging — TLS alert code decoding (40, 42, 48, 51, 112, 116, 120), openssl s_client / testssl.sh / nmap workflows, cert chain validation, SNI/ALPN/mTLS failure patterns, OCSP stapling, clock skew, middlebox interception detection, decryption for forensics.",
+        skillLoader("network-troubleshooter", "tls-handshake-debug")),
 
     // ── 9. Virtual WAN / SD-WAN ──
     roleTool("vwan_role",
@@ -408,6 +493,8 @@ const tools = [
         skillLoader("vwan-sdwan", "branch-connectivity")),
     skillTool("vwan_skill_troubleshoot", "Skill: Troubleshoot vWAN — effective routes, connection state, hub routing.",
         skillLoader("vwan-sdwan", "troubleshoot")),
+    skillTool("vwan_skill_secured_vhub_design", "Skill: Azure Secured Virtual Hub design — when to use vs hub-spoke+NVA, routing intent (internet/private/both), Azure Firewall vs partner NVA SKU selection, rule set design, forced-tunneling, HA & cross-region, observability, cost, common pitfalls (rogue peerings, Private Endpoint inspection).",
+        skillLoader("vwan-sdwan", "secured-vhub-design")),
 
     // ── 10. Network Monitor ──
     roleTool("nmon_role",
@@ -422,6 +509,8 @@ const tools = [
         skillLoader("network-monitor", "traffic-analytics")),
     skillTool("nmon_skill_connection_monitor", "Skill: Connection monitor design — test groups, endpoints, alerting thresholds.",
         skillLoader("network-monitor", "connection-monitor")),
+    skillTool("nmon_skill_synthetic_monitoring", "Skill: Proactive synthetic monitoring — Azure Connection Monitor, App Insights availability tests, AWS CloudWatch Synthetics, GCP Uptime Checks, Blackbox Exporter + Prometheus, global probe vendors. Probe design principles, retries/multi-region thresholds, SLO/SLI integration, dashboards, anti-patterns.",
+        skillLoader("network-monitor", "synthetic-monitoring")),
     skillTool("nmon_skill_alert_design", "Skill: Network alerting strategy — metric alerts, log alerts, action groups, escalation.",
         skillLoader("network-monitor", "alert-design")),
     skillTool("nmon_skill_dashboard_build", "Skill: Network monitoring dashboard — KQL queries, Azure Monitor workbooks, CloudWatch.",
@@ -456,6 +545,8 @@ const tools = [
         ORCHESTRATORS.price),
     skillTool("price_skill_egress_calc", "Skill: Data transfer and egress cost calculation across Azure, AWS, and GCP — tiered pricing, inter-region, peering costs.",
         skillLoader("pricing-analyst", "egress-calc")),
+    skillTool("price_skill_egress_architecture", "Skill: Architectural patterns to structurally reduce egress cost — PrivateLink/Gateway Endpoints, CDN offload, regional pinning, cross-AZ minimization, dedicated interconnects, egress-free storage tiers, compression/batching, multi-cloud peering exchanges, NAT GW tax mitigation, commit discounts. Break-even modeling and review checklist.",
+        skillLoader("pricing-analyst", "egress-architecture")),
     skillTool("price_skill_vpn_pricing", "Skill: VPN gateway pricing comparison — per-hour costs, tunnel limits, data transfer charges across all three clouds.",
         skillLoader("pricing-analyst", "vpn-pricing")),
     skillTool("price_skill_circuit_pricing", "Skill: Dedicated circuit pricing — ExpressRoute, Direct Connect, Cloud Interconnect fees, break-even analysis vs VPN.",
@@ -598,28 +689,60 @@ const tools = [
 
 // ── Register session ───────────────────────────────────────────────────
 
+// Explicit mention pattern — users type `@cloud-networking ...` to engage the extension.
+// Accepts a few common variations and is case-insensitive.
+const MENTION_RE = /(^|\s)@cloud[-_]?networking\b/i;
+
 const session = await joinSession({
     tools,
     hooks: {
         onUserPromptSubmitted: async (input) => {
             if (!input?.prompt) return;
-            const matches = ROUTES.filter((r) => r.trigger.test(input.prompt));
-            if (matches.length === 0) return;
+
+            const mentioned = MENTION_RE.test(input.prompt);
+            // Strip the @cloud-networking mention before scanning for specialist keywords
+            const scanText = mentioned ? input.prompt.replace(MENTION_RE, " ") : input.prompt;
+            const matches = ROUTES.filter((r) => r.trigger.test(scanText));
+
+            // Only engage when the user explicitly mentions @cloud-networking,
+            // OR when networking keywords clearly match a specialist.
+            if (!mentioned && matches.length === 0) return;
+
+            const header = mentioned
+                ? `[cloud-networking] @cloud-networking invoked.`
+                : `[cloud-networking] Detected networking intent.`;
+
+            if (matches.length === 0) {
+                // Mentioned but no specialist matched — engage the router automatically.
+                return {
+                    additionalContext:
+                        `${header} No single specialist matched the request directly.\n\n` +
+                        `Engage the routing flow now: silently call \`cn_route\` with the user's query ` +
+                        `to pick the right specialist, then call that specialist's role tool, then its ` +
+                        `orchestrator, then the relevant skills. If still ambiguous, call ` +
+                        `\`cn_capabilities\` and ask the user which area to focus on.\n\n` +
+                        `Do not list internal tool names to the user — respond in natural language.`,
+                };
+            }
 
             const guidance = matches
-                .map((m) => `• **${m.domain}** → \`${m.prefix}_role\` then \`${m.prefix}_orchestrate\``)
+                .map((m) => `• **${m.domain}** — engage this specialist`)
                 .join("\n");
 
             return {
                 additionalContext:
-                    `[cloud-networking] Detected networking intent. Route to:\n${guidance}\n\n` +
-                    `Call the role tool first, then orchestrate, then skills. ` +
-                    `Call \`cn_capabilities\` for the full specialist map.`,
+                    `${header} Engage the following specialist(s):\n${guidance}\n\n` +
+                    `For each matched specialist, silently call its role tool, then its ` +
+                    `orchestrator, then the relevant skills to fulfil the user's request. ` +
+                    `Respond to the user in natural language — do not list internal tool names.`,
             };
         },
     },
 });
 
 await session.log(
-    "cloud-networking loaded — 19 specialists, 143 tools, fully standalone (cn_capabilities, cn_route)",
+    "cloud-networking loaded — 19 specialists, 156 tools, standalone. Trigger with @cloud-networking",
 );
+
+// Fire-and-forget update check (throttled to once per 24h, opt-out via env var).
+checkForUpdate(session);

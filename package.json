@@ -1,6 +1,6 @@
 {
   "name": "@dmauser/cloud-networking",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Your cloud networking AI team for GitHub Copilot CLI — 11 specialist agents, one install.",
   "type": "module",
   "bin": {
@@ -10,7 +10,8 @@
     "bin/",
     "extensions/cloud-networking/",
     "LICENSE",
-    "README.md"
+    "README.md",
+    "CHANGELOG.md"
   ],
   "keywords": [
     "copilot",
