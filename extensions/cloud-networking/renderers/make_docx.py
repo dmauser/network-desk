@@ -2,7 +2,9 @@
 """make_docx.py - Cloud Networking Word renderer (with REAL Word styles).
 
 Install: pip install python-docx markdown-it-py
-Usage:   python make_docx.py --input report.md --output report.docx --specialist "Hybrid Connectivity"
+Usage:   python make_docx.py --input report.md --specialist "Hybrid Connectivity"
+         # --output is optional; defaults to cloud-networking/<specialist>/reports/<input-stem>.docx
+         # override with: --output path/to/report.docx  (or --outdir to change the base folder)
 
 Policy mandates real Word styles (Heading 1/2/3, Title, Quote, List Bullet) -
 never hand-roll bold runs to fake structure. A TOC field is inserted at the
@@ -166,10 +168,26 @@ def render_markdown(doc, md_text: str) -> int:
     return para_count
 
 
+def _slugify(text: str) -> str:
+    s = re.sub(r"[^a-z0-9]+", "-", str(text).lower()).strip("-")
+    return s or "cloud-networking"
+
+
+def resolve_output(output, specialist, stem, ext, outdir):
+    """Return the explicit --output, or a structured default:
+    <outdir>/<specialist-slug>/reports/<stem>.<ext>."""
+    if output is not None:
+        return output
+    return pathlib.Path(outdir) / _slugify(specialist) / "reports" / f"{stem}.{ext}"
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description="Render a Cloud Networking markdown report to DOCX with real Word styles.")
     ap.add_argument("--input", required=True, type=pathlib.Path)
-    ap.add_argument("--output", required=True, type=pathlib.Path)
+    ap.add_argument("--output", type=pathlib.Path, default=None,
+                    help="Output path. If omitted: cloud-networking/<specialist>/reports/<input-stem>.docx")
+    ap.add_argument("--outdir", default="cloud-networking",
+                    help="Base dir used when --output is omitted (default: cloud-networking)")
     ap.add_argument("--specialist", default="Cloud Networking")
     args = ap.parse_args()
 
@@ -196,11 +214,12 @@ def main() -> int:
     footer = section.footer.paragraphs[0]
     footer.text = f"Cloud Networking - {args.specialist} - {today}"
 
-    args.output.parent.mkdir(parents=True, exist_ok=True)
-    doc.save(args.output)
+    out = resolve_output(args.output, args.specialist, args.input.stem, "docx", args.outdir)
+    out.parent.mkdir(parents=True, exist_ok=True)
+    doc.save(out)
 
-    size = args.output.stat().st_size
-    print(f"OK  {args.output}  ({size:,} bytes, ~{para_count} paragraphs)")
+    size = out.stat().st_size
+    print(f"OK  {out}  ({size:,} bytes, ~{para_count} paragraphs)")
     return 0
 
 

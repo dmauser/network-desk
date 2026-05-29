@@ -697,6 +697,20 @@ let presenceAnnounced = false;
 
 const SPECIALIST_INLINE = PREFIXES.map((p) => `${REGISTRY[p].icon} ${REGISTRY[p].domain} (${pub(p)})`).join(", ");
 
+// Canonical on-disk layout for any artifact a specialist produces (diagrams,
+// reports, generated configs). Injected into the presence note so every
+// specialist saves outputs to a predictable, easy-to-navigate structure.
+const OUTPUT_CONVENTION =
+    "OUTPUT FILES (REQUIRED LAYOUT): When you save ANY generated artifact to disk — diagrams, reports, or generated " +
+    "configs/IaC — place it under a `cloud-networking/` folder in the current working directory, organized by specialist " +
+    "then artifact type:\n" +
+    "  cloud-networking/<specialist>/diagrams/  — Mermaid (.mmd), Excalidraw (.excalidraw), draw.io (.drawio)\n" +
+    "  cloud-networking/<specialist>/reports/   — .md, .html, .pdf, .docx, .xlsx\n" +
+    "  cloud-networking/<specialist>/configs/   — generated IaC, firewall/device configs, scripts\n" +
+    "`<specialist>` is the specialist's kebab-case name (e.g. vnet-architect, firewall-engineer, iac-generator, pricing-analyst). " +
+    "Name files `<kebab-topic>-<YYYYMMDD>.<ext>` (e.g. `hub-spoke-3region-20260528.drawio`). Create missing subfolders. " +
+    "Confirm the path with the user before writing, write only inside the working directory, and never modify live infrastructure.";
+
 const PRESENCE_NOTE =
     "[cloud-networking] The cloud-networking extension (a.k.a. @cloud-networking) is LOADED in this session. " +
     `It bundles ${PREFIXES.length} cloud-networking specialists: ${SPECIALIST_INLINE}. ` +
@@ -715,7 +729,8 @@ const PRESENCE_NOTE =
     "Cloud Networking is analysis-only: it never applies changes, modifies infrastructure, or runs commands against live environments. " +
     "RESPONSE FOOTER (REQUIRED): at the end of EVERY assistant response that touches cloud networking — any turn where you called a `cn_*` tool, " +
     "or discussed any networking topic above — append the following line verbatim, on its own line after all other content:\n\n" +
-    "> Analysis only — verify against vendor documentation before applying.";
+    "> Analysis only — verify against vendor documentation before applying.\n\n" +
+    OUTPUT_CONVENTION;
 
 const DIRECT_MENTION =
     "[cloud-networking — DIRECT MENTION] The user just referenced the cloud-networking extension by name. " +

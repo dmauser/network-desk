@@ -2,7 +2,9 @@
 """make_html.py - Cloud Networking standalone HTML renderer.
 
 Install: pip install markdown2
-Usage:   python make_html.py --input report.md --output report.html --specialist "Firewall Engineering"
+Usage:   python make_html.py --input report.md --specialist "Firewall Engineering"
+         # --output is optional; defaults to cloud-networking/<specialist>/reports/<input-stem>.html
+         # override with: --output path/to/report.html  (or --outdir to change the base folder)
 
 Produces a single self-contained .html file (inline CSS, no external links) that
 is BOTH viewable in a browser and printable with the same brand styling as the
@@ -91,10 +93,26 @@ def render(md_text: str, specialist: str, today: str) -> str:
     )
 
 
+def _slugify(text: str) -> str:
+    s = re.sub(r"[^a-z0-9]+", "-", str(text).lower()).strip("-")
+    return s or "cloud-networking"
+
+
+def resolve_output(output, specialist, stem, ext, outdir):
+    """Return the explicit --output, or a structured default:
+    <outdir>/<specialist-slug>/reports/<stem>.<ext>."""
+    if output is not None:
+        return output
+    return pathlib.Path(outdir) / _slugify(specialist) / "reports" / f"{stem}.{ext}"
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description="Render a Cloud Networking markdown report to standalone HTML.")
     ap.add_argument("--input", required=True, type=pathlib.Path)
-    ap.add_argument("--output", required=True, type=pathlib.Path)
+    ap.add_argument("--output", type=pathlib.Path, default=None,
+                    help="Output path. If omitted: cloud-networking/<specialist>/reports/<input-stem>.html")
+    ap.add_argument("--outdir", default="cloud-networking",
+                    help="Base dir used when --output is omitted (default: cloud-networking)")
     ap.add_argument("--specialist", default="Cloud Networking")
     args = ap.parse_args()
 
@@ -102,11 +120,12 @@ def main() -> int:
     today = datetime.date.today().isoformat()
     page_html = render(md_text, args.specialist, today)
 
-    args.output.parent.mkdir(parents=True, exist_ok=True)
-    args.output.write_text(page_html, encoding="utf-8")
+    out = resolve_output(args.output, args.specialist, args.input.stem, "html", args.outdir)
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text(page_html, encoding="utf-8")
 
-    size = args.output.stat().st_size
-    print(f"OK  {args.output}  ({size:,} bytes)")
+    size = out.stat().st_size
+    print(f"OK  {out}  ({size:,} bytes)")
     return 0
 
 

@@ -194,7 +194,7 @@ When asked for a diagram, deliver:
 
 1. A short prose summary of the layout and which stencil set was chosen.
 2. The full XML in a fenced ```xml block, well-formed and self-contained.
-3. Instructions: "Save as `topology.drawio` and open at https://app.diagrams.net, or use **Extras → Edit Diagram** to paste it directly."
+3. Instructions: "Save under `cloud-networking/vnet-architect/diagrams/<topic>-<YYYYMMDD>.drawio` (e.g. `hub-spoke-3region-20260528.drawio`) and open at https://app.diagrams.net, or use **Extras → Edit Diagram** to paste it directly."
 
 ## References
 

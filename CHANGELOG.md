@@ -8,6 +8,21 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Added — Standard output-file layout for generated artifacts
+
+Generated diagrams, reports, and configs now follow one predictable on-disk structure under a `cloud-networking/` folder in the current working directory:
+
+```
+cloud-networking/<specialist>/diagrams/   # .mmd, .excalidraw, .drawio
+cloud-networking/<specialist>/reports/    # .md, .html, .pdf, .docx, .xlsx
+cloud-networking/<specialist>/configs/    # generated IaC, device configs, scripts
+```
+
+- `<specialist>` is the kebab-case specialist name (e.g. `vnet-architect`, `firewall-engineer`). Files are named `<kebab-topic>-<YYYYMMDD>.<ext>`.
+- The convention is injected via the session presence note, so every specialist that writes a file follows it.
+- The diagram skills (`network-diagram`, `excalidraw-diagram`, `drawio-diagram`) now instruct saving under `cloud-networking/vnet-architect/diagrams/`.
+- The report renderers (`make_html.py`, `make_pdf.py`, `make_docx.py`, `make_xlsx.py`) now make `--output` optional, defaulting to `cloud-networking/<specialist>/reports/<stem>.<ext>`, with a new `--outdir` to override the base folder.
+
 ### Changed — Extension runtime performance
 
 Surgical performance improvements to `extension.mjs` (no behavior change to tool output):

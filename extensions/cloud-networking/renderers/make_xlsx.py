@@ -2,7 +2,9 @@
 """make_xlsx.py - Cloud Networking Excel workbook renderer (with REAL formulas).
 
 Install: pip install openpyxl
-Usage:   python make_xlsx.py --spec spec.json --output report.xlsx
+Usage:   python make_xlsx.py --spec spec.json --specialist "Capacity Planner"
+         # --output is optional; defaults to cloud-networking/<specialist>/reports/<spec-stem>.xlsx
+         # override with: --output path/to/report.xlsx  (or --outdir to change the base folder)
 
 Spec format (JSON) - multi-sheet workbook with real formulas:
 {
@@ -168,10 +170,28 @@ def apply_named_ranges(wb, spec: dict) -> None:
         wb.defined_names[entry["name"]] = dn
 
 
+def _slugify(text: str) -> str:
+    s = re.sub(r"[^a-z0-9]+", "-", str(text).lower()).strip("-")
+    return s or "cloud-networking"
+
+
+def resolve_output(output, specialist, stem, ext, outdir):
+    """Return the explicit --output, or a structured default:
+    <outdir>/<specialist-slug>/reports/<stem>.<ext>."""
+    if output is not None:
+        return output
+    return pathlib.Path(outdir) / _slugify(specialist) / "reports" / f"{stem}.{ext}"
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description="Render a Cloud Networking multi-sheet XLSX workbook with real formulas.")
     ap.add_argument("--spec", required=True, type=pathlib.Path, help="JSON spec describing sheets / cells / formulas")
-    ap.add_argument("--output", required=True, type=pathlib.Path)
+    ap.add_argument("--output", type=pathlib.Path, default=None,
+                    help="Output path. If omitted: cloud-networking/<specialist>/reports/<spec-stem>.xlsx")
+    ap.add_argument("--outdir", default="cloud-networking",
+                    help="Base dir used when --output is omitted (default: cloud-networking)")
+    ap.add_argument("--specialist", default="Cloud Networking",
+                    help="Specialist name used to build the default output path")
     args = ap.parse_args()
 
     try:
@@ -194,12 +214,13 @@ def main() -> int:
         ws["A1"] = spec.get("title", "Cloud Networking Report")
         style_h1(ws["A1"])
 
-    args.output.parent.mkdir(parents=True, exist_ok=True)
-    wb.save(args.output)
+    out = resolve_output(args.output, args.specialist, args.spec.stem, "xlsx", args.outdir)
+    out.parent.mkdir(parents=True, exist_ok=True)
+    wb.save(out)
 
-    size = args.output.stat().st_size
+    size = out.stat().st_size
     sheet_count = len(wb.sheetnames)
-    print(f"OK  {args.output}  ({size:,} bytes, {sheet_count} sheet(s))")
+    print(f"OK  {out}  ({size:,} bytes, {sheet_count} sheet(s))")
     return 0
 
 

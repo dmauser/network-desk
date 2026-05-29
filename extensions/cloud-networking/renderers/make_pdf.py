@@ -2,7 +2,9 @@
 """make_pdf.py - Cloud Networking PDF renderer (Playwright + Chromium + markdown2).
 
 Install: pip install playwright markdown2 && python -m playwright install chromium
-Usage:   python make_pdf.py --input report.md --output report.pdf --specialist "VNet/Subnet Architecture"
+Usage:   python make_pdf.py --input report.md --specialist "VNet/Subnet Architecture"
+         # --output is optional; defaults to cloud-networking/<specialist>/reports/<input-stem>.pdf
+         # override with: --output path/to/report.pdf  (or --outdir to change the base folder)
 
 Brand defaults follow extensions/cloud-networking/data/report-quality.yaml (report_quality.brand).
 Do NOT switch to xhtml2pdf / reportlab / pdfkit / weasyprint - the policy
@@ -106,10 +108,26 @@ async def html_to_pdf(html_str: str, out_path: pathlib.Path) -> None:
         await browser.close()
 
 
+def _slugify(text: str) -> str:
+    s = re.sub(r"[^a-z0-9]+", "-", str(text).lower()).strip("-")
+    return s or "cloud-networking"
+
+
+def resolve_output(output, specialist, stem, ext, outdir):
+    """Return the explicit --output, or a structured default:
+    <outdir>/<specialist-slug>/reports/<stem>.<ext>."""
+    if output is not None:
+        return output
+    return pathlib.Path(outdir) / _slugify(specialist) / "reports" / f"{stem}.{ext}"
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description="Render a Cloud Networking markdown report to PDF.")
     ap.add_argument("--input", required=True, type=pathlib.Path)
-    ap.add_argument("--output", required=True, type=pathlib.Path)
+    ap.add_argument("--output", type=pathlib.Path, default=None,
+                    help="Output path. If omitted: cloud-networking/<specialist>/reports/<input-stem>.pdf")
+    ap.add_argument("--outdir", default="cloud-networking",
+                    help="Base dir used when --output is omitted (default: cloud-networking)")
     ap.add_argument("--specialist", default="Cloud Networking")
     args = ap.parse_args()
 
@@ -117,11 +135,12 @@ def main() -> int:
     today = datetime.date.today().isoformat()
     page_html = render_html(md_text, args.specialist, today)
 
-    args.output.parent.mkdir(parents=True, exist_ok=True)
-    asyncio.run(html_to_pdf(page_html, args.output))
+    out = resolve_output(args.output, args.specialist, args.input.stem, "pdf", args.outdir)
+    out.parent.mkdir(parents=True, exist_ok=True)
+    asyncio.run(html_to_pdf(page_html, out))
 
-    size = args.output.stat().st_size
-    print(f"OK  {args.output}  ({size:,} bytes)")
+    size = out.stat().st_size
+    print(f"OK  {out}  ({size:,} bytes)")
     return 0
 
 

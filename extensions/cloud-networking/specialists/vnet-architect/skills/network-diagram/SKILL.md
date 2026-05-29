@@ -194,6 +194,8 @@ When generating a diagram from a user's network description:
 6. **Apply styling** — Color-code by environment (prod/dev/staging) or by region.
 7. **Validate** — Ensure every labeled CIDR matches the address plan, no orphaned nodes exist, and connection types are accurate.
 
+Mermaid renders inline by default. If the user asks to save it, write the fenced diagram to `cloud-networking/vnet-architect/diagrams/<topic>-<YYYYMMDD>.md` (or `.mmd`), e.g. `hub-spoke-3region-20260528.mmd`.
+
 ### Tips for Readable Diagrams
 
 - **Limit depth to 2 levels** — VNet/VPC as subgraph, subnets as nodes inside. Don't nest subgraphs within subgraphs beyond this.
