@@ -10,10 +10,34 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Added
 
+- **MCP-first source of truth** — every specialist now declares an ordered
+  `mcpSources` list in the registry (Microsoft Learn, Azure MCP, AWS MCP, GCP
+  MCP, Terraform MCP, GitHub MCP, Context7, firewall-vendor MCPs). `cn_role`,
+  `cn_orchestrate`, and `cn_skill` outputs are appended with a generated
+  `## Authoritative Sources (MCP-first)` block driven from a single
+  `MCP_REGISTRY` — no edits to the 124 SKILL.md files. New 6th tool
+  **`cn_sources`** returns the full probe → query → fallback playbook (loaded
+  from `extensions/network-desk/specialists/_shared/mcp-lookup/SKILL.md`).
+  Enforcement is SHOULD-strength: the agent gracefully falls back to baked-in
+  knowledge with a "not validated against live vendor MCP" disclaimer when no
+  MCP is installed.
+- **Validation extended** — `NETWORK_DESK_VALIDATE=1` now also checks that
+  every REGISTRY entry declares `mcpSources`, that every entry resolves in
+  `MCP_REGISTRY`, and that the shared `_shared/mcp-lookup/SKILL.md` exists.
 - **Privacy documentation** — added [`PRIVACY.md`](PRIVACY.md) describing exactly how the
   extension handles data: it collects no telemetry, transmits no prompts/code/files, and makes
   only a single optional once-per-24h GitHub version check (disable with
   `NETWORK_DESK_NO_UPDATE_CHECK=1`). Referenced from the README and shipped with the package.
+  PRIVACY.md also documents that MCP-first guidance instructs the **host CLI agent** (not
+  Network Desk) to call third-party MCP servers, and that any data sent to such servers is
+  governed by their own privacy terms.
+
+### Changed
+
+- **Canonical footer** updated from
+  `Analysis only — verify against vendor documentation before applying.` to
+  `Analysis only — verify against vendor MCP / documentation before applying.`
+  to reflect the MCP-first sourcing.
 
 ---
 

@@ -310,6 +310,20 @@ You: @network-desk design a hub-spoke VNet with Azure Firewall and
 
 You never need to call individual tools — just describe what you need after `@network-desk` and the coordinator handles the rest.
 
+### Source of truth: vendor MCP servers (MCP-first)
+
+Network Desk specialists prefer **vendor MCP servers** as the source of truth over
+baked-in knowledge. Each specialist declares an ordered preference list — for example,
+`cn_vnet` consults Azure MCP / AWS MCP / GCP MCP / Terraform MCP / Microsoft Learn / Context7,
+while `cn_fw` checks vendor-specific firewall MCPs first and falls back to Context7. The
+guidance is appended to every `cn_role` / `cn_orchestrate` / `cn_skill` response, and the
+new **`cn_sources`** tool returns the full probe → query → fallback playbook.
+
+This is **SHOULD**-strength, not MUST: if no relevant MCP is installed, the specialist
+answers from curated knowledge and appends `> Not validated against live vendor MCP — verify before applying.`
+Network Desk itself never calls an MCP — only the host Copilot CLI agent does, using
+whatever MCP servers you have configured. See [`PRIVACY.md`](PRIVACY.md#vendor-mcp-servers-source-of-truth-guidance) for the trust-boundary details.
+
 ## Usage Examples
 
 Trigger the extension with **`@network-desk`** and describe what you need in plain language — the coordinator picks the right specialist automatically.
