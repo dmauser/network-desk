@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""make_docx.py - Cloud Networking Word renderer (with REAL Word styles).
+"""make_docx.py - Network Desk Word renderer (with REAL Word styles).
 
 Install: pip install python-docx markdown-it-py
 Usage:   python make_docx.py --input report.md --specialist "Hybrid Connectivity"
-         # --output is optional; defaults to cloud-networking/<specialist>/reports/<input-stem>.docx
+         # --output is optional; defaults to network-desk/<specialist>/reports/<input-stem>.docx
          # override with: --output path/to/report.docx  (or --outdir to change the base folder)
 
 Policy mandates real Word styles (Heading 1/2/3, Title, Quote, List Bullet) -
@@ -170,7 +170,7 @@ def render_markdown(doc, md_text: str) -> int:
 
 def _slugify(text: str) -> str:
     s = re.sub(r"[^a-z0-9]+", "-", str(text).lower()).strip("-")
-    return s or "cloud-networking"
+    return s or "network-desk"
 
 
 def resolve_output(output, specialist, stem, ext, outdir):
@@ -182,13 +182,13 @@ def resolve_output(output, specialist, stem, ext, outdir):
 
 
 def main() -> int:
-    ap = argparse.ArgumentParser(description="Render a Cloud Networking markdown report to DOCX with real Word styles.")
+    ap = argparse.ArgumentParser(description="Render a Network Desk markdown report to DOCX with real Word styles.")
     ap.add_argument("--input", required=True, type=pathlib.Path)
     ap.add_argument("--output", type=pathlib.Path, default=None,
-                    help="Output path. If omitted: cloud-networking/<specialist>/reports/<input-stem>.docx")
-    ap.add_argument("--outdir", default="cloud-networking",
-                    help="Base dir used when --output is omitted (default: cloud-networking)")
-    ap.add_argument("--specialist", default="Cloud Networking")
+                    help="Output path. If omitted: network-desk/<specialist>/reports/<input-stem>.docx")
+    ap.add_argument("--outdir", default="network-desk",
+                    help="Base dir used when --output is omitted (default: network-desk)")
+    ap.add_argument("--specialist", default="Network Desk")
     args = ap.parse_args()
 
     try:
@@ -203,7 +203,7 @@ def main() -> int:
 
     doc.add_paragraph(args.specialist, style="Title")
     today = datetime.date.today().isoformat()
-    doc.add_paragraph(f"Cloud Networking - {today}")
+    doc.add_paragraph(f"Network Desk - {today}")
 
     add_toc_field(doc)
     doc.add_page_break()
@@ -212,7 +212,7 @@ def main() -> int:
 
     section = doc.sections[0]
     footer = section.footer.paragraphs[0]
-    footer.text = f"Cloud Networking - {args.specialist} - {today}"
+    footer.text = f"Network Desk - {args.specialist} - {today}"
 
     out = resolve_output(args.output, args.specialist, args.input.stem, "docx", args.outdir)
     out.parent.mkdir(parents=True, exist_ok=True)

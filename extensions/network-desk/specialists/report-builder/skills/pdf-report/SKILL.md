@@ -10,9 +10,9 @@ Author the report with the `report-structure` skill first, then render it here.
 
 `make_pdf.py` ships inside this extension's `renderers/` directory. Resolve its path by trying these candidates in order (first that exists wins):
 
-1. `./extensions/cloud-networking/renderers/make_pdf.py`  *(repo checkout)*
-2. `./.github/extensions/cloud-networking/renderers/make_pdf.py`  *(project install)*
-3. `$HOME/.copilot/extensions/cloud-networking/renderers/make_pdf.py`  *(user install — `%USERPROFILE%` on Windows)*
+1. `./extensions/network-desk/renderers/make_pdf.py`  *(repo checkout)*
+2. `./.github/extensions/network-desk/renderers/make_pdf.py`  *(project install)*
+3. `$HOME/.copilot/extensions/network-desk/renderers/make_pdf.py`  *(user install — `%USERPROFILE%` on Windows)*
 
 ## Dependencies
 
@@ -27,10 +27,10 @@ python -m playwright install chromium   # one-time browser download (~100+ MB)
 python "$RENDERERS/make_pdf.py" \
   --input  report.md \
   --specialist pricing-analyst
-# --output OPTIONAL → cloud-networking/pricing-analyst/reports/report.pdf
+# --output OPTIONAL → network-desk/pricing-analyst/reports/report.pdf
 ```
 
-- **Pass the specialist *directory* name** (kebab-case) as `--specialist` so the default output path matches the convention. Or pass an explicit `--output cloud-networking/pricing-analyst/reports/nat-egress-comparison-20260528.pdf`.
+- **Pass the specialist *directory* name** (kebab-case) as `--specialist` so the default output path matches the convention. Or pass an explicit `--output network-desk/pricing-analyst/reports/nat-egress-comparison-20260528.pdf`.
 - `--outdir <dir>` overrides the base folder.
 
 ## Graceful failure (important — PDF has the heaviest dependencies)

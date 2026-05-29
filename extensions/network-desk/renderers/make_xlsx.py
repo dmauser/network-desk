@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""make_xlsx.py - Cloud Networking Excel workbook renderer (with REAL formulas).
+"""make_xlsx.py - Network Desk Excel workbook renderer (with REAL formulas).
 
 Install: pip install openpyxl
 Usage:   python make_xlsx.py --spec spec.json --specialist "Capacity Planner"
-         # --output is optional; defaults to cloud-networking/<specialist>/reports/<spec-stem>.xlsx
+         # --output is optional; defaults to network-desk/<specialist>/reports/<spec-stem>.xlsx
          # override with: --output path/to/report.xlsx  (or --outdir to change the base folder)
 
 Spec format (JSON) - multi-sheet workbook with real formulas:
@@ -172,7 +172,7 @@ def apply_named_ranges(wb, spec: dict) -> None:
 
 def _slugify(text: str) -> str:
     s = re.sub(r"[^a-z0-9]+", "-", str(text).lower()).strip("-")
-    return s or "cloud-networking"
+    return s or "network-desk"
 
 
 def resolve_output(output, specialist, stem, ext, outdir):
@@ -184,13 +184,13 @@ def resolve_output(output, specialist, stem, ext, outdir):
 
 
 def main() -> int:
-    ap = argparse.ArgumentParser(description="Render a Cloud Networking multi-sheet XLSX workbook with real formulas.")
+    ap = argparse.ArgumentParser(description="Render a Network Desk multi-sheet XLSX workbook with real formulas.")
     ap.add_argument("--spec", required=True, type=pathlib.Path, help="JSON spec describing sheets / cells / formulas")
     ap.add_argument("--output", type=pathlib.Path, default=None,
-                    help="Output path. If omitted: cloud-networking/<specialist>/reports/<spec-stem>.xlsx")
-    ap.add_argument("--outdir", default="cloud-networking",
-                    help="Base dir used when --output is omitted (default: cloud-networking)")
-    ap.add_argument("--specialist", default="Cloud Networking",
+                    help="Output path. If omitted: network-desk/<specialist>/reports/<spec-stem>.xlsx")
+    ap.add_argument("--outdir", default="network-desk",
+                    help="Base dir used when --output is omitted (default: network-desk)")
+    ap.add_argument("--specialist", default="Network Desk",
                     help="Specialist name used to build the default output path")
     args = ap.parse_args()
 
@@ -211,7 +211,7 @@ def main() -> int:
 
     if not wb.sheetnames:
         ws = wb.create_sheet(title="Summary")
-        ws["A1"] = spec.get("title", "Cloud Networking Report")
+        ws["A1"] = spec.get("title", "Network Desk Report")
         style_h1(ws["A1"])
 
     out = resolve_output(args.output, args.specialist, args.spec.stem, "xlsx", args.outdir)

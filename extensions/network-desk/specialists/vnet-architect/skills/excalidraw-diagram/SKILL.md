@@ -168,7 +168,7 @@ When asked for a diagram, deliver:
 
 1. A short prose summary of the layout choices.
 2. The full JSON in a fenced ```json block, valid and self-contained.
-3. Instructions: "Save under `cloud-networking/vnet-architect/diagrams/<topic>-<YYYYMMDD>.excalidraw` (e.g. `hub-spoke-3region-20260528.excalidraw`) and open at https://aka.ms/excalidraw, or drag the file onto excalidraw.com."
+3. Instructions: "Save under `network-desk/vnet-architect/diagrams/<topic>-<YYYYMMDD>.excalidraw` (e.g. `hub-spoke-3region-20260528.excalidraw`) and open at https://aka.ms/excalidraw, or drag the file onto excalidraw.com."
 
 ## References
 

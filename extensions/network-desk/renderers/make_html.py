@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""make_html.py - Cloud Networking standalone HTML renderer.
+"""make_html.py - Network Desk standalone HTML renderer.
 
 Install: pip install markdown2
 Usage:   python make_html.py --input report.md --specialist "Firewall Engineering"
-         # --output is optional; defaults to cloud-networking/<specialist>/reports/<input-stem>.html
+         # --output is optional; defaults to network-desk/<specialist>/reports/<input-stem>.html
          # override with: --output path/to/report.html  (or --outdir to change the base folder)
 
 Produces a single self-contained .html file (inline CSS, no external links) that
@@ -70,7 +70,7 @@ HTML_SHELL = """<!doctype html>
 </head>
 <body>
 __BODY__
-<p class="footer">Cloud Networking - __SPECIALIST__ - __DATE__</p>
+<p class="footer">Network Desk - __SPECIALIST__ - __DATE__</p>
 </body>
 </html>"""
 
@@ -95,7 +95,7 @@ def render(md_text: str, specialist: str, today: str) -> str:
 
 def _slugify(text: str) -> str:
     s = re.sub(r"[^a-z0-9]+", "-", str(text).lower()).strip("-")
-    return s or "cloud-networking"
+    return s or "network-desk"
 
 
 def resolve_output(output, specialist, stem, ext, outdir):
@@ -107,13 +107,13 @@ def resolve_output(output, specialist, stem, ext, outdir):
 
 
 def main() -> int:
-    ap = argparse.ArgumentParser(description="Render a Cloud Networking markdown report to standalone HTML.")
+    ap = argparse.ArgumentParser(description="Render a Network Desk markdown report to standalone HTML.")
     ap.add_argument("--input", required=True, type=pathlib.Path)
     ap.add_argument("--output", type=pathlib.Path, default=None,
-                    help="Output path. If omitted: cloud-networking/<specialist>/reports/<input-stem>.html")
-    ap.add_argument("--outdir", default="cloud-networking",
-                    help="Base dir used when --output is omitted (default: cloud-networking)")
-    ap.add_argument("--specialist", default="Cloud Networking")
+                    help="Output path. If omitted: network-desk/<specialist>/reports/<input-stem>.html")
+    ap.add_argument("--outdir", default="network-desk",
+                    help="Base dir used when --output is omitted (default: network-desk)")
+    ap.add_argument("--specialist", default="Network Desk")
     args = ap.parse_args()
 
     md_text = args.input.read_text(encoding="utf-8")

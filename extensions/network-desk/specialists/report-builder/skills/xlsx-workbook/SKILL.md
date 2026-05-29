@@ -10,9 +10,9 @@ Render a **multi-sheet Excel workbook with real, editable formulas** using the s
 
 `make_xlsx.py` ships inside this extension's `renderers/` directory. Resolve its path (first that exists wins):
 
-1. `./extensions/cloud-networking/renderers/make_xlsx.py`  *(repo checkout)*
-2. `./.github/extensions/cloud-networking/renderers/make_xlsx.py`  *(project install)*
-3. `$HOME/.copilot/extensions/cloud-networking/renderers/make_xlsx.py`  *(user install — `%USERPROFILE%` on Windows)*
+1. `./extensions/network-desk/renderers/make_xlsx.py`  *(repo checkout)*
+2. `./.github/extensions/network-desk/renderers/make_xlsx.py`  *(project install)*
+3. `$HOME/.copilot/extensions/network-desk/renderers/make_xlsx.py`  *(user install — `%USERPROFILE%` on Windows)*
 
 ## Dependencies
 
@@ -67,7 +67,7 @@ Required top-level fields: **`title`**, **`specialist`**, **`sheets`**. Rules:
 python "$RENDERERS/make_xlsx.py" \
   --spec model.json \
   --specialist capacity-planner
-# --output OPTIONAL → cloud-networking/capacity-planner/reports/model.xlsx
+# --output OPTIONAL → network-desk/capacity-planner/reports/model.xlsx
 ```
 
 - Pass the specialist **directory** name (kebab-case) as `--specialist` for the default path, or set `--output` explicitly. `--outdir` overrides the base folder.

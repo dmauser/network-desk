@@ -1,4 +1,4 @@
-// Extension: cloud-networking (standalone)
+// Extension: network-desk (standalone)
 // Self-contained cloud networking agent that bundles all specialist
 // roles and skills. No external extension dependencies required.
 //
@@ -20,10 +20,10 @@ const SPECIALISTS = join(HERE, "specialists");
 // ── Update check ───────────────────────────────────────────────────────
 // Lightweight, async, throttled check against the GitHub repo for a newer
 // version. Runs at most once every 24h, fully non-blocking, fails silently.
-// Opt out via env var CLOUD_NETWORKING_NO_UPDATE_CHECK=1.
+// Opt out via env var NETWORK_DESK_NO_UPDATE_CHECK=1.
 
 const UPDATE_CHECK_INTERVAL_MS = 24 * 60 * 60 * 1000; // 24h
-const UPDATE_MANIFEST_URL = "https://raw.githubusercontent.com/dmauser/cloud-networking/master/package.json";
+const UPDATE_MANIFEST_URL = "https://raw.githubusercontent.com/dmauser/network-desk/master/package.json";
 const INSTALL_META_PATH = join(HERE, ".install-meta.json");
 const UPDATE_STATE_PATH = join(HERE, ".update-check.json");
 
@@ -42,7 +42,7 @@ async function readJsonSafe(path) {
 }
 
 async function checkForUpdate(session) {
-    if (process.env.CLOUD_NETWORKING_NO_UPDATE_CHECK === "1") return;
+    if (process.env.NETWORK_DESK_NO_UPDATE_CHECK === "1") return;
 
     try {
         const meta = await readJsonSafe(INSTALL_META_PATH);
@@ -54,7 +54,7 @@ async function checkForUpdate(session) {
 
         const ac = new AbortController();
         const timer = setTimeout(() => ac.abort(), 4000);
-        const res = await fetch(UPDATE_MANIFEST_URL, { signal: ac.signal, headers: { "user-agent": "cloud-networking-extension" } });
+        const res = await fetch(UPDATE_MANIFEST_URL, { signal: ac.signal, headers: { "user-agent": "network-desk-extension" } });
         clearTimeout(timer);
         if (!res.ok) return;
         const remote = await res.json();
@@ -67,12 +67,12 @@ async function checkForUpdate(session) {
         if (semverGt(latest, installed)) {
             const installType = meta.installType || "user";
             const cmd = installType === "project"
-                ? "npx github:dmauser/cloud-networking update"
-                : "npx github:dmauser/cloud-networking update";
+                ? "npx github:dmauser/network-desk update"
+                : "npx github:dmauser/network-desk update";
             await session.log(
-                `cloud-networking: update available — installed ${installed}, latest ${latest}. ` +
+                `network-desk: update available — installed ${installed}, latest ${latest}. ` +
                 `Run \`${cmd}\` to upgrade. See CHANGELOG.md for details. ` +
-                `(Disable this check with CLOUD_NETWORKING_NO_UPDATE_CHECK=1.)`
+                `(Disable this check with NETWORK_DESK_NO_UPDATE_CHECK=1.)`
             );
         }
     } catch {
@@ -400,7 +400,7 @@ const REGISTRY = {
         domain: "Documentation & Reporting",
         icon: "📄",
         trigger: /\b(create|generate|produce|prepare|build|export|render|package|compile)\b[^.\n]{0,60}\b(report|deliverable|documentation|write[-\s]?up|pdf|docx|word\s+document|xlsx|excel\s+(workbook|model)|html\s+report|workbook)\b|\b(report|deliverable|write[-\s]?up|analysis)\b[^.\n]{0,40}\b(as|to|into|in)\b[^.\n]{0,20}\b(pdf|docx|word|xlsx|excel|html|markdown)\b/i,
-        guidance: "Packages findings from the domain specialists into polished deliverables (Markdown/HTML/PDF/DOCX/XLSX). This is a packaging/rendering specialist — do the technical analysis with the relevant domain specialist FIRST, then use report-builder to structure and render it. Renderer scripts ship in the extension's `renderers/` directory; render to the standard `cloud-networking/<specialist>/reports/` location and keep the Markdown/JSON source alongside the output. Rendering only — never modifies live infrastructure.",
+        guidance: "Packages findings from the domain specialists into polished deliverables (Markdown/HTML/PDF/DOCX/XLSX). This is a packaging/rendering specialist — do the technical analysis with the relevant domain specialist FIRST, then use report-builder to structure and render it. Renderer scripts ship in the extension's `renderers/` directory; render to the standard `network-desk/<specialist>/reports/` location and keep the Markdown/JSON source alongside the output. Rendering only — never modifies live infrastructure.",
         skills: {
             "report-structure": "Standard report skeleton (exec summary → scope → findings table → diagram → recommendations → references), quality checklist, and format-selection matrix.",
             "html-report": "Render a Markdown report to self-contained styled HTML via make_html.py (needs markdown2).",
@@ -476,7 +476,7 @@ function buildCapabilitiesSummary() {
         return `### ${def.icon} ${def.domain} — \`specialist: "${pub(p)}"\`\n${skills}`;
     }).join("\n\n");
 
-    _capabilitiesSummary = `# Cloud Networking — Available Specialists
+    _capabilitiesSummary = `# Network Desk — Available Specialists
 
 This extension exposes its ${PREFIXES.length} specialists through **five tools**. Specialists are
 identified by their \`cn_\`-prefixed id (e.g. \`cn_vnet\`) and selected by *argument*,
@@ -657,7 +657,7 @@ const tools = [
 // Verifies every role/skill .md referenced by the REGISTRY exists on disk.
 // This is filesystem I/O that is only useful while developing the extension —
 // in a published install the layout is static and already covered by CI/tests.
-// It is therefore opt-in (set CLOUD_NETWORKING_VALIDATE=1) and, when enabled,
+// It is therefore opt-in (set NETWORK_DESK_VALIDATE=1) and, when enabled,
 // performs its reads concurrently rather than serially.
 
 async function fileMissing(path) {
@@ -665,7 +665,7 @@ async function fileMissing(path) {
 }
 
 async function validateRegistry(session) {
-    if (process.env.CLOUD_NETWORKING_VALIDATE !== "1") return [];
+    if (process.env.NETWORK_DESK_VALIDATE !== "1") return [];
 
     const problems = [];
     const seen = new Set();
@@ -683,19 +683,19 @@ async function validateRegistry(session) {
     }
     await Promise.all(checks);
     if (problems.length) {
-        await session.log(`cloud-networking: registry validation found ${problems.length} issue(s): ${problems.join("; ")}`);
+        await session.log(`network-desk: registry validation found ${problems.length} issue(s): ${problems.join("; ")}`);
     }
     return problems;
 }
 
 // ── Register session ───────────────────────────────────────────────────
 
-// Matches the extension name in any form: @cloud-networking, cloud-networking,
-// cloud networking, cloudnetworking (with or without a leading @).
-const MENTION_RE = /(^|[^\w])@?cloud[\s_-]?networking\b/i;
+// Matches the extension name in any form: @network-desk, network-desk,
+// network desk, networkdesk (with or without a leading @).
+const MENTION_RE = /(^|[^\w])@?network[\s_-]?desk\b/i;
 
 const TOOL_USAGE_NOTE =
-    "You MUST use ONLY these cloud-networking tools: `cn_route`, `cn_role`, `cn_orchestrate`, `cn_skill`, `cn_capabilities`. " +
+    "You MUST use ONLY these network-desk tools: `cn_route`, `cn_role`, `cn_orchestrate`, `cn_skill`, `cn_capabilities`. " +
     "You MUST NOT read, open, list, or search the specialist files under `specialists/**` directly with any file/view/glob/grep/shell tool. " +
     "Always load specialist content via the registered `cn_role`, `cn_orchestrate`, and `cn_skill` tools — never by reading the `.md` files yourself. " +
     "Names like `cn_vnet_role` or `vnet_skill_address_planner` are NOT registered tools; select the specialist and skill via arguments, e.g. `cn_skill({ specialist: \"cn_vnet\", skill: \"address-planner\" })`. " +
@@ -706,7 +706,7 @@ const TOOL_USAGE_NOTE =
 // per session so repeated matching prompts don't crowd the context window.
 const announcedPrefixes = new Set();
 // Presence note is injected on session start AND (belt-and-suspenders) on the
-// first user prompt, so the agent learns cloud-networking exists before it
+// first user prompt, so the agent learns network-desk exists before it
 // decides it doesn't know about it.
 let presenceAnnounced = false;
 
@@ -717,11 +717,11 @@ const SPECIALIST_INLINE = PREFIXES.map((p) => `${REGISTRY[p].icon} ${REGISTRY[p]
 // specialist saves outputs to a predictable, easy-to-navigate structure.
 const OUTPUT_CONVENTION =
     "OUTPUT FILES (REQUIRED LAYOUT): When you save ANY generated artifact to disk — diagrams, reports, or generated " +
-    "configs/IaC — place it under a `cloud-networking/` folder in the current working directory, organized by specialist " +
+    "configs/IaC — place it under a `network-desk/` folder in the current working directory, organized by specialist " +
     "then artifact type:\n" +
-    "  cloud-networking/<specialist>/diagrams/  — Mermaid (.mmd), Excalidraw (.excalidraw), draw.io (.drawio)\n" +
-    "  cloud-networking/<specialist>/reports/   — .md, .html, .pdf, .docx, .xlsx\n" +
-    "  cloud-networking/<specialist>/configs/   — generated IaC, firewall/device configs, scripts\n" +
+    "  network-desk/<specialist>/diagrams/  — Mermaid (.mmd), Excalidraw (.excalidraw), draw.io (.drawio)\n" +
+    "  network-desk/<specialist>/reports/   — .md, .html, .pdf, .docx, .xlsx\n" +
+    "  network-desk/<specialist>/configs/   — generated IaC, firewall/device configs, scripts\n" +
     "`<specialist>` is the specialist's kebab-case name (e.g. vnet-architect, firewall-engineer, iac-generator, pricing-analyst). " +
     "Name files `<kebab-topic>-<YYYYMMDD>.<ext>` (e.g. `hub-spoke-3region-20260528.drawio`). Create missing subfolders. " +
     "Confirm the path with the user before writing, write only inside the working directory, and never modify live infrastructure. " +
@@ -729,30 +729,30 @@ const OUTPUT_CONVENTION =
     "(`cn_role({ specialist: \"cn_doc\" })` then its `report-structure` and `*-report`/`xlsx-workbook` skills).";
 
 const PRESENCE_NOTE =
-    "[cloud-networking] The cloud-networking extension (a.k.a. @cloud-networking) is LOADED in this session. " +
-    `It bundles ${PREFIXES.length} cloud-networking specialists: ${SPECIALIST_INLINE}. ` +
+    "[network-desk] The network-desk extension (a.k.a. @network-desk) is LOADED in this session. " +
+    `It bundles ${PREFIXES.length} network-desk specialists: ${SPECIALIST_INLINE}. ` +
     "Discovery tools available right now: `cn_capabilities` (full specialist + skill map), `cn_route` (pick the right specialist for a query), " +
     "`cn_role` (load a specialist's role definition — call this FIRST before answering), `cn_orchestrate` (step-by-step workflow + skill catalog), " +
     "`cn_skill` (deep guidance for a specific skill). " +
     "When the user mentions VNets/VPCs, subnets/CIDR/IP planning, firewalls/NSGs/rule audits, load balancers, DNS, Private Link/private endpoints, " +
     "hybrid connectivity (VPN/ExpressRoute/Direct Connect/Interconnect), network security, connectivity troubleshooting/packet capture, " +
     "Virtual WAN/SD-WAN, network monitoring, multi-cloud networking, networking pricing/cost, IaC (Bicep/Terraform/Ansible) for networking, " +
-    "container/Kubernetes networking, CDN/edge, network automation, SASE/SSE, capacity planning, or IPv6 migration — or says 'cloud-networking' / " +
-    "'@cloud-networking' / 'this extension' / 'what can you do' in a networking context — you MUST call `cn_route` (or `cn_capabilities`) FIRST, " +
+    "container/Kubernetes networking, CDN/edge, network automation, SASE/SSE, capacity planning, or IPv6 migration — or says 'network-desk' / " +
+    "'@network-desk' / 'this extension' / 'what can you do' in a networking context — you MUST call `cn_route` (or `cn_capabilities`) FIRST, " +
     "then the matched specialist's `cn_role`, before answering. " +
     "Do NOT answer networking questions from prior/general knowledge, and do NOT read the specialist files under `specialists/**` directly — " +
     "load ALL specialist content via `cn_role` / `cn_orchestrate` / `cn_skill`. " +
-    "Never claim cloud-networking is unavailable: it is loaded. " +
-    "Cloud Networking is analysis-only: it never applies changes, modifies infrastructure, or runs commands against live environments. " +
+    "Never claim network-desk is unavailable: it is loaded. " +
+    "Network Desk is analysis-only: it never applies changes, modifies infrastructure, or runs commands against live environments. " +
     "RESPONSE FOOTER (REQUIRED): at the end of EVERY assistant response that touches cloud networking — any turn where you called a `cn_*` tool, " +
     "or discussed any networking topic above — append the following line verbatim, on its own line after all other content:\n\n" +
     "> Analysis only — verify against vendor documentation before applying.\n\n" +
     OUTPUT_CONVENTION;
 
 const DIRECT_MENTION =
-    "[cloud-networking — DIRECT MENTION] The user just referenced the cloud-networking extension by name. " +
+    "[network-desk — DIRECT MENTION] The user just referenced the network-desk extension by name. " +
     `It IS loaded in this session (${tools.length} tools, ${PREFIXES.length} specialists). ` +
-    "Do NOT tell the user cloud-networking is unavailable, unknown, or not part of the CLI. " +
+    "Do NOT tell the user network-desk is unavailable, unknown, or not part of the CLI. " +
     "REQUIRED next action: call the `cn_capabilities` tool now to retrieve the specialist map, then answer the user's question using that information. " +
     "If the user asked for examples or how to use it, after calling `cn_capabilities` summarize the specialists and suggest 3–5 concrete example prompts " +
     "(e.g. 'design a hub-spoke VNet topology across 3 regions', 'audit my Azure Firewall rules for shadowed or overly-broad entries', " +
@@ -766,7 +766,7 @@ const session = await joinSession({
     hooks: {
         onSessionStart: async () => {
             // Fires on startup / new / resume — inject the presence note as
-            // session-level context so the agent knows cloud-networking exists
+            // session-level context so the agent knows network-desk exists
             // from turn 1 without waiting for a user prompt.
             presenceAnnounced = true;
             return { additionalContext: PRESENCE_NOTE };
@@ -798,7 +798,7 @@ const session = await joinSession({
                     .map((p) => `• **${REGISTRY[p].icon} ${REGISTRY[p].domain}** — \`cn_role({ specialist: "${pub(p)}" })\` then \`cn_orchestrate({ specialist: "${pub(p)}" })\``)
                     .join("\n");
                 parts.push(
-                    `[cloud-networking] Detected networking intent. The following specialist(s) MUST handle this request:\n${guidance}\n\n` +
+                    `[network-desk] Detected networking intent. The following specialist(s) MUST handle this request:\n${guidance}\n\n` +
                     `Before producing ANY substantive networking answer, you MUST call the matched specialist's role via ` +
                     `\`cn_role({ specialist })\` FIRST. Do NOT answer from prior/general knowledge, and do NOT read the ` +
                     `specialist \`.md\` files under \`specialists/**\` directly. For each specialist call \`cn_role\` then ` +
@@ -808,7 +808,7 @@ const session = await joinSession({
                 );
             } else if (mentioned && matches.length === 0) {
                 parts.push(
-                    `[cloud-networking] No single specialist matched directly. You MUST call \`cn_route\` with the user's ` +
+                    `[network-desk] No single specialist matched directly. You MUST call \`cn_route\` with the user's ` +
                     `query (or \`cn_capabilities\`) to pick the right specialist BEFORE answering — do NOT answer ` +
                     `networking questions from prior/general knowledge.\n\n` +
                     TOOL_USAGE_NOTE,
@@ -823,7 +823,7 @@ const session = await joinSession({
 
 const totalSkills = PREFIXES.reduce((n, p) => n + Object.keys(REGISTRY[p].skills).length, 0);
 await session.log(
-    `cloud-networking loaded — ${PREFIXES.length} specialists, ${totalSkills} skills, ${tools.length} tools. Trigger with @cloud-networking`,
+    `network-desk loaded — ${PREFIXES.length} specialists, ${totalSkills} skills, ${tools.length} tools. Trigger with @network-desk`,
 );
 
 // Validate registry against the filesystem (non-blocking).

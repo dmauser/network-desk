@@ -10,15 +10,15 @@ Author the report with the `report-structure` skill first, then render it here.
 
 `make_html.py` ships inside this extension's `renderers/` directory. Resolve its path by trying these candidates in order (first that exists wins):
 
-1. `./extensions/cloud-networking/renderers/make_html.py`  *(repo checkout)*
-2. `./.github/extensions/cloud-networking/renderers/make_html.py`  *(project install)*
-3. `$HOME/.copilot/extensions/cloud-networking/renderers/make_html.py`  *(user install — `%USERPROFILE%` on Windows)*
+1. `./extensions/network-desk/renderers/make_html.py`  *(repo checkout)*
+2. `./.github/extensions/network-desk/renderers/make_html.py`  *(project install)*
+3. `$HOME/.copilot/extensions/network-desk/renderers/make_html.py`  *(user install — `%USERPROFILE%` on Windows)*
 
 ```bash
 # Bash one-liner to find it
-for p in ./extensions/cloud-networking/renderers \
-         ./.github/extensions/cloud-networking/renderers \
-         "$HOME/.copilot/extensions/cloud-networking/renderers"; do
+for p in ./extensions/network-desk/renderers \
+         ./.github/extensions/network-desk/renderers \
+         "$HOME/.copilot/extensions/network-desk/renderers"; do
   [ -f "$p/make_html.py" ] && RENDERERS="$p" && break
 done
 ```
@@ -35,12 +35,12 @@ pip install markdown2
 python "$RENDERERS/make_html.py" \
   --input  report.md \
   --specialist firewall-engineer
-# --output is OPTIONAL. Omitted → cloud-networking/firewall-engineer/reports/report.html
+# --output is OPTIONAL. Omitted → network-desk/firewall-engineer/reports/report.html
 ```
 
 - **Pass the specialist *directory* name** (kebab-case: `firewall-engineer`, `vnet-architect`, `pricing-analyst`) as `--specialist`. The default output path is built from it, so passing a display name like `"Firewall Engineering"` would produce the wrong folder (`firewall-engineering/`).
-- To control the path explicitly: `--output cloud-networking/firewall-engineer/reports/azfw-audit-20260528.html`.
-- `--outdir <dir>` changes the base folder (default `cloud-networking`).
+- To control the path explicitly: `--output network-desk/firewall-engineer/reports/azfw-audit-20260528.html`.
+- `--outdir <dir>` changes the base folder (default `network-desk`).
 
 ## Graceful failure
 

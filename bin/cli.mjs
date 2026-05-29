@@ -8,11 +8,11 @@ import { execSync } from "node:child_process";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const PKG_ROOT = resolve(__dirname, "..");
-const EXTENSION_SRC = join(PKG_ROOT, "extensions", "cloud-networking");
+const EXTENSION_SRC = join(PKG_ROOT, "extensions", "network-desk");
 const COPILOT_DIR = join(homedir(), ".copilot");
-const EXT_DEST = join(COPILOT_DIR, "extensions", "cloud-networking");
+const EXT_DEST = join(COPILOT_DIR, "extensions", "network-desk");
 
-const GITIGNORE_ENTRY = ".github/extensions/cloud-networking/";
+const GITIGNORE_ENTRY = ".github/extensions/network-desk/";
 
 const SPECIALIST_NAMES = [
     "vnet-architect", "firewall-engineer", "load-balancer",
@@ -44,7 +44,7 @@ async function writeInstallMeta(destDir, installType) {
             version: pkg.version,
             installType,
             installedAt: new Date().toISOString(),
-            source: "github:dmauser/cloud-networking",
+            source: "github:dmauser/network-desk",
         };
         await writeFile(join(destDir, ".install-meta.json"), JSON.stringify(meta, null, 2) + "\n");
     } catch {
@@ -76,16 +76,16 @@ async function addToGitignore(repoRoot) {
         const content = await readFile(gitignorePath, "utf8");
         if (content.includes(GITIGNORE_ENTRY)) return;
         const separator = content.endsWith("\n") ? "" : "\n";
-        await appendFile(gitignorePath, `${separator}\n# Cloud Networking extension (installed per-developer)\n${GITIGNORE_ENTRY}\n`);
+        await appendFile(gitignorePath, `${separator}\n# Network Desk extension (installed per-developer)\n${GITIGNORE_ENTRY}\n`);
     } catch {
-        await writeFile(gitignorePath, `# Cloud Networking extension (installed per-developer)\n${GITIGNORE_ENTRY}\n`);
+        await writeFile(gitignorePath, `# Network Desk extension (installed per-developer)\n${GITIGNORE_ENTRY}\n`);
     }
     ok(`Added ${GITIGNORE_ENTRY} to .gitignore`);
 }
 
 async function initProject() {
     log("");
-    log(`${CYAN}Cloud Networking${RESET} — installing extensions (project-level)`);
+    log(`${CYAN}Network Desk${RESET} — installing extensions (project-level)`);
     log("");
 
     const repoRoot = findGitRoot();
@@ -97,7 +97,7 @@ async function initProject() {
         ok(`Initialized git repository in ${projectRoot}`);
     }
 
-    const projectDest = join(projectRoot, ".github", "extensions", "cloud-networking");
+    const projectDest = join(projectRoot, ".github", "extensions", "network-desk");
 
     if (await exists(projectDest)) {
         info("Existing project-level installation found — replacing...");
@@ -107,7 +107,7 @@ async function initProject() {
     await mkdir(join(projectRoot, ".github", "extensions"), { recursive: true });
     await cp(EXTENSION_SRC, projectDest, { recursive: true });
     await writeInstallMeta(projectDest, "project");
-    ok("Extension installed to .github/extensions/cloud-networking/");
+    ok("Extension installed to .github/extensions/network-desk/");
 
     await addToGitignore(projectRoot);
 
@@ -131,7 +131,7 @@ async function initProject() {
 
 async function init() {
     log("");
-    log(`${CYAN}Cloud Networking${RESET} — installing extensions`);
+    log(`${CYAN}Network Desk${RESET} — installing extensions`);
     log("");
 
     const extDir = join(COPILOT_DIR, "extensions");
@@ -157,7 +157,7 @@ async function init() {
 
     await cp(EXTENSION_SRC, EXT_DEST, { recursive: true });
     await writeInstallMeta(EXT_DEST, "user");
-    ok("Extension installed to ~/.copilot/extensions/cloud-networking/");
+    ok("Extension installed to ~/.copilot/extensions/network-desk/");
 
     const specialistsDir = join(EXT_DEST, "specialists");
     if (await exists(specialistsDir)) {
@@ -174,7 +174,7 @@ async function init() {
     log(`  copilot --experimental`);
     log("");
     log(`  ${DIM}# Or install per-project instead (no experimental mode needed):${RESET}`);
-    log(`  cloud-networking init --project`);
+    log(`  network-desk init --project`);
     log("");
 }
 
@@ -182,7 +182,7 @@ async function uninstall() {
     const isProject = process.argv.includes("--project");
 
     log("");
-    log(`${CYAN}Cloud Networking${RESET} — uninstalling${isProject ? " (project-level)" : ""}`);
+    log(`${CYAN}Network Desk${RESET} — uninstalling${isProject ? " (project-level)" : ""}`);
     log("");
 
     if (isProject) {
@@ -191,17 +191,17 @@ async function uninstall() {
             err("Not inside a git repository.");
             process.exit(1);
         }
-        const projectDest = join(repoRoot, ".github", "extensions", "cloud-networking");
+        const projectDest = join(repoRoot, ".github", "extensions", "network-desk");
         if (await exists(projectDest)) {
             await rm(projectDest, { recursive: true, force: true });
-            ok("Removed .github/extensions/cloud-networking/");
+            ok("Removed .github/extensions/network-desk/");
         } else {
             info("No project-level installation found.");
         }
     } else {
         if (await exists(EXT_DEST)) {
             await rm(EXT_DEST, { recursive: true, force: true });
-            ok("Removed ~/.copilot/extensions/cloud-networking/");
+            ok("Removed ~/.copilot/extensions/network-desk/");
         } else {
             info("Not installed — nothing to remove.");
         }
@@ -220,14 +220,14 @@ async function uninstall() {
 
 async function status() {
     log("");
-    log(`${CYAN}Cloud Networking${RESET} — status`);
+    log(`${CYAN}Network Desk${RESET} — status`);
     log("");
 
     let found = false;
 
     if (await exists(EXT_DEST)) {
         found = true;
-        ok("User-level: installed at ~/.copilot/extensions/cloud-networking/");
+        ok("User-level: installed at ~/.copilot/extensions/network-desk/");
         info("  Requires: copilot --experimental");
 
         const meta = await readInstallMeta(EXT_DEST);
@@ -251,16 +251,16 @@ async function status() {
             if (await exists(join(extDir, name))) conflicts.push(name);
         }
         if (conflicts.length > 0) {
-            err(`  ${conflicts.length} conflicting individual extension(s) found — run 'cloud-networking init' to fix`);
+            err(`  ${conflicts.length} conflicting individual extension(s) found — run 'network-desk init' to fix`);
         }
     }
 
     const repoRoot = findGitRoot();
     if (repoRoot) {
-        const projectDest = join(repoRoot, ".github", "extensions", "cloud-networking");
+        const projectDest = join(repoRoot, ".github", "extensions", "network-desk");
         if (await exists(projectDest)) {
             found = true;
-            ok(`Project-level: installed at .github/extensions/cloud-networking/`);
+            ok(`Project-level: installed at .github/extensions/network-desk/`);
             info("  Works without experimental mode");
 
             const projMeta = await readInstallMeta(projectDest);
@@ -278,16 +278,16 @@ async function status() {
     }
 
     if (!found) {
-        err("Not installed. Run: cloud-networking init");
-        info("  User-level:    cloud-networking init");
-        info("  Project-level: cloud-networking init --project");
+        err("Not installed. Run: network-desk init");
+        info("  User-level:    network-desk init");
+        info("  Project-level: network-desk init --project");
     }
     log("");
 }
 
 async function update() {
     log("");
-    log(`${CYAN}Cloud Networking${RESET} — checking for installations to update`);
+    log(`${CYAN}Network Desk${RESET} — checking for installations to update`);
     log("");
 
     let updated = false;
@@ -301,7 +301,7 @@ async function update() {
 
     const repoRoot = findGitRoot();
     if (repoRoot) {
-        const projectDest = join(repoRoot, ".github", "extensions", "cloud-networking");
+        const projectDest = join(repoRoot, ".github", "extensions", "network-desk");
         if (await exists(projectDest)) {
             info("Project-level installation detected — updating...");
             log("");
@@ -312,8 +312,8 @@ async function update() {
 
     if (!updated) {
         err("Nothing to update — extension is not installed.");
-        info("  User-level:    cloud-networking init");
-        info("  Project-level: cloud-networking init --project");
+        info("  User-level:    network-desk init");
+        info("  Project-level: network-desk init --project");
         log("");
     }
 }
@@ -329,9 +329,9 @@ async function showVersion() {
 
 function showHelp() {
     log("");
-    log(`${CYAN}Cloud Networking${RESET} — your cloud networking AI team`);
+    log(`${CYAN}Network Desk${RESET} — your cloud networking AI team`);
     log("");
-    log("Usage: cloud-networking <command> [options]");
+    log("Usage: network-desk <command> [options]");
     log("");
     log("Commands:");
     log("  init              Install extensions to ~/.copilot/extensions/ (requires experimental mode)");

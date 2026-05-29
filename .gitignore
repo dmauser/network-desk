@@ -2,7 +2,7 @@ node_modules/
 .DS_Store
 *.log
 out/
-.github/extensions/cloud-networking/
+.github/extensions/network-desk/
 
 # Per-install runtime metadata written by the extension/CLI
 .install-meta.json

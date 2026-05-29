@@ -1,12 +1,24 @@
 # Changelog
 
-All notable changes to **@dmauser/cloud-networking** are documented in this file.
+All notable changes to **@dmauser/network-desk** are documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
-## [Unreleased]
+## [2.0.0] - 2026-05-28
+
+### Changed — ⚠️ BREAKING: renamed the extension to **Network Desk**
+
+The project, npm package, extension directory, CLI command, `@mention` trigger, and GitHub repository were renamed from `cloud-networking` to `network-desk`.
+
+- **npm package:** `@dmauser/cloud-networking` → `@dmauser/network-desk`.
+- **Mention trigger:** `@cloud-networking` → `@network-desk` (the matcher also accepts `network desk` / `networkdesk`).
+- **CLI command & install paths:** `cloud-networking` → `network-desk` (installs to `~/.copilot/extensions/network-desk/` and `.github/extensions/network-desk/`).
+- **Output-file convention folder:** generated artifacts now save under `network-desk/<specialist>/{diagrams,reports,configs}/`.
+- **Environment variables:** `CLOUD_NETWORKING_NO_UPDATE_CHECK` → `NETWORK_DESK_NO_UPDATE_CHECK`; `CLOUD_NETWORKING_VALIDATE` → `NETWORK_DESK_VALIDATE`.
+- **GitHub repo:** `dmauser/cloud-networking` → `dmauser/network-desk` (GitHub preserves redirects from the old URL).
+- The tool prefix (`cn_`) and specialist aliases (`cn_vnet`, `cn_fw`, …) are **unchanged** to avoid breaking existing routing/invocations.
 
 ### Added — Report Builder specialist (`cn_doc`)
 
@@ -19,24 +31,24 @@ A new packaging specialist that turns any other specialist's analysis into a pol
 
 ### Added — Standard output-file layout for generated artifacts
 
-Generated diagrams, reports, and configs now follow one predictable on-disk structure under a `cloud-networking/` folder in the current working directory:
+Generated diagrams, reports, and configs now follow one predictable on-disk structure under a `network-desk/` folder in the current working directory:
 
 ```
-cloud-networking/<specialist>/diagrams/   # .mmd, .excalidraw, .drawio
-cloud-networking/<specialist>/reports/    # .md, .html, .pdf, .docx, .xlsx
-cloud-networking/<specialist>/configs/    # generated IaC, device configs, scripts
+network-desk/<specialist>/diagrams/   # .mmd, .excalidraw, .drawio
+network-desk/<specialist>/reports/    # .md, .html, .pdf, .docx, .xlsx
+network-desk/<specialist>/configs/    # generated IaC, device configs, scripts
 ```
 
 - `<specialist>` is the kebab-case specialist name (e.g. `vnet-architect`, `firewall-engineer`). Files are named `<kebab-topic>-<YYYYMMDD>.<ext>`.
 - The convention is injected via the session presence note, so every specialist that writes a file follows it.
-- The diagram skills (`network-diagram`, `excalidraw-diagram`, `drawio-diagram`) now instruct saving under `cloud-networking/vnet-architect/diagrams/`.
-- The report renderers (`make_html.py`, `make_pdf.py`, `make_docx.py`, `make_xlsx.py`) now make `--output` optional, defaulting to `cloud-networking/<specialist>/reports/<stem>.<ext>`, with a new `--outdir` to override the base folder.
+- The diagram skills (`network-diagram`, `excalidraw-diagram`, `drawio-diagram`) now instruct saving under `network-desk/vnet-architect/diagrams/`.
+- The report renderers (`make_html.py`, `make_pdf.py`, `make_docx.py`, `make_xlsx.py`) now make `--output` optional, defaulting to `network-desk/<specialist>/reports/<stem>.<ext>`, with a new `--outdir` to override the base folder.
 
 ### Changed — Extension runtime performance
 
 Surgical performance improvements to `extension.mjs` (no behavior change to tool output):
 
-- **Startup registry validation is now opt-in and concurrent.** `validateRegistry()` previously read all ~138 role/skill `.md` files serially from disk on every session start. It now runs only when `CLOUD_NETWORKING_VALIDATE=1` (a dev-time check; published installs are static and covered by tests) and, when enabled, performs its file checks in parallel via `Promise.all`.
+- **Startup registry validation is now opt-in and concurrent.** `validateRegistry()` previously read all ~138 role/skill `.md` files serially from disk on every session start. It now runs only when `NETWORK_DESK_VALIDATE=1` (a dev-time check; published installs are static and covered by tests) and, when enabled, performs its file checks in parallel via `Promise.all`.
 - **In-memory file cache.** Role/skill files are immutable for a session, so `loadFile()` now caches successful reads, avoiding repeat disk I/O on subsequent `cn_role`/`cn_skill` calls. Failures are not cached.
 - **Memoized capabilities summary.** `buildCapabilitiesSummary()` is derived only from the static `REGISTRY`; it is now computed once and reused across `cn_capabilities` calls.
 
@@ -57,12 +69,12 @@ A repo-wide best-practices audit of all 19 specialists and 119 skills (web-verif
 ### Added — `cn_`-prefixed specialist ids, presence note, and stronger routing
 
 - **Specialist ids are now `cn_`-prefixed** (`cn_vnet`, `cn_fw`, `cn_dns`, …) for a consistent namespace. They are the canonical value for the `specialist` argument and appear in all `cn_route` / `cn_capabilities` / `cn_orchestrate` output. The bare forms (`vnet`, `fw`, …) and directory names remain accepted as aliases, so nothing breaks.
-- **Session-start presence note** (`onSessionStart`) announces the extension, its 19 specialists, and the discovery tools from turn 1 — so the agent never claims cloud-networking is unavailable. A belt-and-suspenders fallback re-injects it on the first prompt for older CLI builds.
-- **Direct-mention handling**: naming the extension (`@cloud-networking`, or just "cloud-networking") injects an imperative instruction to call `cn_capabilities` first and offer concrete example prompts.
+- **Session-start presence note** (`onSessionStart`) announces the extension, its 19 specialists, and the discovery tools from turn 1 — so the agent never claims network-desk is unavailable. A belt-and-suspenders fallback re-injects it on the first prompt for older CLI builds.
+- **Direct-mention handling**: naming the extension (`@network-desk`, or just "network-desk") injects an imperative instruction to call `cn_capabilities` first and offer concrete example prompts.
 - **Per-specialist throttling**: each routing hint is injected at most once per session to avoid crowding the context window.
 - **Hardened routing guidance**: the hook now uses imperative MUST language, requires calling the matched specialist's `cn_role` **before** answering (no answering from prior/general knowledge), and explicitly **prohibits reading the `specialists/**` files directly** — all specialist content must be loaded via `cn_role` / `cn_orchestrate` / `cn_skill`.
 - **Specialist emoji icons** surfaced in `cn_capabilities`, `cn_orchestrate`, `cn_route`, the routing hints, and the README team table.
-- Broadened the mention pattern to match `cloud-networking` with or without a leading `@`.
+- Broadened the mention pattern to match `network-desk` with or without a leading `@`.
 
 ### Fixed — Exceeded the 128-tool API limit (extension failed to load)
 
@@ -112,18 +124,18 @@ Orchestrator prompts (`ORCHESTRATORS.fw`, `.lb`, `.dns`, `.hyb`, `.nsec`, `.ntsh
 - Tool count: 145 → 146.
 
 ### Added — Auto-update check and `update` command
-- The extension now performs a **lightweight automatic update check** against GitHub on session start. Behavior: at most once every 24 h, ~4 s network timeout, fully async, never blocks extension load, fails silently on any error. When a newer version is detected, a one-line `cloud-networking: update available — installed X.Y.Z, latest A.B.C. Run \`npx github:dmauser/cloud-networking update\` to upgrade.` notice is written to the session log.
-- Opt-out via `CLOUD_NETWORKING_NO_UPDATE_CHECK=1` environment variable.
-- New CLI command **`cloud-networking update`** (alias `upgrade`) — auto-detects whether the user has a user-level install, a project-level install, or both, and re-installs each in place by pulling the latest from `github:dmauser/cloud-networking`.
-- New CLI flag **`cloud-networking --version`** / `-v` to print the installed CLI version.
-- Install metadata is now recorded at `<install-dir>/.install-meta.json` (version, install type, install timestamp) at every `init` / `init --project`, and surfaced by `cloud-networking status`.
+- The extension now performs a **lightweight automatic update check** against GitHub on session start. Behavior: at most once every 24 h, ~4 s network timeout, fully async, never blocks extension load, fails silently on any error. When a newer version is detected, a one-line `network-desk: update available — installed X.Y.Z, latest A.B.C. Run \`npx github:dmauser/network-desk update\` to upgrade.` notice is written to the session log.
+- Opt-out via `NETWORK_DESK_NO_UPDATE_CHECK=1` environment variable.
+- New CLI command **`network-desk update`** (alias `upgrade`) — auto-detects whether the user has a user-level install, a project-level install, or both, and re-installs each in place by pulling the latest from `github:dmauser/network-desk`.
+- New CLI flag **`network-desk --version`** / `-v` to print the installed CLI version.
+- Install metadata is now recorded at `<install-dir>/.install-meta.json` (version, install type, install timestamp) at every `init` / `init --project`, and surfaced by `network-desk status`.
 - README's "Updating" section rewritten to document the auto-check, the new `update` command, the opt-out env var, and a pointer to `CHANGELOG.md`.
 - `.gitignore` updated to exclude the runtime `.install-meta.json` and `.update-check.json` files anywhere in the tree.
 
 ## [1.1.0] — 2026-05-18
 
-### Added — `@cloud-networking` mention trigger
-- New explicit invocation: type **`@cloud-networking`** anywhere in a prompt to engage the extension. The `onUserPromptSubmitted` hook recognizes the mention (case-insensitive, accepts `@cloud-networking`, `@cloud_networking`, `@cloudnetworking`) and always engages the router, even when no specialist keyword matches.
+### Added — `@network-desk` mention trigger
+- New explicit invocation: type **`@network-desk`** anywhere in a prompt to engage the extension. The `onUserPromptSubmitted` hook recognizes the mention (case-insensitive, accepts `@network-desk`, `@cloud_networking`, `@cloudnetworking`) and always engages the router, even when no specialist keyword matches.
 - When mentioned without a keyword match, the router instructs the model to silently call `cn_route` (and `cn_capabilities` if still ambiguous) to pick the right specialist before responding.
 - Routing context now tells the model to respond in **natural language** rather than exposing internal tool names to the user.
 
@@ -141,23 +153,23 @@ Orchestrator prompts (`ORCHESTRATORS.fw`, `.lb`, `.dns`, `.hyb`, `.nsec`, `.ntsh
 - Updated the `vnet-architect` agent persona and the VNet orchestrator prompt to enforce this policy.
 
 ### Changed — README and user-facing examples
-- All usage examples rewritten as natural-language prompts prefixed with **`@cloud-networking ...`** (every specialist and every multi-domain example, ~60 examples in total).
-- "How It Works" rewritten to highlight the `@cloud-networking` mention as the trigger — no more `cn_capabilities` / `cn_route` / `<prefix>_role` plumbing in user-facing documentation.
+- All usage examples rewritten as natural-language prompts prefixed with **`@network-desk ...`** (every specialist and every multi-domain example, ~60 examples in total).
+- "How It Works" rewritten to highlight the `@network-desk` mention as the trigger — no more `cn_capabilities` / `cn_route` / `<prefix>_role` plumbing in user-facing documentation.
 - "Discovery" section rewritten as natural-language asks ("what can you help me with?", "which specialists cover firewalls?").
 - Quick Start now shows two natural-language invocation examples.
-- Troubleshooting row about `cn_capabilities` replaced with one about `@cloud-networking` not engaging.
+- Troubleshooting row about `cn_capabilities` replaced with one about `@network-desk` not engaging.
 - New **Changelog** link in the table of contents.
 
 ### Internal
 - Bumped tool count from 143 → 145 (two new diagram skills).
-- Reinstalled to `~/.copilot/extensions/cloud-networking/` with `cloud-networking init`.
+- Reinstalled to `~/.copilot/extensions/network-desk/` with `network-desk init`.
 
 ---
 
 ## [1.0.0]
 
 ### Added
-- Initial public release of `@dmauser/cloud-networking`.
+- Initial public release of `@dmauser/network-desk`.
 - 19 specialist agents covering VNet design, firewalls (14 vendors), load balancing, DNS, private link, hybrid connectivity, network security, troubleshooting, vWAN/SD-WAN, monitoring, multi-cloud, pricing, IaC, container networking, CDN/edge, network automation/GitOps, SASE/SSE, capacity planning, and IPv6 migration.
 - Auto-routing hook (`onUserPromptSubmitted`) detecting networking keywords.
 - Discovery tools `cn_capabilities` and `cn_route`.
@@ -166,6 +178,6 @@ Orchestrator prompts (`ORCHESTRATORS.fw`, `.lb`, `.dns`, `.hyb`, `.nsec`, `.ntsh
 
 ---
 
-[Unreleased]: https://github.com/dmauser/cloud-networking/compare/v1.1.0...HEAD
-[1.1.0]: https://github.com/dmauser/cloud-networking/compare/v1.0.0...v1.1.0
-[1.0.0]: https://github.com/dmauser/cloud-networking/releases/tag/v1.0.0
+[Unreleased]: https://github.com/dmauser/network-desk/compare/v1.1.0...HEAD
+[1.1.0]: https://github.com/dmauser/network-desk/compare/v1.0.0...v1.1.0
+[1.0.0]: https://github.com/dmauser/network-desk/releases/tag/v1.0.0

@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Define the standard skeleton and quality checklist for every cloud-networking deliverable, so reports are consistent, professional, and ready to render to HTML/PDF/DOCX/XLSX.
+Define the standard skeleton and quality checklist for every network-desk deliverable, so reports are consistent, professional, and ready to render to HTML/PDF/DOCX/XLSX.
 
 This skill governs **structure and quality**. The four renderer skills (`html-report`, `pdf-report`, `docx-report`, `xlsx-workbook`) govern **format conversion**.
 
@@ -72,7 +72,7 @@ When the user says "report" without a format, default to **Markdown + HTML** and
 Save the Markdown source and every rendered artifact under:
 
 ```
-cloud-networking/<specialist>/reports/<kebab-topic>-<YYYYMMDD>.<ext>
+network-desk/<specialist>/reports/<kebab-topic>-<YYYYMMDD>.<ext>
 ```
 
 `<specialist>` is the owning domain specialist's directory name (e.g. `firewall-engineer`, `pricing-analyst`, `vnet-architect`). Keep the `.md` source next to the rendered file so it can be regenerated.

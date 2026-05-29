@@ -1,8 +1,8 @@
 # Copilot Instructions
 
-## Project: Cloud Networking Desk
+## Project: Network Desk
 
-This is a Copilot CLI extension pack (`@dmauser/cloud-networking`) providing 20 specialist agents for cloud networking tasks across Azure, AWS, and GCP, plus 14 firewall vendor platforms.
+This is a Copilot CLI extension pack (`@dmauser/network-desk`) providing 20 specialist agents for cloud networking tasks across Azure, AWS, and GCP, plus 14 firewall vendor platforms.
 
 ## Build & Run
 
@@ -17,8 +17,8 @@ node bin/cli.mjs uninstall     # Remove
 ## Architecture
 
 - `bin/cli.mjs` — CLI installer (init, status, uninstall)
-- `extensions/cloud-networking/extension.mjs` — Main extension: `REGISTRY` (single source of truth), parameterized tool handlers, session hooks via `@github/copilot-sdk/extension`
-- `extensions/cloud-networking/specialists/<name>/` — Each specialist has:
+- `extensions/network-desk/extension.mjs` — Main extension: `REGISTRY` (single source of truth), parameterized tool handlers, session hooks via `@github/copilot-sdk/extension`
+- `extensions/network-desk/specialists/<name>/` — Each specialist has:
   - `agents/<name>.md` — Agent role definition (persona, workflow, guardrails)
   - `skills/<skill-name>/SKILL.md` — Deep domain expertise for each skill
 - All specialists use **Pattern B** (separate files), not Pattern A (single SKILLS.md)

@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
-"""make_pdf.py - Cloud Networking PDF renderer (Playwright + Chromium + markdown2).
+"""make_pdf.py - Network Desk PDF renderer (Playwright + Chromium + markdown2).
 
 Install: pip install playwright markdown2 && python -m playwright install chromium
 Usage:   python make_pdf.py --input report.md --specialist "VNet/Subnet Architecture"
-         # --output is optional; defaults to cloud-networking/<specialist>/reports/<input-stem>.pdf
+         # --output is optional; defaults to network-desk/<specialist>/reports/<input-stem>.pdf
          # override with: --output path/to/report.pdf  (or --outdir to change the base folder)
 
-Brand defaults follow extensions/cloud-networking/data/report-quality.yaml (report_quality.brand).
+Brand defaults follow extensions/network-desk/data/report-quality.yaml (report_quality.brand).
 Do NOT switch to xhtml2pdf / reportlab / pdfkit / weasyprint - the policy
 mandates Chromium for faithful CSS, tables, Mermaid-rendered diagrams, and emoji.
 """
@@ -49,7 +49,7 @@ BRAND_CSS = """
 @page {
   size: Letter;
   margin: 0.55in;
-  @bottom-center { content: "Cloud Networking - __SPECIALIST__ - Page " counter(page) " of " counter(pages) " - __DATE__"; font: 9pt 'Segoe UI', Helvetica, sans-serif; color: #555; }
+  @bottom-center { content: "Network Desk - __SPECIALIST__ - Page " counter(page) " of " counter(pages) " - __DATE__"; font: 9pt 'Segoe UI', Helvetica, sans-serif; color: #555; }
 }
 body { font: 10.5pt 'Segoe UI', Helvetica, Arial, sans-serif; color: #1d1d1f; line-height: 1.45; }
 h1 { color: var(--primary); font-size: 22pt; margin: 0 0 6pt; border-bottom: 2pt solid var(--primary); padding-bottom: 4pt; }
@@ -110,7 +110,7 @@ async def html_to_pdf(html_str: str, out_path: pathlib.Path) -> None:
 
 def _slugify(text: str) -> str:
     s = re.sub(r"[^a-z0-9]+", "-", str(text).lower()).strip("-")
-    return s or "cloud-networking"
+    return s or "network-desk"
 
 
 def resolve_output(output, specialist, stem, ext, outdir):
@@ -122,13 +122,13 @@ def resolve_output(output, specialist, stem, ext, outdir):
 
 
 def main() -> int:
-    ap = argparse.ArgumentParser(description="Render a Cloud Networking markdown report to PDF.")
+    ap = argparse.ArgumentParser(description="Render a Network Desk markdown report to PDF.")
     ap.add_argument("--input", required=True, type=pathlib.Path)
     ap.add_argument("--output", type=pathlib.Path, default=None,
-                    help="Output path. If omitted: cloud-networking/<specialist>/reports/<input-stem>.pdf")
-    ap.add_argument("--outdir", default="cloud-networking",
-                    help="Base dir used when --output is omitted (default: cloud-networking)")
-    ap.add_argument("--specialist", default="Cloud Networking")
+                    help="Output path. If omitted: network-desk/<specialist>/reports/<input-stem>.pdf")
+    ap.add_argument("--outdir", default="network-desk",
+                    help="Base dir used when --output is omitted (default: network-desk)")
+    ap.add_argument("--specialist", default="Network Desk")
     args = ap.parse_args()
 
     md_text = args.input.read_text(encoding="utf-8")

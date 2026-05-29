@@ -1,4 +1,4 @@
-# Cloud Networking
+# Network Desk
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Node.js >= 18](https://img.shields.io/badge/node-%3E%3D18-brightgreen.svg)](https://nodejs.org/)
@@ -12,7 +12,7 @@
 | | Section | Description |
 |---|---------|-------------|
 | 🚀 | [Quick Start](#quick-start) | One-command install |
-| 💡 | [What is Cloud Networking?](#what-is-cloud-networking) | Overview and key concepts |
+| 💡 | [What is Network Desk?](#what-is-network-desk) | Overview and key concepts |
 | 👥 | [The Team](#the-team) | All 20 specialists at a glance |
 | 📦 | [Installation](#installation) | 5 ways to install (npx user-level, npx project-level, npm, Copilot prompt, manual) |
 | 🖥️ | [CLI Reference](#cli-reference) | `init`, `status`, `uninstall`, `--version` |
@@ -29,28 +29,28 @@
 ## Quick Start
 
 ```bash
-npx github:dmauser/cloud-networking init
+npx github:dmauser/network-desk init
 ```
 
-That's it. Launch Copilot CLI with experimental mode (`copilot --experimental`) in any repo and trigger the extension with **`@cloud-networking`** followed by what you need:
+That's it. Launch Copilot CLI with experimental mode (`copilot --experimental`) in any repo and trigger the extension with **`@network-desk`** followed by what you need:
 
 ```
-@cloud-networking design a hub-spoke VNet topology for a 3-tier app across dev/staging/prod
+@network-desk design a hub-spoke VNet topology for a 3-tier app across dev/staging/prod
 ```
 
 ```
-@cloud-networking generate Palo Alto rules to allow HTTPS from my app subnet to a backend on port 8443
+@network-desk generate Palo Alto rules to allow HTTPS from my app subnet to a backend on port 8443
 ```
 
 The coordinator picks the right specialist automatically and responds in plain language — no tool names to remember.
 
-## What is Cloud Networking?
+## What is Network Desk?
 
-Cloud Networking gives you a coordinated team of network specialist agents through [GitHub Copilot CLI](https://docs.github.com/copilot/concepts/agents/about-copilot-cli). Describe what you need — VNet design, firewall rules, DNS troubleshooting, hybrid connectivity, IaC generation, container networking, SASE architecture — and the coordinator routes your request to the right specialist automatically.
+Network Desk gives you a coordinated team of network specialist agents through [GitHub Copilot CLI](https://docs.github.com/copilot/concepts/agents/about-copilot-cli). Describe what you need — VNet design, firewall rules, DNS troubleshooting, hybrid connectivity, IaC generation, container networking, SASE architecture — and the coordinator routes your request to the right specialist automatically.
 
 Each specialist runs with its own domain expertise, guardrails, and workflow. The coordinator handles routing and multi-domain orchestration so you don't have to remember which tools to call.
 
-> **Analysis only** — Cloud Networking produces designs, configurations, IaC templates, and analysis for human review. It generates deployment code but does not execute deployments, modify live firewalls, or make changes to production networks.
+> **Analysis only** — Network Desk produces designs, configurations, IaC templates, and analysis for human review. It generates deployment code but does not execute deployments, modify live firewalls, or make changes to production networks.
 
 ## The Team
 
@@ -77,7 +77,7 @@ Each specialist runs with its own domain expertise, guardrails, and workflow. Th
 | 🔢 | **IPv6 Migration** | `cn_ipv6` | Dual-stack design, transition planning, addressing, NAT64/DNS64, troubleshooting |
 | 📄 | **Report Builder** | `cn_doc` | Packages findings into polished Markdown/HTML/PDF/DOCX reports and XLSX models with formulas |
 
-> The `specialist` column is the value the coordinator passes internally (e.g. `cn_role({ specialist: "cn_vnet" })`). The bare forms (`vnet`, `fw`, …) are still accepted as aliases. You never type these — just describe what you need after `@cloud-networking`.
+> The `specialist` column is the value the coordinator passes internally (e.g. `cn_role({ specialist: "cn_vnet" })`). The bare forms (`vnet`, `fw`, …) are still accepted as aliases. You never type these — just describe what you need after `@network-desk`.
 
 ### Firewall Vendors (14)
 
@@ -96,7 +96,7 @@ Azure Firewall · AWS Network Firewall · GCP Cloud Firewall / Cloud Armor · Pa
 The fastest way to install globally. Extensions load in every repo but require **experimental mode**:
 
 ```bash
-npx github:dmauser/cloud-networking init
+npx github:dmauser/network-desk init
 ```
 
 Then launch Copilot with experimental mode:
@@ -106,7 +106,7 @@ copilot --experimental
 ```
 
 This will:
-1. Create `~/.copilot/extensions/cloud-networking/` if it doesn't exist
+1. Create `~/.copilot/extensions/network-desk/` if it doesn't exist
 2. Copy the extension router and all 20 specialists
 3. Remove any conflicting individual specialist extensions
 4. Display a summary of what was installed
@@ -120,7 +120,7 @@ Installs the extension into the current repo's `.github/extensions/` directory. 
 ```bash
 # cd into your repo first
 cd my-repo
-npx github:dmauser/cloud-networking init --project
+npx github:dmauser/network-desk init --project
 ```
 
 Then launch Copilot normally from the repo:
@@ -130,7 +130,7 @@ copilot
 ```
 
 This will:
-1. Create `.github/extensions/cloud-networking/` in the current repo
+1. Create `.github/extensions/network-desk/` in the current repo
 2. Copy the extension router and all 20 specialists
 3. Add the extension directory to `.gitignore` (each developer runs init themselves)
 
@@ -139,17 +139,17 @@ This will:
 If you prefer a persistent CLI command instead of `npx`:
 
 ```bash
-npm install -g github:dmauser/cloud-networking
+npm install -g github:dmauser/network-desk
 
 # User-level install (requires experimental mode)
-cloud-networking init
+network-desk init
 
 # Or project-level install (no experimental mode needed)
-cloud-networking init --project
+network-desk init --project
 
 # Now available as a command:
-cloud-networking status
-cloud-networking --version
+network-desk status
+network-desk --version
 ```
 
 ### Option D — Install from inside Copilot CLI
@@ -157,19 +157,19 @@ cloud-networking --version
 Already have Copilot CLI open? You can install directly from the prompt — just ask Copilot to clone the repo and run the installer for you:
 
 ```
-Clone https://github.com/dmauser/cloud-networking.git and run `node bin/cli.mjs init` from the cloned directory.
+Clone https://github.com/dmauser/network-desk.git and run `node bin/cli.mjs init` from the cloned directory.
 ```
 
 Or if you already cloned the repo and are inside it:
 
 ```
-Run `node bin/cli.mjs init` to install the cloud-networking extensions.
+Run `node bin/cli.mjs init` to install the network-desk extensions.
 ```
 
-Copilot will execute the commands, copy the extensions into `~/.copilot/extensions/cloud-networking/`, and confirm the result. After installation, restart Copilot CLI to load the new extensions, then verify with:
+Copilot will execute the commands, copy the extensions into `~/.copilot/extensions/network-desk/`, and confirm the result. After installation, restart Copilot CLI to load the new extensions, then verify with:
 
 ```
-show me the cloud-networking capabilities
+show me the network-desk capabilities
 ```
 
 ### Option E — Manual install (offline / corporate environments)
@@ -182,8 +182,8 @@ Use this if you're behind a corporate proxy or don't have access to npm/npx.
 **Step 1 — Clone the repo:**
 
 ```bash
-git clone https://github.com/dmauser/cloud-networking.git
-cd cloud-networking
+git clone https://github.com/dmauser/network-desk.git
+cd network-desk
 ```
 
 **Step 2 — Copy to your Copilot extensions directory:**
@@ -191,22 +191,22 @@ cd cloud-networking
 macOS / Linux:
 
 ```bash
-mkdir -p ~/.copilot/extensions/cloud-networking
-cp -r extensions/cloud-networking/* ~/.copilot/extensions/cloud-networking/
+mkdir -p ~/.copilot/extensions/network-desk
+cp -r extensions/network-desk/* ~/.copilot/extensions/network-desk/
 ```
 
 Windows (PowerShell):
 
 ```powershell
-$dest = "$env:USERPROFILE\.copilot\extensions\cloud-networking"
+$dest = "$env:USERPROFILE\.copilot\extensions\network-desk"
 New-Item -ItemType Directory -Force -Path $dest | Out-Null
-Copy-Item -Path "extensions\cloud-networking\*" -Destination $dest -Recurse -Force
+Copy-Item -Path "extensions\network-desk\*" -Destination $dest -Recurse -Force
 ```
 
 **Step 3 — Verify the files are in place:**
 
 ```bash
-ls ~/.copilot/extensions/cloud-networking/
+ls ~/.copilot/extensions/network-desk/
 # Should show: extension.mjs  specialists/
 ```
 
@@ -218,40 +218,40 @@ After any install method, check that everything is in place:
 
 ```bash
 # If you used Option A or B:
-npx github:dmauser/cloud-networking status
+npx github:dmauser/network-desk status
 
 # Or launch Copilot CLI and ask:
 copilot
-> show me the cloud-networking capabilities
+> show me the network-desk capabilities
 ```
 
 You should see all 20 specialists listed with their tools.
 
 ### Updating
 
-The extension automatically checks GitHub for a newer version on each session start (throttled to once every 24h, fully non-blocking, never blocks load). When an update is available, you'll see a one-line `cloud-networking: update available — installed X.Y.Z, latest A.B.C` notice in the session log.
+The extension automatically checks GitHub for a newer version on each session start (throttled to once every 24h, fully non-blocking, never blocks load). When an update is available, you'll see a one-line `network-desk: update available — installed X.Y.Z, latest A.B.C` notice in the session log.
 
 To update, run the **`update`** command — it auto-detects whether you have a user-level install, a project-level install (in the current repo), or both, and re-installs each in place:
 
 ```bash
-npx github:dmauser/cloud-networking update
+npx github:dmauser/network-desk update
 ```
 
 Equivalent shortcuts (any of these re-pulls the latest):
 
 ```bash
 # Re-run init explicitly (replaces the existing install)
-npx github:dmauser/cloud-networking init             # user-level
-npx github:dmauser/cloud-networking init --project   # project-level
+npx github:dmauser/network-desk init             # user-level
+npx github:dmauser/network-desk init --project   # project-level
 
 # If installed globally
-npm install -g github:dmauser/cloud-networking
-cloud-networking update
+npm install -g github:dmauser/network-desk
+network-desk update
 ```
 
-**Opt out of auto-check.** Set the environment variable `CLOUD_NETWORKING_NO_UPDATE_CHECK=1` to disable the periodic GitHub poll entirely.
+**Opt out of auto-check.** Set the environment variable `NETWORK_DESK_NO_UPDATE_CHECK=1` to disable the periodic GitHub poll entirely.
 
-Each install records its version in `<install-dir>/.install-meta.json`, and `cloud-networking status` will display it alongside the install date.
+Each install records its version in `<install-dir>/.install-meta.json`, and `network-desk status` will display it alongside the install date.
 
 See [CHANGELOG.md](CHANGELOG.md) for what's new in each release.
 
@@ -259,44 +259,44 @@ See [CHANGELOG.md](CHANGELOG.md) for what's new in each release.
 
 ```bash
 # Using the CLI:
-npx github:dmauser/cloud-networking uninstall
+npx github:dmauser/network-desk uninstall
 
 # Or manually:
 # macOS / Linux
-rm -rf ~/.copilot/extensions/cloud-networking
+rm -rf ~/.copilot/extensions/network-desk
 # Windows (PowerShell)
-Remove-Item -Recurse -Force "$env:USERPROFILE\.copilot\extensions\cloud-networking"
+Remove-Item -Recurse -Force "$env:USERPROFILE\.copilot\extensions\network-desk"
 ```
 
 ## CLI Reference
 
-The `cloud-networking` CLI manages installation of the Copilot extensions. You can run it via `npx` or install it globally.
+The `network-desk` CLI manages installation of the Copilot extensions. You can run it via `npx` or install it globally.
 
 | Command | Description |
 |---------|-------------|
-| `cloud-networking init` | Install/reinstall extensions to `~/.copilot/extensions/` |
-| `cloud-networking init --project` | Install extensions to `.github/extensions/` in current repo |
-| `cloud-networking update` | Re-install over any existing user-level and/or project-level install (pulls latest from GitHub) |
-| `cloud-networking status` | Check installation status, version, and list available specialists |
-| `cloud-networking uninstall` | Remove installed extensions |
-| `cloud-networking --version` | Print the installed CLI version |
-| `cloud-networking help` | Show CLI help |
+| `network-desk init` | Install/reinstall extensions to `~/.copilot/extensions/` |
+| `network-desk init --project` | Install extensions to `.github/extensions/` in current repo |
+| `network-desk update` | Re-install over any existing user-level and/or project-level install (pulls latest from GitHub) |
+| `network-desk status` | Check installation status, version, and list available specialists |
+| `network-desk uninstall` | Remove installed extensions |
+| `network-desk --version` | Print the installed CLI version |
+| `network-desk help` | Show CLI help |
 
-The extension also performs an **automatic update check** against GitHub once every 24 hours when a Copilot session starts, and prints a one-line notice if a newer version is available. Set `CLOUD_NETWORKING_NO_UPDATE_CHECK=1` to disable.
+The extension also performs an **automatic update check** against GitHub once every 24 hours when a Copilot session starts, and prints a one-line notice if a newer version is available. Set `NETWORK_DESK_NO_UPDATE_CHECK=1` to disable.
 
 ## How It Works
 
-Trigger the extension with **`@cloud-networking`** anywhere in your prompt — or just ask a networking question. The coordinator announces itself at session start, auto-detects networking intent (even without the `@` mention), picks the right specialist(s), loads their role and skills behind the scenes via the registered tools, and replies in natural language. Each routing hint is shown once per specialist per session to keep the conversation clean.
+Trigger the extension with **`@network-desk`** anywhere in your prompt — or just ask a networking question. The coordinator announces itself at session start, auto-detects networking intent (even without the `@` mention), picks the right specialist(s), loads their role and skills behind the scenes via the registered tools, and replies in natural language. Each routing hint is shown once per specialist per session to keep the conversation clean.
 
 ```
-You: @cloud-networking design a hub-spoke VNet with Azure Firewall and
+You: @network-desk design a hub-spoke VNet with Azure Firewall and
      monitor east-west traffic with flow logs
 
          │
          ▼
    ┌─────────────────────────────────────────────────────────────┐
-   │ Cloud Networking coordinator                                │
-   │ • Detects @cloud-networking mention                         │
+   │ Network Desk coordinator                                    │
+   │ • Detects @network-desk mention                             │
    │ • Identifies multi-domain intent:                           │
    │     VNet design · Firewall · Network monitoring             │
    │ • Engages the matching specialists in sequence              │
@@ -307,284 +307,284 @@ You: @cloud-networking design a hub-spoke VNet with Azure Firewall and
    stitches the answer together in plain language.
 ```
 
-You never need to call individual tools — just describe what you need after `@cloud-networking` and the coordinator handles the rest.
+You never need to call individual tools — just describe what you need after `@network-desk` and the coordinator handles the rest.
 
 ## Usage Examples
 
-Trigger the extension with **`@cloud-networking`** and describe what you need in plain language — the coordinator picks the right specialist automatically.
+Trigger the extension with **`@network-desk`** and describe what you need in plain language — the coordinator picks the right specialist automatically.
 
 ### 🏗️ VNet/Subnet Architect
 
 ```
-@cloud-networking Design a hub-spoke VNet topology for a 3-tier app with separate dev/staging/prod environments.
+@network-desk Design a hub-spoke VNet topology for a 3-tier app with separate dev/staging/prod environments.
 ```
 ```
-@cloud-networking Plan an IP address scheme for 12 VNets across 3 Azure regions with no overlapping CIDRs.
+@network-desk Plan an IP address scheme for 12 VNets across 3 Azure regions with no overlapping CIDRs.
 ```
 ```
-@cloud-networking Generate a Mermaid diagram of my current hub-spoke peering architecture.
+@network-desk Generate a Mermaid diagram of my current hub-spoke peering architecture.
 ```
 
 ### 🔥 Firewall Engineer
 
 ```
-@cloud-networking Generate Palo Alto PAN-OS rules to allow HTTPS from my app subnet to a backend API on port 8443.
+@network-desk Generate Palo Alto PAN-OS rules to allow HTTPS from my app subnet to a backend API on port 8443.
 ```
 ```
-@cloud-networking Migrate these Cisco ASA ACLs to Azure Firewall policy rules.
+@network-desk Migrate these Cisco ASA ACLs to Azure Firewall policy rules.
 ```
 ```
-@cloud-networking Audit my FortiGate ruleset for shadowed, redundant, or overly permissive rules.
+@network-desk Audit my FortiGate ruleset for shadowed, redundant, or overly permissive rules.
 ```
 
 ### ⚖️ Load Balancer
 
 ```
-@cloud-networking Which Azure load balancer should I use — Standard LB, App Gateway, or Front Door?
+@network-desk Which Azure load balancer should I use — Standard LB, App Gateway, or Front Door?
 ```
 ```
-@cloud-networking Design health probes for a multi-region API behind Azure Front Door.
+@network-desk Design health probes for a multi-region API behind Azure Front Door.
 ```
 ```
-@cloud-networking Configure SSL offload on an Application Gateway with end-to-end TLS.
+@network-desk Configure SSL offload on an Application Gateway with end-to-end TLS.
 ```
 
 ### 🌐 DNS Specialist
 
 ```
-@cloud-networking Design a private DNS zone architecture for 5 VNets with hub-spoke peering.
+@network-desk Design a private DNS zone architecture for 5 VNets with hub-spoke peering.
 ```
 ```
-@cloud-networking Audit my DNS records for stale entries, mismatched TTLs, and missing PTR records.
+@network-desk Audit my DNS records for stale entries, mismatched TTLs, and missing PTR records.
 ```
 ```
-@cloud-networking Troubleshoot — internal VMs can't resolve privatelink.blob.core.windows.net.
+@network-desk Troubleshoot — internal VMs can't resolve privatelink.blob.core.windows.net.
 ```
 
 ### 🔒 Private Link Engineer
 
 ```
-@cloud-networking Set up private endpoints for Azure SQL and Storage with proper DNS integration.
+@network-desk Set up private endpoints for Azure SQL and Storage with proper DNS integration.
 ```
 ```
-@cloud-networking Review the security posture of my private endpoint configuration — any gaps?
+@network-desk Review the security posture of my private endpoint configuration — any gaps?
 ```
 ```
-@cloud-networking Expose my internal API to a partner tenant using Private Link Service.
+@network-desk Expose my internal API to a partner tenant using Private Link Service.
 ```
 
 ### 🔗 Hybrid Connectivity
 
 ```
-@cloud-networking Design a site-to-site VPN between Azure and our on-prem data center with BGP.
+@network-desk Design a site-to-site VPN between Azure and our on-prem data center with BGP.
 ```
 ```
-@cloud-networking Plan an ExpressRoute circuit with Global Reach for US-East and West Europe.
+@network-desk Plan an ExpressRoute circuit with Global Reach for US-East and West Europe.
 ```
 ```
-@cloud-networking Design a failover strategy: ExpressRoute primary, VPN backup with automatic failover.
+@network-desk Design a failover strategy: ExpressRoute primary, VPN backup with automatic failover.
 ```
 
 ### 🛡️ Network Security
 
 ```
-@cloud-networking Audit all NSGs in my subscription — flag any-any rules, unused NSGs, and overly broad ranges.
+@network-desk Audit all NSGs in my subscription — flag any-any rules, unused NSGs, and overly broad ranges.
 ```
 ```
-@cloud-networking Design a micro-segmentation strategy for a PCI-DSS compliant environment.
+@network-desk Design a micro-segmentation strategy for a PCI-DSS compliant environment.
 ```
 ```
-@cloud-networking Analyze NSG flow logs to identify top talkers and unexpected traffic patterns.
+@network-desk Analyze NSG flow logs to identify top talkers and unexpected traffic patterns.
 ```
 
 ### 🔧 Network Troubleshooter
 
 ```
-@cloud-networking My VM in spoke-vnet-02 can't reach the database in hub-vnet — diagnose the connectivity path.
+@network-desk My VM in spoke-vnet-02 can't reach the database in hub-vnet — diagnose the connectivity path.
 ```
 ```
-@cloud-networking Run a packet capture on my NVA to debug why return traffic is being dropped.
+@network-desk Run a packet capture on my NVA to debug why return traffic is being dropped.
 ```
 ```
-@cloud-networking Investigate high latency between my Azure VMs and on-prem servers — is it routing or MTU?
+@network-desk Investigate high latency between my Azure VMs and on-prem servers — is it routing or MTU?
 ```
 
 ### 🌍 Virtual WAN / SD-WAN
 
 ```
-@cloud-networking Design a Virtual WAN topology for 20 branch offices across 3 regions.
+@network-desk Design a Virtual WAN topology for 20 branch offices across 3 regions.
 ```
 ```
-@cloud-networking Configure routing intent for internet breakout through Azure Firewall in my vWAN hub.
+@network-desk Configure routing intent for internet breakout through Azure Firewall in my vWAN hub.
 ```
 ```
-@cloud-networking Integrate a Palo Alto NVA into my Virtual WAN hub for traffic inspection.
+@network-desk Integrate a Palo Alto NVA into my Virtual WAN hub for traffic inspection.
 ```
 
 ### 📊 Network Monitor
 
 ```
-@cloud-networking Set up NSG flow logs with Traffic Analytics for all my production VNets.
+@network-desk Set up NSG flow logs with Traffic Analytics for all my production VNets.
 ```
 ```
-@cloud-networking Build a monitoring dashboard for VPN gateway throughput, latency, and tunnel status.
+@network-desk Build a monitoring dashboard for VPN gateway throughput, latency, and tunnel status.
 ```
 ```
-@cloud-networking Create alert rules for when ExpressRoute circuit utilization exceeds 80%.
+@network-desk Create alert rules for when ExpressRoute circuit utilization exceeds 80%.
 ```
 
 ### ☁️ Multi-Cloud Networking
 
 ```
-@cloud-networking Design a transit architecture connecting Azure, AWS, and GCP with consistent addressing.
+@network-desk Design a transit architecture connecting Azure, AWS, and GCP with consistent addressing.
 ```
 ```
-@cloud-networking Map equivalent networking services across Azure, AWS, and GCP for our migration plan.
+@network-desk Map equivalent networking services across Azure, AWS, and GCP for our migration plan.
 ```
 ```
-@cloud-networking Compare the cost of cross-cloud connectivity options: VPN vs dedicated interconnect vs SD-WAN.
+@network-desk Compare the cost of cross-cloud connectivity options: VPN vs dedicated interconnect vs SD-WAN.
 ```
 
 ### 💰 Pricing Analyst
 
 ```
-@cloud-networking How much will 5TB of monthly egress from Azure East US cost?
+@network-desk How much will 5TB of monthly egress from Azure East US cost?
 ```
 ```
-@cloud-networking Compare VPN gateway costs across Azure, AWS, and GCP for 500 Mbps.
+@network-desk Compare VPN gateway costs across Azure, AWS, and GCP for 500 Mbps.
 ```
 ```
-@cloud-networking Should I use ExpressRoute or S2S VPN for 2 Gbps sustained? Show me the break-even.
+@network-desk Should I use ExpressRoute or S2S VPN for 2 Gbps sustained? Show me the break-even.
 ```
 
 ### 📐 IaC Generator
 
 ```
-@cloud-networking Generate a Bicep template for a hub-spoke VNet with Azure Firewall and VPN Gateway.
+@network-desk Generate a Bicep template for a hub-spoke VNet with Azure Firewall and VPN Gateway.
 ```
 ```
-@cloud-networking Create Terraform modules for a multi-region AWS VPC with Transit Gateway.
+@network-desk Create Terraform modules for a multi-region AWS VPC with Transit Gateway.
 ```
 ```
-@cloud-networking Write an Ansible playbook to deploy NSGs and route tables for my Azure network.
+@network-desk Write an Ansible playbook to deploy NSGs and route tables for my Azure network.
 ```
 
 ### 🐳 Container Networking
 
 ```
-@cloud-networking Which CNI plugin should I use for my AKS cluster — Azure CNI Overlay or Cilium?
+@network-desk Which CNI plugin should I use for my AKS cluster — Azure CNI Overlay or Cilium?
 ```
 ```
-@cloud-networking Design Kubernetes network policies to isolate namespaces while allowing shared services.
+@network-desk Design Kubernetes network policies to isolate namespaces while allowing shared services.
 ```
 ```
-@cloud-networking Compare Istio vs Linkerd for my service mesh — we need mTLS and traffic splitting.
+@network-desk Compare Istio vs Linkerd for my service mesh — we need mTLS and traffic splitting.
 ```
 
 ### 🌐 CDN & Edge Networking
 
 ```
-@cloud-networking Design an Azure Front Door configuration with multi-origin failover and caching.
+@network-desk Design an Azure Front Door configuration with multi-origin failover and caching.
 ```
 ```
-@cloud-networking Optimize cache hit ratio for my API responses — what cache key strategy should I use?
+@network-desk Optimize cache hit ratio for my API responses — what cache key strategy should I use?
 ```
 ```
-@cloud-networking Configure WAF rules at the edge to block bot traffic while allowing legitimate API calls.
+@network-desk Configure WAF rules at the edge to block bot traffic while allowing legitimate API calls.
 ```
 
 ### 🔄 Network Automation & GitOps
 
 ```
-@cloud-networking Design a GitHub Actions pipeline for deploying Terraform network changes with approval gates.
+@network-desk Design a GitHub Actions pipeline for deploying Terraform network changes with approval gates.
 ```
 ```
-@cloud-networking Set up drift detection to alert when someone makes out-of-band changes to my NSGs.
+@network-desk Set up drift detection to alert when someone makes out-of-band changes to my NSGs.
 ```
 ```
-@cloud-networking What policy-as-code rules should I enforce to prevent public IP creation in production?
+@network-desk What policy-as-code rules should I enforce to prevent public IP creation in production?
 ```
 
 ### 🛡️ SASE / SSE
 
 ```
-@cloud-networking Design a SASE architecture to replace our legacy VPN for 5,000 remote users.
+@network-desk Design a SASE architecture to replace our legacy VPN for 5,000 remote users.
 ```
 ```
-@cloud-networking Compare Zscaler ZPA vs Microsoft Entra Private Access for our ZTNA implementation.
+@network-desk Compare Zscaler ZPA vs Microsoft Entra Private Access for our ZTNA implementation.
 ```
 ```
-@cloud-networking How should I integrate SD-WAN with our SASE platform for branch office connectivity?
+@network-desk How should I integrate SD-WAN with our SASE platform for branch office connectivity?
 ```
 
 ### 📏 Network Capacity Planning
 
 ```
-@cloud-networking What VPN Gateway SKU do I need for 800 Mbps sustained throughput with 15 tunnels?
+@network-desk What VPN Gateway SKU do I need for 800 Mbps sustained throughput with 15 tunnels?
 ```
 ```
-@cloud-networking Forecast our ExpressRoute bandwidth needs — we're growing 30% per quarter.
+@network-desk Forecast our ExpressRoute bandwidth needs — we're growing 30% per quarter.
 ```
 ```
-@cloud-networking Calculate maximum single-flow TCP throughput for a 50ms RTT link with 64KB window.
+@network-desk Calculate maximum single-flow TCP throughput for a 50ms RTT link with 64KB window.
 ```
 
 ### 🔢 IPv6 Migration
 
 ```
-@cloud-networking Design a dual-stack VNet configuration for my Azure workloads.
+@network-desk Design a dual-stack VNet configuration for my Azure workloads.
 ```
 ```
-@cloud-networking Plan an IPv6 migration for our Azure environment — which services support IPv6 today?
+@network-desk Plan an IPv6 migration for our Azure environment — which services support IPv6 today?
 ```
 ```
-@cloud-networking Set up NAT64/DNS64 so my IPv6-only VMs can reach IPv4-only external services.
+@network-desk Set up NAT64/DNS64 so my IPv6-only VMs can reach IPv4-only external services.
 ```
 
 ### 📄 Report Builder
 
 ```
-@cloud-networking Package the firewall rule-audit findings into a polished PDF report.
+@network-desk Package the firewall rule-audit findings into a polished PDF report.
 ```
 ```
-@cloud-networking Export this hub-spoke design review as a Word document with an executive summary.
+@network-desk Export this hub-spoke design review as a Word document with an executive summary.
 ```
 ```
-@cloud-networking Build an XLSX capacity model with formulas for subnet sizing and growth.
+@network-desk Build an XLSX capacity model with formulas for subnet sizing and growth.
 ```
 
-> Report Builder is a **packaging** specialist — it turns another specialist's analysis into a deliverable. It does not perform networking analysis itself. Generated files land under `cloud-networking/<specialist>/reports/` (see [Output files](#output-files)). Rendering to PDF/DOCX/XLSX uses the bundled Python renderers (`renderers/make_*.py`); when a dependency is missing the skill falls back to Markdown/HTML.
+> Report Builder is a **packaging** specialist — it turns another specialist's analysis into a deliverable. It does not perform networking analysis itself. Generated files land under `network-desk/<specialist>/reports/` (see [Output files](#output-files)). Rendering to PDF/DOCX/XLSX uses the bundled Python renderers (`renderers/make_*.py`); when a dependency is missing the skill falls back to Markdown/HTML.
 
 ### 🔀 Multi-Domain (cross-specialist workflows)
 
 ```
-@cloud-networking Design a hub-spoke VNet, add firewall rules for east-west traffic, and set up monitoring.
+@network-desk Design a hub-spoke VNet, add firewall rules for east-west traffic, and set up monitoring.
 ```
 ```
-@cloud-networking Plan a hybrid connectivity setup with ExpressRoute, configure private endpoints for PaaS services, and audit the NSGs.
+@network-desk Plan a hybrid connectivity setup with ExpressRoute, configure private endpoints for PaaS services, and audit the NSGs.
 ```
 ```
-@cloud-networking Troubleshoot connectivity from on-prem through VPN to a private endpoint, and check DNS resolution along the path.
+@network-desk Troubleshoot connectivity from on-prem through VPN to a private endpoint, and check DNS resolution along the path.
 ```
 
 ### 🔎 Discovery
 
 ```
-@cloud-networking what can you help me with?
+@network-desk what can you help me with?
 ```
 ```
-@cloud-networking which specialists cover firewalls and what do they do?
+@network-desk which specialists cover firewalls and what do they do?
 ```
 ```
-@cloud-networking I need to set up private endpoints for my storage accounts — who should handle this?
+@network-desk I need to set up private endpoints for my storage accounts — who should handle this?
 ```
 
 ## Output files
 
-Specialists are **analysis-first** and return their findings inline in the chat. When you ask for a saved artifact — a diagram, a rendered report, or a spreadsheet model — files are written into a predictable tree rooted at `cloud-networking/` in your current working directory:
+Specialists are **analysis-first** and return their findings inline in the chat. When you ask for a saved artifact — a diagram, a rendered report, or a spreadsheet model — files are written into a predictable tree rooted at `network-desk/` in your current working directory:
 
 ```
-cloud-networking/
+network-desk/
 └── <specialist>/            # kebab dir name, e.g. firewall-engineer, capacity-planner
     ├── diagrams/            # Mermaid / Excalidraw / draw.io sources
     ├── reports/             # Markdown / HTML / PDF / DOCX deliverables
@@ -594,7 +594,7 @@ cloud-networking/
 Files are named `<kebab-topic>-<YYYYMMDD>.<ext>` by default (e.g. `rule-audit-20260115.pdf`). Example:
 
 ```
-cloud-networking/
+network-desk/
 ├── firewall-engineer/
 │   ├── reports/rule-audit-20260115.pdf
 │   └── configs/east-west-policy-20260115.json
@@ -602,20 +602,20 @@ cloud-networking/
     └── reports/ip-plan-20260115.xlsx
 ```
 
-The bundled Python renderers (`extensions/cloud-networking/renderers/make_{html,pdf,docx,xlsx}.py`) honor this layout: pass `--specialist <kebab-dir>` and they resolve the output path automatically (override with `--output`/`--outdir`). The [Report Builder](#-report-builder) specialist orchestrates these renderers for high-quality reports.
+The bundled Python renderers (`extensions/network-desk/renderers/make_{html,pdf,docx,xlsx}.py`) honor this layout: pass `--specialist <kebab-dir>` and they resolve the output path automatically (override with `--output`/`--outdir`). The [Report Builder](#-report-builder) specialist orchestrates these renderers for high-quality reports.
 
 ## Repository Structure
 
 ```
-cloud-networking/
+network-desk/
 ├── README.md                              # This file
 ├── LICENSE                                # MIT license
 ├── package.json                           # npm package config (name, bin, engines)
 ├── bin/
 │   └── cli.mjs                            # CLI installer (init, uninstall, status)
 └── extensions/
-    └── cloud-networking/
-        ├── extension.mjs                  # Router: @cloud-networking mention trigger + auto-routing hook
+    └── network-desk/
+        ├── extension.mjs                  # Router: @network-desk mention trigger + auto-routing hook
         └── specialists/
             ├── vnet-architect/
             │   ├── agents/
@@ -906,10 +906,10 @@ cloud-networking/
 
 ### Installed extension structure
 
-After running `cloud-networking init`, the installed layout mirrors the `extensions/cloud-networking/` tree above:
+After running `network-desk init`, the installed layout mirrors the `extensions/network-desk/` tree above:
 
 ```
-~/.copilot/extensions/cloud-networking/
+~/.copilot/extensions/network-desk/
 ├── extension.mjs                          # Router + auto-routing hook
 └── specialists/                           # All 20 specialist directories
     └── (same structure as above)
@@ -934,14 +934,14 @@ specialist-name/
 
 | Symptom | Fix |
 |---------|-----|
-| Extensions not loading (`/env` shows "Extensions: none") | Enable experimental mode: `copilot --experimental` — or use project-level install: `cloud-networking init --project` |
+| Extensions not loading (`/env` shows "Extensions: none") | Enable experimental mode: `copilot --experimental` — or use project-level install: `network-desk init --project` |
 | Tools not appearing after install | Restart Copilot CLI to reload extensions |
-| `@cloud-networking` doesn't engage | Verify `~/.copilot/extensions/cloud-networking/extension.mjs` exists; run `cloud-networking status` |
-| Specialist tools missing | Run `cloud-networking status` to check — should list all 20 specialists |
-| Conflicting individual extensions | Run `cloud-networking init` — it removes old standalone specialist installs |
+| `@network-desk` doesn't engage | Verify `~/.copilot/extensions/network-desk/extension.mjs` exists; run `network-desk status` |
+| Specialist tools missing | Run `network-desk status` to check — should list all 20 specialists |
+| Conflicting individual extensions | Run `network-desk init` — it removes old standalone specialist installs |
 | `npx` hangs or fails | Use Option E (manual install) — clone the repo and copy files directly |
 | Firewall config for unsupported vendor | Check the [14 supported vendors](#firewall-vendors-14) list |
-| Version mismatch after update | Run `cloud-networking status` — compare CLI version vs installed version |
+| Version mismatch after update | Run `network-desk status` — compare CLI version vs installed version |
 
 ## License
 

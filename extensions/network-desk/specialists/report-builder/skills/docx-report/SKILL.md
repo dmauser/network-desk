@@ -10,9 +10,9 @@ Author the report with the `report-structure` skill first, then render it here.
 
 `make_docx.py` ships inside this extension's `renderers/` directory. Resolve its path by trying these candidates in order (first that exists wins):
 
-1. `./extensions/cloud-networking/renderers/make_docx.py`  *(repo checkout)*
-2. `./.github/extensions/cloud-networking/renderers/make_docx.py`  *(project install)*
-3. `$HOME/.copilot/extensions/cloud-networking/renderers/make_docx.py`  *(user install — `%USERPROFILE%` on Windows)*
+1. `./extensions/network-desk/renderers/make_docx.py`  *(repo checkout)*
+2. `./.github/extensions/network-desk/renderers/make_docx.py`  *(project install)*
+3. `$HOME/.copilot/extensions/network-desk/renderers/make_docx.py`  *(user install — `%USERPROFILE%` on Windows)*
 
 ## Dependencies
 
@@ -26,10 +26,10 @@ pip install python-docx markdown-it-py
 python "$RENDERERS/make_docx.py" \
   --input  report.md \
   --specialist vnet-architect
-# --output OPTIONAL → cloud-networking/vnet-architect/reports/report.docx
+# --output OPTIONAL → network-desk/vnet-architect/reports/report.docx
 ```
 
-- **Pass the specialist *directory* name** (kebab-case) as `--specialist`. Or set `--output cloud-networking/vnet-architect/reports/hub-spoke-3region-20260528.docx`.
+- **Pass the specialist *directory* name** (kebab-case) as `--specialist`. Or set `--output network-desk/vnet-architect/reports/hub-spoke-3region-20260528.docx`.
 - `--outdir <dir>` overrides the base folder.
 - Heading hierarchy in the Markdown (`#`/`##`/`###`) drives the Word headings **and** the TOC — so keep headings clean and well-nested.
 
