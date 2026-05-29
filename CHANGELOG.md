@@ -8,6 +8,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Changed — Extension runtime performance
+
+Surgical performance improvements to `extension.mjs` (no behavior change to tool output):
+
+- **Startup registry validation is now opt-in and concurrent.** `validateRegistry()` previously read all ~138 role/skill `.md` files serially from disk on every session start. It now runs only when `CLOUD_NETWORKING_VALIDATE=1` (a dev-time check; published installs are static and covered by tests) and, when enabled, performs its file checks in parallel via `Promise.all`.
+- **In-memory file cache.** Role/skill files are immutable for a session, so `loadFile()` now caches successful reads, avoiding repeat disk I/O on subsequent `cn_role`/`cn_skill` calls. Failures are not cached.
+- **Memoized capabilities summary.** `buildCapabilitiesSummary()` is derived only from the static `REGISTRY`; it is now computed once and reused across `cn_capabilities` calls.
+
 ### Changed — Specialist content audit: 2026 currency, consistency, and guardrail normalization
 
 A repo-wide best-practices audit of all 19 specialists and 119 skills (web-verified against current vendor documentation) drove **109 fixes** (4 critical, 45 high, 33 medium, 27 low) across 128 markdown files. Highlights:

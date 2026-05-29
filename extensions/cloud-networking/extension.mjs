@@ -81,9 +81,18 @@ async function checkForUpdate(session) {
 
 // ── File loaders ───────────────────────────────────────────────────────
 
+// Specialist role/skill files are immutable for the lifetime of a session, so
+// cache successful reads to avoid re-reading the same .md from disk on repeat
+// cn_role/cn_skill calls. Failures are not cached.
+const fileCache = new Map();
+
 async function loadFile(path) {
+    const cached = fileCache.get(path);
+    if (cached !== undefined) return cached;
     try {
-        return await readFile(path, "utf8");
+        const content = await readFile(path, "utf8");
+        fileCache.set(path, content);
+        return content;
     } catch (err) {
         return { textResultForLlm: `Failed to load: ${err.message}`, resultType: "failure" };
     }
@@ -440,7 +449,9 @@ function specialistList() {
     return PREFIXES.map((p, i) => `| ${i + 1} | ${REGISTRY[p].icon} | ${REGISTRY[p].domain} | \`${pub(p)}\` | ${Object.keys(REGISTRY[p].skills).length} |`).join("\n");
 }
 
+let _capabilitiesSummary = null;
 function buildCapabilitiesSummary() {
+    if (_capabilitiesSummary !== null) return _capabilitiesSummary;
     const rows = specialistList();
     const skillBlocks = PREFIXES.map((p) => {
         const def = REGISTRY[p];
@@ -450,7 +461,7 @@ function buildCapabilitiesSummary() {
         return `### ${def.icon} ${def.domain} — \`specialist: "${pub(p)}"\`\n${skills}`;
     }).join("\n\n");
 
-    return `# Cloud Networking — Available Specialists
+    _capabilitiesSummary = `# Cloud Networking — Available Specialists
 
 This extension exposes its 19 specialists through **five tools**. Specialists are
 identified by their \`cn_\`-prefixed id (e.g. \`cn_vnet\`) and selected by *argument*,
@@ -479,6 +490,7 @@ Bicep, Terraform (azurerm/aws/google), Ansible (azure.azcollection/amazon.aws/go
 
 ## Specialists and their skills
 ${skillBlocks}`;
+    return _capabilitiesSummary;
 }
 
 function buildOrchestrator(prefix) {
@@ -627,21 +639,34 @@ const tools = [
 ];
 
 // ── Startup registry validation (logs issues, never crashes) ───────────
+// Verifies every role/skill .md referenced by the REGISTRY exists on disk.
+// This is filesystem I/O that is only useful while developing the extension —
+// in a published install the layout is static and already covered by CI/tests.
+// It is therefore opt-in (set CLOUD_NETWORKING_VALIDATE=1) and, when enabled,
+// performs its reads concurrently rather than serially.
+
+async function fileMissing(path) {
+    try { await readFile(path, "utf8"); return false; } catch { return true; }
+}
 
 async function validateRegistry(session) {
+    if (process.env.CLOUD_NETWORKING_VALIDATE !== "1") return [];
+
     const problems = [];
     const seen = new Set();
+    const checks = [];
     for (const [prefix, def] of Object.entries(REGISTRY)) {
         if (seen.has(prefix)) problems.push(`duplicate prefix: ${prefix}`);
         seen.add(prefix);
         try { def.trigger.test(""); } catch { problems.push(`invalid trigger regex: ${prefix}`); }
         const roleMd = join(SPECIALISTS, def.dir, "agents", `${def.dir}.md`);
-        try { await readFile(roleMd, "utf8"); } catch { problems.push(`missing role md: ${def.dir}`); }
+        checks.push(fileMissing(roleMd).then((m) => { if (m) problems.push(`missing role md: ${def.dir}`); }));
         for (const skill of Object.keys(def.skills)) {
             const md = join(SPECIALISTS, def.dir, "skills", skill, "SKILL.md");
-            try { await readFile(md, "utf8"); } catch { problems.push(`missing skill md: ${prefix}/${skill}`); }
+            checks.push(fileMissing(md).then((m) => { if (m) problems.push(`missing skill md: ${prefix}/${skill}`); }));
         }
     }
+    await Promise.all(checks);
     if (problems.length) {
         await session.log(`cloud-networking: registry validation found ${problems.length} issue(s): ${problems.join("; ")}`);
     }
