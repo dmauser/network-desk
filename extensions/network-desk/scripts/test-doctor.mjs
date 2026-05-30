@@ -29,7 +29,6 @@ let exitCode = 0;
 try {
     const ext = await import(pathToFileURL(join(REPO, "extensions", "network-desk", "extension.mjs")).href);
     const { classifyMcpConfig, renderDoctorMarkdown } = ext;
-    const tools = globalThis.__NETWORK_DESK_TOOLS || [];
 
 let pass = 0, fail = 0;
 function assert(cond, msg) {
@@ -125,19 +124,6 @@ header("Case 5: mixed (azure-mcp present, terraform-mcp configured-not-loaded)")
 
 console.log(`\n=== ${pass} passed, ${fail} failed ===`);
     exitCode = fail === 0 ? 0 : 1;
-
-    // Case 6: cn_role output includes per-specialist MCP availability hint.
-    header("Case 6: cn_role surfaces per-specialist MCP availability");
-    {
-        const cnRole = tools.find((t) => t.name === "cn_role");
-        assert(!!cnRole, "cn_role tool registered");
-        const out = await cnRole.handler({ specialist: "cn_vnet" });
-        const text = typeof out === "string" ? out : (out?.textResultForLlm ?? JSON.stringify(out));
-        assert(/MCP availability for/i.test(text), "role output mentions 'MCP availability for'");
-        assert(/Run `cn_mcp_doctor`/.test(text), "role output nudges user to run cn_mcp_doctor");
-    }
-    if (fail !== 0) exitCode = 1;
-    console.log(`\n=== final: ${pass} passed, ${fail} failed ===`);
 } finally {
     // Clean up: only remove what we created. If the user has a real
     // node_modules tree, we leave the @github/copilot-sdk subdir alone (the

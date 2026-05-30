@@ -10,11 +10,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Added
 
-- **Per-specialist MCP availability hint** — `cn_role`, `cn_orchestrate`, and
-  `cn_skill` now also append a targeted block listing which of *that
-  specialist's* recommended MCP servers are loaded, partially configured, or
-  missing, and nudge the user to run `cn_mcp_doctor` for install snippets. The
-  doctor cache is warmed on each invocation; cost is one cached file read.
 - **MCP doctor (`cn_mcp_doctor`)** — read-only inspector that reads
   `~/.copilot/m-mcp-servers.json` and reports which Network-Desk-recommended
   MCP servers are Present, Configured-but-not-loaded, or Missing. Returns

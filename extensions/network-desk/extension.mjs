@@ -958,48 +958,11 @@ function renderAuthoritativeSourcesBlock(prefix) {
     ].join("\n");
 }
 
-// Per-specialist MCP availability hint. Reads the cached doctor report
-// (populated on session start by the greeting hooks) and tells the user
-// which of THIS specialist's recommended MCPs are loaded vs. missing,
-// with a one-line nudge to run cn_mcp_doctor for install snippets.
-// Returns "" if the report isn't cached yet (avoids forcing async I/O
-// inside this sync renderer) or if the specialist has no mcpSources.
-function renderSpecialistMcpAvailability(prefix) {
-    const def = REGISTRY[prefix];
-    const sources = Array.isArray(def?.mcpSources) ? def.mcpSources : [];
-    if (sources.length === 0) return "";
-    if (!_doctorReport?.result) return "";
-    const { present, configuredNotLoaded } = _doctorReport.result;
-    const presentKeys = new Set(present.map((p) => p.key));
-    const cnlKeys = new Set(configuredNotLoaded.map((c) => c.key));
-    const loaded = sources.filter((k) => presentKeys.has(k));
-    const partial = sources.filter((k) => cnlKeys.has(k));
-    const missing = sources.filter((k) => !presentKeys.has(k) && !cnlKeys.has(k));
-    if (missing.length === 0 && partial.length === 0) {
-        return [
-            "",
-            `> ✅ MCP availability: all ${sources.length} recommended servers for ${def.domain} are loaded (${loaded.map((k) => "`" + k + "`").join(", ")}).`,
-            "",
-        ].join("\n");
-    }
-    const lines = [
-        "",
-        `> ⚠️ **MCP availability for ${def.domain}:** ${loaded.length} of ${sources.length} recommended servers loaded.`,
-    ];
-    if (loaded.length) lines.push(`> - ✅ Loaded: ${loaded.map((k) => "`" + k + "`").join(", ")}`);
-    if (partial.length) lines.push(`> - ⏳ Configured but not yet loaded (restart Copilot CLI): ${partial.map((k) => "`" + k + "`").join(", ")}`);
-    if (missing.length) lines.push(`> - ❌ Missing: ${missing.map((k) => "`" + k + "`").join(", ")}`);
-    lines.push("> ");
-    lines.push("> Run `cn_mcp_doctor` for copy-pasteable install snippets. Answers will continue with baked-in knowledge plus a *Not validated against live vendor MCP* disclaimer until these are added.");
-    lines.push("");
-    return lines.join("\n");
-}
-
 // loadFile() may return either a string (success, cached) or a failure
 // object { textResultForLlm, resultType: "failure" }. withMcpBlock appends
 // the MCP-first block on success and leaves failures untouched.
 function withMcpBlock(loaded, prefix) {
-    if (typeof loaded === "string") return loaded + renderAuthoritativeSourcesBlock(prefix) + renderSpecialistMcpAvailability(prefix);
+    if (typeof loaded === "string") return loaded + renderAuthoritativeSourcesBlock(prefix);
     return loaded;
 }
 
@@ -1077,7 +1040,6 @@ const tools = [
         handler: async (args) => {
             const prefix = resolveSpecialist(args?.specialist);
             if (!prefix) return unknownSpecialistMsg(args?.specialist);
-            await runMcpDoctor(); // warm cache for renderSpecialistMcpAvailability
             const loaded = await loadFile(join(SPECIALISTS, REGISTRY[prefix].dir, "agents", `${REGISTRY[prefix].dir}.md`));
             return withMcpBlock(loaded, prefix);
         },
@@ -1094,8 +1056,7 @@ const tools = [
         handler: async (args) => {
             const prefix = resolveSpecialist(args?.specialist);
             if (!prefix) return unknownSpecialistMsg(args?.specialist);
-            await runMcpDoctor();
-            return buildOrchestrator(prefix) + renderAuthoritativeSourcesBlock(prefix) + renderSpecialistMcpAvailability(prefix);
+            return buildOrchestrator(prefix) + renderAuthoritativeSourcesBlock(prefix);
         },
     },
     {
@@ -1124,7 +1085,6 @@ const tools = [
                     resultType: "failure",
                 };
             }
-            await runMcpDoctor();
             return withMcpBlock(await loadFile(join(SPECIALISTS, def.dir, "skills", skill, "SKILL.md")), prefix);
         },
     },
