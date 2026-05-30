@@ -22,6 +22,11 @@ environment variable. Everything else it does happens entirely on your machine.
   **same local Copilot session** — it is never sent off your machine by the extension.
 - **Bundled specialist content** (Markdown role and skill files shipped with the extension),
   read from local disk and returned to the Copilot session when you engage a specialist.
+- **The Copilot CLI MCP config file** at `~/.copilot/m-mcp-servers.json` (Windows:
+  `%USERPROFILE%\.copilot\m-mcp-servers.json`), read **read-only** by the `cn_mcp_doctor`
+  tool to detect which vendor MCP servers are installed. The file's contents stay on your
+  machine; only a derived report (counts, server names, and recommended additions) is
+  returned to the Copilot session. Network Desk **never writes** this file.
 - **The current working directory**, only when you (or the agent on your behalf) explicitly
   save a generated artifact — see [Files written locally](#files-written-locally).
 
@@ -81,6 +86,13 @@ queries. This is delivered as **guidance text** inside the Markdown that
 does not call any MCP server.** The decision to call an MCP, and the actual call, are
 made by the **host Copilot CLI agent** using whatever MCP tools you have separately
 installed and configured.
+
+The `cn_mcp_doctor` tool **reads** `~/.copilot/m-mcp-servers.json` (read-only) to detect
+which MCP servers are configured and loaded, and returns a report with copy-pasteable
+JSON snippets you can merge yourself. **It does not modify the file**, and it makes
+**no network calls** of its own. The doctor's output (server names, tool counts, install
+URLs we ship in the extension) is returned to the Copilot session like any other
+extension tool result and stays on your machine unless you choose to share it.
 
 What this means in practice:
 

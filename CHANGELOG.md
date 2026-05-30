@@ -10,6 +10,20 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Added
 
+- **MCP doctor (`cn_mcp_doctor`)** — read-only inspector that reads
+  `~/.copilot/m-mcp-servers.json` and reports which Network-Desk-recommended
+  MCP servers are Present, Configured-but-not-loaded, or Missing. Returns
+  install URLs and copy-pasteable JSON snippets for missing servers from a
+  new `MCP_INSTALL_SNIPPETS` map. Tool count grows 6 → 7 (still ≪ 128).
+- **First-mention advisory** — the first time `@network-desk` is mentioned
+  in a session, an `ℹ️ Detected N of M recommended servers. Run cn_mcp_doctor for details.` line is appended to the presence note. Non-blocking and
+  shown once per session.
+- **README "MCP setup" section** — documents the doctor, the per-platform
+  config path, and a worked diff example for adding microsoft-learn,
+  azure-mcp, and terraform-mcp.
+- **Optional smoke-test script** — `extensions/network-desk/scripts/test-doctor.mjs`
+  covers four detection cases (missing file / builtins-only / configured-not-loaded /
+  fully-present). Standalone; the repo has no test harness.
 - **MCP-first source of truth** — every specialist now declares an ordered
   `mcpSources` list in the registry (Microsoft Learn, Azure MCP, AWS MCP, GCP
   MCP, Terraform MCP, GitHub MCP, Context7, firewall-vendor MCPs). `cn_role`,
@@ -29,8 +43,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
   only a single optional once-per-24h GitHub version check (disable with
   `NETWORK_DESK_NO_UPDATE_CHECK=1`). Referenced from the README and shipped with the package.
   PRIVACY.md also documents that MCP-first guidance instructs the **host CLI agent** (not
-  Network Desk) to call third-party MCP servers, and that any data sent to such servers is
-  governed by their own privacy terms.
+  Network Desk) to call third-party MCP servers, that any data sent to such servers is
+  governed by their own privacy terms, and that `cn_mcp_doctor` only reads (never writes)
+  the local MCP config file and makes no network calls of its own.
 
 ### Changed
 

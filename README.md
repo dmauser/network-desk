@@ -324,6 +324,59 @@ answers from curated knowledge and appends `> Not validated against live vendor 
 Network Desk itself never calls an MCP — only the host Copilot CLI agent does, using
 whatever MCP servers you have configured. See [`PRIVACY.md`](PRIVACY.md#vendor-mcp-servers-source-of-truth-guidance) for the trust-boundary details.
 
+## MCP setup
+
+Network Desk ships a built-in **MCP doctor** that detects which vendor MCP servers you
+have installed and prints copy-pasteable JSON snippets for the missing ones. It is
+**read-only** — it never writes the config file for you.
+
+**Run it:**
+
+```text
+@network-desk run cn_mcp_doctor
+```
+
+You'll also see a one-line advisory the first time you mention `@network-desk` in a
+session, e.g. *"ℹ️ network-desk works best with MCP servers. Detected 2 of 8 recommended servers. Run `cn_mcp_doctor` for details."*
+
+**Config path (the doctor reads, never writes):**
+
+| Platform | Path |
+|---|---|
+| Windows | `%USERPROFILE%\.copilot\m-mcp-servers.json` |
+| macOS / Linux | `~/.copilot/m-mcp-servers.json` |
+
+**Worked example.** Starting from a fresh CLI install whose config has only the
+`filesystem` and `playwright` builtins, the doctor reports 0 of 8 recommended MCPs and
+suggests merging fragments like these under `servers` (showing three of the eight):
+
+```diff
+ {
+   "servers": {
+     "filesystem": { "builtin": true, "tools": [ ... ] },
+     "playwright": { "builtin": true, "tools": [ ... ] },
++    "microsoft-learn": {
++      "command": "npx",
++      "args": ["-y", "@microsoft/mcp-server-learn"]
++    },
++    "azure-mcp": {
++      "command": "npx",
++      "args": ["-y", "@azure/mcp@latest", "server", "start"]
++    },
++    "terraform-mcp": {
++      "command": "docker",
++      "args": ["run", "-i", "--rm", "hashicorp/terraform-mcp-server"]
++    }
+   }
+ }
+```
+
+After merging, restart the Copilot CLI and re-run `cn_mcp_doctor` — the affected entries
+move from **Missing** to **Present**, and Network Desk specialists start citing them as
+the source of truth automatically. Verify each install command against the URL the
+doctor prints next to each missing server (network-desk does not auto-update those
+URLs; vendor packaging changes occasionally).
+
 ## Usage Examples
 
 Trigger the extension with **`@network-desk`** and describe what you need in plain language — the coordinator picks the right specialist automatically.
