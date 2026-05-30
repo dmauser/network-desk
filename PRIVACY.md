@@ -4,11 +4,9 @@ _Last updated: 2026-05-29 · Applies to: `@dmauser/network-desk` (the **Network 
 
 ## Summary (TL;DR)
 
-Network Desk is a **local, mostly read-only** Copilot CLI extension. It does **not** collect
+Network Desk is a **local, read-only** Copilot CLI extension. It does **not** collect
 telemetry, does **not** track usage, and does **not** transmit your prompts, code, or
-generated files anywhere. The single tool that writes to disk (`cn_mcp_install`) is opt-in
-and requires the host's per-call approval prompt — see
-[Vendor MCP servers](#vendor-mcp-servers-source-of-truth-guidance).
+generated files anywhere.
 
 The extension makes **exactly one** outbound network request: a once-per-24-hours version
 check against the project's public GitHub manifest. You can turn this off with a single
@@ -28,8 +26,7 @@ environment variable. Everything else it does happens entirely on your machine.
   `%USERPROFILE%\.copilot\m-mcp-servers.json`), read **read-only** by the `cn_mcp_doctor`
   tool to detect which vendor MCP servers are installed. The file's contents stay on your
   machine; only a derived report (counts, server names, and recommended additions) is
-  returned to the Copilot session. Network Desk **never writes** this file unless you
-  explicitly invoke `cn_mcp_install` and approve the host's per-call permission prompt.
+  returned to the Copilot session. Network Desk **never writes** this file.
 - **The current working directory**, only when you (or the agent on your behalf) explicitly
   save a generated artifact — see [Files written locally](#files-written-locally).
 
@@ -56,10 +53,8 @@ extension itself adds **no** identifying information beyond the static user-agen
 - ❌ No accounts, no API keys, no credentials required or stored by the extension.
 - ❌ No external runtime dependencies — the extension uses only the GitHub Copilot SDK and
   Node.js built-in modules, which keeps the supply-chain surface minimal.
-- ❌ No changes to your cloud infrastructure. All specialist tools are read-only and
-  deliver analysis (Markdown guidance) only. The single exception is `cn_mcp_install`,
-  an opt-in writer for `~/.copilot/m-mcp-servers.json` that requires the host CLI's
-  per-call approval prompt — see [Vendor MCP servers](#vendor-mcp-servers-source-of-truth-guidance).
+- ❌ No changes to your cloud infrastructure. All tools are read-only and deliver analysis
+  (Markdown guidance) only.
 
 ## Files written locally
 
@@ -98,28 +93,6 @@ JSON snippets you can merge yourself. **It does not modify the file**, and it ma
 **no network calls** of its own. The doctor's output (server names, tool counts, install
 URLs we ship in the extension) is returned to the Copilot session like any other
 extension tool result and stays on your machine unless you choose to share it.
-
-### Opt-in writer (`cn_mcp_install`)
-
-Network Desk ships **one optional write tool**, `cn_mcp_install`, which merges a
-recommended MCP server snippet into `~/.copilot/m-mcp-servers.json` so you do not have
-to copy-paste it yourself. This is the **only** Network Desk tool that writes to disk,
-and it is explicitly opt-in:
-
-- Every call requires the host Copilot CLI's **per-call Approve / Deny prompt**
-  (`skipPermission: false`); Network Desk cannot bypass it.
-- It **never overwrites** an existing server entry unless you pass `force: true`.
-- Before each write it saves a timestamped backup at
-  `~/.copilot/m-mcp-servers.json.backup-<ISO-timestamp>` and writes the new content
-  atomically (`*.tmp` + rename) so a crash mid-write cannot corrupt the file.
-- It makes **no network calls**; it only adds a JSON fragment shipped inside this
-  extension. You still need to run any vendor-side steps (`docker pull`, `npm install`,
-  authentication) yourself, and to restart the Copilot CLI to load the new tools.
-- The snippets are listed in `MCP_INSTALL_SNIPPETS` in `extension.mjs`. You can audit
-  them before approving any call.
-
-If you do not want this capability at all, simply never approve the prompt — the doctor
-(`cn_mcp_doctor`) and all specialist tools remain fully functional and read-only.
 
 What this means in practice:
 

@@ -10,13 +10,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Added
 
-- **Opt-in MCP writer (`cn_mcp_install`)** — one-step installer that merges a
-  recommended MCP snippet into `~/.copilot/m-mcp-servers.json` with the host's
-  per-call Approve/Deny prompt (`skipPermission: false`). Preserves untouched
-  servers, refuses to overwrite without `force: true`, keeps a timestamped
-  `.backup-*` of the original, and writes atomically (`*.tmp` + rename). Tool
-  count grows 7 → 8 (still ≪ 128). PRIVACY.md now flags this single non-read-only
-  tool explicitly.
 - **Per-specialist MCP availability hint** — `cn_role`, `cn_orchestrate`, and
   `cn_skill` now also append a targeted block listing which of *that
   specialist's* recommended MCP servers are loaded, partially configured, or
