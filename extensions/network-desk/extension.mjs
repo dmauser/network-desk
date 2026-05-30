@@ -16,71 +16,6 @@ import { dirname, join } from "node:path";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const SPECIALISTS = join(HERE, "specialists");
-const SHARED_MCP_LOOKUP = join(SPECIALISTS, "_shared", "mcp-lookup", "SKILL.md");
-
-// ── MCP source-of-truth registry ───────────────────────────────────────
-// Network Desk specialists prefer vendor MCP servers as the source of
-// truth over baked-in knowledge. Each REGISTRY entry below declares an
-// ordered `mcpSources` list referencing keys defined here. The role,
-// orchestration and skill outputs append a generated "Authoritative
-// Sources (MCP-first)" block driven entirely by this metadata, so the
-// per-specialist mapping lives in code (not in 124 SKILL.md files).
-//
-// Enforcement is SHOULD-strength: if no MCP is installed, the agent
-// falls back to baked-in knowledge with a clear disclaimer. The full
-// playbook lives in specialists/_shared/mcp-lookup/SKILL.md and is
-// surfaced via the cn_sources tool.
-
-const MCP_REGISTRY = {
-    "microsoft-learn": {
-        name: "Microsoft Learn MCP",
-        prefixes: ["microsoft_docs_*", "microsoft.docs.*"],
-        good_for: "Azure, Entra, M365, .NET, Windows official docs",
-        install: "https://learn.microsoft.com/training/support/mcp",
-    },
-    "azure-mcp": {
-        name: "Azure MCP (azmcp)",
-        prefixes: ["azmcp_*"],
-        good_for: "Live Azure tenant queries — subscriptions, RGs, Key Vault, storage, monitor/KQL",
-        install: "https://github.com/Azure/azure-mcp",
-    },
-    "aws-mcp": {
-        name: "AWS Labs MCP servers",
-        prefixes: ["awslabs_*", "aws_*"],
-        good_for: "AWS docs, CDK, Terraform AWS provider, service APIs",
-        install: "https://github.com/awslabs/mcp",
-    },
-    "gcp-mcp": {
-        name: "Google Cloud MCP family",
-        prefixes: ["gcp_*", "googlecloud_*", "cloudrun_*"],
-        good_for: "GCP resources, Cloud Run, BigQuery, GCP docs",
-        install: "https://github.com/GoogleCloudPlatform/cloud-run-mcp",
-    },
-    "terraform-mcp": {
-        name: "HashiCorp Terraform MCP",
-        prefixes: ["terraform_*"],
-        good_for: "Provider schemas, registry modules, resource docs across all clouds",
-        install: "https://github.com/hashicorp/terraform-mcp-server",
-    },
-    "github-mcp": {
-        name: "GitHub MCP",
-        prefixes: ["github_*"],
-        good_for: "Repos, issues, PRs, Actions, gh CLI docs",
-        install: "https://github.com/github/github-mcp-server",
-    },
-    "context7": {
-        name: "Context7 MCP",
-        prefixes: ["context7_*", "c7_*"],
-        good_for: "Generic vendor/library docs fallback (Palo Alto, Fortinet, Cisco, Juniper, Zscaler, Sophos, OPNsense, pfSense, VyOS, …)",
-        install: "https://github.com/upstash/context7",
-    },
-    "firewall-vendors": {
-        name: "Vendor-specific firewall MCPs",
-        prefixes: ["panos_*", "fortios_*", "checkpoint_*", "asa_*", "srx_*", "(varies by vendor)"],
-        good_for: "Live config/docs for a specific firewall vendor — many vendors have no MCP yet; fall back to context7",
-        install: "Vendor-published; check the vendor's developer site",
-    },
-};
 
 // ── Update check ───────────────────────────────────────────────────────
 // Lightweight, async, throttled check against the GitHub repo for a newer
@@ -188,7 +123,6 @@ const REGISTRY = {
             "drawio-diagram": "Generate draw.io (.drawio XML) network topology diagrams. Prefers native cloud-provider stencils (mxgraph.azure2, mxgraph.aws4, mxgraph.gcp2).",
             "migration-planner": "Plan network migrations — on-prem to cloud, cloud-to-cloud address space.",
         },
-        mcpSources: ["azure-mcp", "aws-mcp", "gcp-mcp", "terraform-mcp", "microsoft-learn", "context7"],
     },
     fw: {
         dir: "firewall-engineer",
@@ -209,7 +143,6 @@ const REGISTRY = {
             "log-analysis": "Parse and analyze firewall logs (syslog, CEF, LEEF) for security events.",
             "troubleshoot": "Troubleshoot firewall connectivity — packet flow, NAT, routing, policy lookup. Multi-vendor.",
         },
-        mcpSources: ["firewall-vendors", "azure-mcp", "aws-mcp", "gcp-mcp", "microsoft-learn", "context7"],
     },
     lb: {
         dir: "load-balancer",
@@ -228,7 +161,6 @@ const REGISTRY = {
             "traffic-routing": "Traffic routing methods — weighted, priority, geographic, latency-based, session affinity.",
             "troubleshoot": "Troubleshoot LB issues — backend health, asymmetric routing, SNAT exhaustion, 502/504 errors.",
         },
-        mcpSources: ["azure-mcp", "aws-mcp", "gcp-mcp", "microsoft-learn", "terraform-mcp", "context7"],
     },
     dns: {
         dir: "dns-specialist",
@@ -246,7 +178,6 @@ const REGISTRY = {
             "migration-plan": "Plan DNS migrations — zone transfers, cutover strategies, TTL lowering.",
             "troubleshoot": "Troubleshoot DNS resolution — nslookup/dig analysis, forwarding chain tracing.",
         },
-        mcpSources: ["azure-mcp", "aws-mcp", "gcp-mcp", "microsoft-learn", "context7"],
     },
     pl: {
         dir: "private-link",
@@ -263,7 +194,6 @@ const REGISTRY = {
             "security-review": "Review private endpoint security — NSG on PE subnets, network policies, access controls.",
             "troubleshoot": "Troubleshoot PE connectivity — DNS resolution, NSG blocks, approval state.",
         },
-        mcpSources: ["azure-mcp", "aws-mcp", "gcp-mcp", "microsoft-learn", "terraform-mcp", "context7"],
     },
     hyb: {
         dir: "hybrid-connectivity",
@@ -282,7 +212,6 @@ const REGISTRY = {
             "failover-design": "Redundancy and failover — dual circuits, VPN backup, BFD, fast convergence.",
             "troubleshoot": "Troubleshoot hybrid connectivity — BGP neighbor state, tunnel status, MTU issues, asymmetric routing.",
         },
-        mcpSources: ["azure-mcp", "aws-mcp", "gcp-mcp", "microsoft-learn", "terraform-mcp", "context7"],
     },
     nsec: {
         dir: "network-security",
@@ -302,7 +231,6 @@ const REGISTRY = {
             "compliance-check": "Check network config against compliance frameworks (CIS, NIST, PCI-DSS network controls).",
             "troubleshoot": "Troubleshoot network security — blocked traffic, effective rules, IP flow verify.",
         },
-        mcpSources: ["azure-mcp", "aws-mcp", "gcp-mcp", "microsoft-learn", "terraform-mcp", "context7"],
     },
     ntsh: {
         dir: "network-troubleshooter",
@@ -322,7 +250,6 @@ const REGISTRY = {
             "mtu-path-discovery": "MTU/MSS troubleshooting — path MTU discovery, fragmentation, jumbo frames.",
             "tls-handshake-debug": "TLS handshake debugging — TLS alert code decoding, openssl s_client / testssl.sh / nmap workflows, cert chain validation, SNI/ALPN/mTLS failure patterns, OCSP stapling, middlebox interception detection.",
         },
-        mcpSources: ["azure-mcp", "aws-mcp", "gcp-mcp", "microsoft-learn", "context7"],
     },
     vwan: {
         dir: "vwan-sdwan",
@@ -340,7 +267,6 @@ const REGISTRY = {
             "branch-connectivity": "Branch connectivity — S2S VPN, P2S, ExpressRoute to vWAN.",
             "troubleshoot": "Troubleshoot vWAN — effective routes, connection state, hub routing.",
         },
-        mcpSources: ["azure-mcp", "microsoft-learn", "terraform-mcp", "context7"],
     },
     nmon: {
         dir: "network-monitor",
@@ -359,7 +285,6 @@ const REGISTRY = {
             "dashboard-build": "Network monitoring dashboard — KQL queries, Azure Monitor workbooks, CloudWatch.",
             "baseline-analysis": "Network baseline analysis — normal traffic patterns, anomaly detection.",
         },
-        mcpSources: ["azure-mcp", "aws-mcp", "gcp-mcp", "microsoft-learn", "context7"],
     },
     mcn: {
         dir: "multi-cloud-net",
@@ -376,7 +301,6 @@ const REGISTRY = {
             "latency-optimization": "Cross-cloud latency optimization — peering locations, backbone routing, CDN.",
             "cost-comparison": "Network cost comparison across clouds — egress, peering, VPN, interconnect pricing.",
         },
-        mcpSources: ["azure-mcp", "aws-mcp", "gcp-mcp", "microsoft-learn", "terraform-mcp", "context7"],
     },
     price: {
         dir: "pricing-analyst",
@@ -396,7 +320,6 @@ const REGISTRY = {
             "cost-optimizer": "Network cost optimization — reduce egress, right-size gateways, reserved capacity, architectural patterns to save.",
             "price-compare": "Cross-cloud network pricing comparison — side-by-side tables for equivalent services, workload scenario costs.",
         },
-        mcpSources: ["azure-mcp", "aws-mcp", "gcp-mcp", "microsoft-learn", "context7"],
     },
     iac: {
         dir: "iac-generator",
@@ -412,7 +335,6 @@ const REGISTRY = {
             "ansible-gen": "Generate Ansible playbooks for network automation across Azure, AWS, and GCP using official collections.",
             "arm-gen": "Generate ARM JSON templates for Azure networking resources with parameter files and linked template patterns.",
         },
-        mcpSources: ["terraform-mcp", "microsoft-learn", "aws-mcp", "gcp-mcp", "github-mcp", "context7"],
     },
     cnet: {
         dir: "container-networking",
@@ -430,7 +352,6 @@ const REGISTRY = {
             "cross-cluster": "Multi-cluster networking — Submariner, ClusterMesh, Istio multi-cluster, Fleet Manager.",
             "troubleshoot": "Container networking troubleshooting — pod connectivity, CoreDNS, CNI failures, IP exhaustion, sidecar issues.",
         },
-        mcpSources: ["azure-mcp", "aws-mcp", "gcp-mcp", "microsoft-learn", "terraform-mcp", "context7"],
     },
     cdn: {
         dir: "cdn-edge",
@@ -447,7 +368,6 @@ const REGISTRY = {
             "waf-edge": "Security at the edge — WAF policies, bot management, rate limiting, DDoS at CDN, geo-blocking.",
             "troubleshoot": "CDN troubleshooting — cache miss analysis, origin health, TLS issues, latency debugging, purge failures.",
         },
-        mcpSources: ["azure-mcp", "aws-mcp", "gcp-mcp", "microsoft-learn", "terraform-mcp", "context7"],
     },
     nauto: {
         dir: "network-automation",
@@ -464,7 +384,6 @@ const REGISTRY = {
             "testing": "Network config testing — Terratest, Pester, pytest, smoke tests, integration tests, chaos engineering.",
             "rollback": "Rollback and change management — state rollback, blue-green, canary, blast radius control, validation gates.",
         },
-        mcpSources: ["github-mcp", "terraform-mcp", "microsoft-learn", "azure-mcp", "aws-mcp", "gcp-mcp", "context7"],
     },
     sase: {
         dir: "sase-sse",
@@ -481,7 +400,6 @@ const REGISTRY = {
             "sdwan-integration": "SD-WAN with SASE integration — traffic steering, branch connectivity, QoS, vendor integrations.",
             "vendor-compare": "SASE/SSE vendor comparison — Zscaler, Palo Alto Prisma, Netskope, Cisco, Microsoft, Fortinet.",
         },
-        mcpSources: ["context7", "microsoft-learn"],
     },
     ncap: {
         dir: "capacity-planner",
@@ -498,7 +416,6 @@ const REGISTRY = {
             "scalability-design": "Scalability patterns — subscription/account limits, horizontal scaling, when to split architectures.",
             "growth-model": "Growth modeling — user/device projections, traffic amplification, seasonal spikes, budget justification.",
         },
-        mcpSources: ["azure-mcp", "aws-mcp", "gcp-mcp", "microsoft-learn", "context7"],
     },
     ipv6: {
         dir: "ipv6-migration",
@@ -515,7 +432,6 @@ const REGISTRY = {
             "compatibility": "IPv4/IPv6 compatibility — NAT64, DNS64, 464XLAT, SIIT. When to use each mechanism.",
             "troubleshoot": "IPv6 troubleshooting — connectivity, ICMPv6, PMTUD, NDP, DNS resolution, firewall misconfigs.",
         },
-        mcpSources: ["azure-mcp", "aws-mcp", "gcp-mcp", "microsoft-learn", "context7"],
     },
     doc: {
         dir: "report-builder",
@@ -532,9 +448,6 @@ const REGISTRY = {
             "docx-report": "Render a Markdown report to an editable Word doc with real styles + TOC via make_docx.py (needs python-docx).",
             "xlsx-workbook": "Build a multi-sheet Excel workbook with REAL formulas + named ranges from a JSON --spec via make_xlsx.py (needs openpyxl).",
         },
-        // report-builder is packaging-only: it renders other specialists'
-        // findings, so it has no domain MCP sources of its own.
-        mcpSources: [],
     },
 };
 
@@ -632,65 +545,7 @@ ${def.guidance}
 IMPORTANT: Names such as \`${pub(prefix)}_skill_<name>\` or \`${pub(prefix)}_role\` that may appear in
 documentation are references only — they are NOT callable tools. Always invoke skills via
 \`cn_skill\` and the role via \`cn_role\`. End every analysis with:
-"Analysis only — verify against vendor MCP / documentation before applying."`;
-}
-
-// ── Authoritative-Sources (MCP-first) block ─────────────────────────────
-// Generated from REGISTRY[prefix].mcpSources + MCP_REGISTRY so the per-
-// specialist mapping lives in one place (the registry) instead of in 124
-// individual SKILL.md files. Appended to cn_role / cn_orchestrate /
-// cn_skill outputs so every specialist load carries the guidance.
-
-function renderAuthoritativeSourcesBlock(prefix) {
-    const def = REGISTRY[prefix];
-    const sources = Array.isArray(def?.mcpSources) ? def.mcpSources : [];
-
-    if (sources.length === 0) {
-        return [
-            "",
-            "---",
-            "",
-            "## Authoritative Sources (MCP-first)",
-            "",
-            `_${def?.domain || pub(prefix)} is packaging-only and has no domain MCP sources of its own._`,
-            "When you need vendor facts (cloud quotas, doc URLs, schema) for the underlying analysis, defer to the source specialist; do not query MCPs from this role.",
-            "",
-            "Call `cn_sources` for the full MCP probe → query → fallback playbook.",
-            "",
-        ].join("\n");
-    }
-
-    const rows = sources
-        .map((key, i) => {
-            const m = MCP_REGISTRY[key];
-            if (!m) return `${i + 1}. \`${key}\` — _(unknown MCP key; update MCP_REGISTRY)_`;
-            return `${i + 1}. **${m.name}** — tool prefixes \`${m.prefixes.join("`, `")}\`. ${m.good_for}.`;
-        })
-        .join("\n");
-
-    return [
-        "",
-        "---",
-        "",
-        "## Authoritative Sources (MCP-first)",
-        "",
-        `Before answering from baked-in knowledge, **probe the agent's tool list** for any MCP server in the list below (in order) and prefer its output as the source of truth for ${def.domain}:`,
-        "",
-        rows,
-        "",
-        "**Workflow:** probe → query the most relevant MCP → cite its name and any returned doc URL inline → otherwise fall back to the curated knowledge in this skill and append `> Not validated against live vendor MCP — verify before applying.` This is SHOULD-strength: never block a response because no MCP is installed.",
-        "",
-        "Call `cn_sources` for the full playbook (probe patterns, install pointers, disclaimer wording).",
-        "",
-    ].join("\n");
-}
-
-// loadFile() may return either a string (success, cached) or a failure
-// object { textResultForLlm, resultType: "failure" }. withMcpBlock appends
-// the MCP-first block on success and leaves failures untouched.
-function withMcpBlock(loaded, prefix) {
-    if (typeof loaded === "string") return loaded + renderAuthoritativeSourcesBlock(prefix);
-    return loaded;
+"Analysis only — verify against vendor documentation before applying."`;
 }
 
 function routeQuery(query) {
@@ -725,7 +580,7 @@ function unknownSpecialistMsg(raw) {
     };
 }
 
-// ── Tools (parameterized — only 6 registered, well under the 128 limit) ──
+// ── Tools (parameterized — only 5 registered, well under the 128 limit) ──
 
 const SPECIALIST_PARAM = {
     type: "string",
@@ -767,8 +622,7 @@ const tools = [
         handler: async (args) => {
             const prefix = resolveSpecialist(args?.specialist);
             if (!prefix) return unknownSpecialistMsg(args?.specialist);
-            const loaded = await loadFile(join(SPECIALISTS, REGISTRY[prefix].dir, "agents", `${REGISTRY[prefix].dir}.md`));
-            return withMcpBlock(loaded, prefix);
+            return loadFile(join(SPECIALISTS, REGISTRY[prefix].dir, "agents", `${REGISTRY[prefix].dir}.md`));
         },
     },
     {
@@ -783,7 +637,7 @@ const tools = [
         handler: async (args) => {
             const prefix = resolveSpecialist(args?.specialist);
             if (!prefix) return unknownSpecialistMsg(args?.specialist);
-            return buildOrchestrator(prefix) + renderAuthoritativeSourcesBlock(prefix);
+            return buildOrchestrator(prefix);
         },
     },
     {
@@ -812,15 +666,8 @@ const tools = [
                     resultType: "failure",
                 };
             }
-            return withMcpBlock(await loadFile(join(SPECIALISTS, def.dir, "skills", skill, "SKILL.md")), prefix);
+            return loadFile(join(SPECIALISTS, def.dir, "skills", skill, "SKILL.md"));
         },
-    },
-    {
-        name: "cn_sources",
-        description: "Returns the Network Desk MCP-first source-of-truth playbook — which vendor MCP servers (Microsoft Learn, Azure MCP, AWS MCP, GCP MCP, Terraform MCP, GitHub MCP, Context7, firewall-vendor MCPs) to consult, the probe → query → fallback workflow, citation rules, and disclaimer wording. Call this once per session if you need the full playbook; the per-specialist source list is also surfaced inline by cn_role / cn_orchestrate / cn_skill.",
-        parameters: { type: "object", properties: {} },
-        skipPermission: true,
-        handler: async () => loadFile(SHARED_MCP_LOOKUP),
     },
 ];
 
@@ -851,19 +698,7 @@ async function validateRegistry(session) {
             const md = join(SPECIALISTS, def.dir, "skills", skill, "SKILL.md");
             checks.push(fileMissing(md).then((m) => { if (m) problems.push(`missing skill md: ${prefix}/${skill}`); }));
         }
-        // MCP-source-of-truth metadata: every specialist must declare
-        // `mcpSources` (empty array allowed for packaging-only specialists
-        // like cn_doc), and every key must exist in MCP_REGISTRY.
-        if (!Array.isArray(def.mcpSources)) {
-            problems.push(`missing or non-array mcpSources: ${prefix}`);
-        } else {
-            for (const key of def.mcpSources) {
-                if (!MCP_REGISTRY[key]) problems.push(`unknown MCP key in ${prefix}.mcpSources: ${key}`);
-            }
-        }
     }
-    // The shared MCP-lookup playbook backs the cn_sources tool.
-    checks.push(fileMissing(SHARED_MCP_LOOKUP).then((m) => { if (m) problems.push(`missing shared md: _shared/mcp-lookup/SKILL.md`); }));
     await Promise.all(checks);
     if (problems.length) {
         await session.log(`network-desk: registry validation found ${problems.length} issue(s): ${problems.join("; ")}`);
@@ -878,7 +713,7 @@ async function validateRegistry(session) {
 const MENTION_RE = /(^|[^\w])@?network[\s_-]?desk\b/i;
 
 const TOOL_USAGE_NOTE =
-    "You MUST use ONLY these network-desk tools: `cn_route`, `cn_role`, `cn_orchestrate`, `cn_skill`, `cn_capabilities`, `cn_sources`. " +
+    "You MUST use ONLY these network-desk tools: `cn_route`, `cn_role`, `cn_orchestrate`, `cn_skill`, `cn_capabilities`. " +
     "You MUST NOT read, open, list, or search the specialist files under `specialists/**` directly with any file/view/glob/grep/shell tool. " +
     "Always load specialist content via the registered `cn_role`, `cn_orchestrate`, and `cn_skill` tools — never by reading the `.md` files yourself. " +
     "Names like `cn_vnet_role` or `vnet_skill_address_planner` are NOT registered tools; select the specialist and skill via arguments, e.g. `cn_skill({ specialist: \"cn_vnet\", skill: \"address-planner\" })`. " +
@@ -927,15 +762,9 @@ const PRESENCE_NOTE =
     "load ALL specialist content via `cn_role` / `cn_orchestrate` / `cn_skill`. " +
     "Never claim network-desk is unavailable: it is loaded. " +
     "Network Desk is analysis-only: it never applies changes, modifies infrastructure, or runs commands against live environments. " +
-    "MCP-FIRST SOURCE OF TRUTH (SHOULD): When answering, FIRST probe the agent's tool list for any vendor MCP server in scope " +
-    "(Microsoft Learn, Azure MCP `azmcp_*`, AWS MCP `awslabs_*`, GCP MCP `gcp_*`, Terraform MCP `terraform_*`, GitHub MCP `github_*`, " +
-    "Context7 `context7_*`, or firewall-vendor MCPs). If a relevant MCP is available, query it before relying on baked-in knowledge and " +
-    "cite it inline. If none is available, answer from the curated specialist knowledge and append `> Not validated against live vendor MCP — verify before applying.` " +
-    "Do not invent tool names; do not claim to have queried an MCP you did not actually call. Each specialist's preferred MCP order is " +
-    "surfaced inline by `cn_role`/`cn_orchestrate`/`cn_skill` (see the \"Authoritative Sources (MCP-first)\" block); call `cn_sources` for the full playbook. " +
     "RESPONSE FOOTER (REQUIRED): at the end of EVERY assistant response that touches cloud networking — any turn where you called a `cn_*` tool, " +
     "or discussed any networking topic above — append the following line verbatim, on its own line after all other content:\n\n" +
-    "> Analysis only — verify against vendor MCP / documentation before applying.\n\n" +
+    "> Analysis only — verify against vendor documentation before applying.\n\n" +
     OUTPUT_CONVENTION;
 
 const DIRECT_MENTION =
@@ -948,7 +777,7 @@ const DIRECT_MENTION =
     "'plan a non-overlapping IP address scheme for prod/dev/test', 'troubleshoot asymmetric routing through my NVA', " +
     "'compare NAT Gateway vs egress costs across Azure/AWS/GCP', 'generate Terraform for a dual-stack hub VPC'). " +
     "Remember the response-footer rule from the presence note: end this response with " +
-    "'Analysis only — verify against vendor MCP / documentation before applying.'";
+    "'Analysis only — verify against vendor documentation before applying.'";
 
 const session = await joinSession({
     tools,
