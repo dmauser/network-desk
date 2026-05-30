@@ -355,6 +355,84 @@ function doctorSummaryLine({ result }) {
     return `ℹ️ network-desk works best with MCP servers. Detected ${present.length} of ${totalRecommended} recommended servers.${extra} Run \`cn_mcp_doctor\` for details and copy-pasteable install snippets.`;
 }
 
+// ── Optional opt-in writer (cn_mcp_install) ─────────────────────────────
+// Network Desk is analysis-only by default. cn_mcp_install is the ONE
+// exception: a per-call, user-approved tool that merges a recommended
+// snippet into ~/.copilot/m-mcp-servers.json. It requires the host's
+// approval prompt (skipPermission: false), preserves all existing servers,
+// writes atomically (tmp + rename), keeps a timestamped .backup, and never
+// overwrites an existing server entry unless force=true.
+function ensureServersObject(config) {
+    if (!config || typeof config !== "object") return { servers: {} };
+    if (!config.servers || typeof config.servers !== "object") config.servers = {};
+    return config;
+}
+
+// Exported for the smoke-test script.
+export function planInstall(config, key, { force = false } = {}) {
+    const snippet = MCP_INSTALL_SNIPPETS[key];
+    if (!snippet) return { ok: false, reason: `no snippet for "${key}"` };
+    const cfg = ensureServersObject(config ? { ...config, servers: { ...(config.servers || {}) } } : { servers: {} });
+    const changes = [];
+    for (const [serverName, entry] of Object.entries(snippet)) {
+        // Skip placeholder/comment-only entries (e.g. firewall-vendors).
+        if (serverName.startsWith("//")) {
+            return { ok: false, reason: `\`${key}\` has no machine-installable snippet (vendor-published; see install pointer)` };
+        }
+        const existing = cfg.servers[serverName];
+        if (existing && !force) {
+            changes.push({ name: serverName, action: "skipped", reason: "already present" });
+            continue;
+        }
+        cfg.servers[serverName] = entry;
+        changes.push({ name: serverName, action: existing ? "replaced" : "added" });
+    }
+    return { ok: true, config: cfg, changes };
+}
+
+async function writeMcpConfigAtomically(newConfig) {
+    const dir = dirname(MCP_CONFIG_PATH);
+    try {
+        await readFile(MCP_CONFIG_PATH); // existence check
+        // Best-effort backup with a timestamp suffix.
+        const ts = new Date().toISOString().replace(/[:.]/g, "-");
+        const backupPath = `${MCP_CONFIG_PATH}.backup-${ts}`;
+        try {
+            const original = await readFile(MCP_CONFIG_PATH, "utf8");
+            await writeFile(backupPath, original, "utf8");
+        } catch { /* best-effort */ }
+    } catch { /* file didn't exist — no backup needed */ }
+    // Ensure parent dir exists (first-time install on a clean machine).
+    try { await (await import("node:fs/promises")).mkdir(dir, { recursive: true }); } catch {}
+    const tmpPath = `${MCP_CONFIG_PATH}.tmp-${process.pid}`;
+    const body = JSON.stringify(newConfig, null, 2) + "\n";
+    await writeFile(tmpPath, body, "utf8");
+    const { rename } = await import("node:fs/promises");
+    await rename(tmpPath, MCP_CONFIG_PATH);
+}
+
+async function runMcpInstall({ server, force = false }) {
+    if (!server || typeof server !== "string") {
+        return { ok: false, message: "Missing required argument `server`. Pass one of the recommended MCP keys (see `cn_mcp_doctor`)." };
+    }
+    if (!Object.prototype.hasOwnProperty.call(MCP_INSTALL_SNIPPETS, server)) {
+        const valid = Object.keys(MCP_INSTALL_SNIPPETS).filter((k) => !Object.keys(MCP_INSTALL_SNIPPETS[k]).every((n) => n.startsWith("//")));
+        return { ok: false, message: `Unknown server "${server}". Valid keys: ${valid.map((k) => "`" + k + "`").join(", ")}.` };
+    }
+    const { config: existing, error } = await readMcpConfig();
+    if (error && error !== "file not found") {
+        return { ok: false, message: `Refusing to write: cannot read existing config (${error}). Fix it manually first.` };
+    }
+    const plan = planInstall(existing, server, { force });
+    if (!plan.ok) return { ok: false, message: plan.reason };
+    if (plan.changes.every((c) => c.action === "skipped")) {
+        return { ok: true, noop: true, changes: plan.changes, message: `\`${server}\` is already present in m-mcp-servers.json. Pass \`force: true\` to overwrite.` };
+    }
+    await writeMcpConfigAtomically(plan.config);
+    _doctorReport = null; // invalidate cache
+    return { ok: true, changes: plan.changes, message: `Wrote \`${server}\` to ${MCP_CONFIG_PATH}. Restart Copilot CLI to load the new server.` };
+}
+
 // ── Update check ───────────────────────────────────────────────────────
 // Lightweight, async, throttled check against the GitHub repo for a newer
 // version. Runs at most once every 24h, fully non-blocking, fails silently.
@@ -1035,7 +1113,7 @@ function unknownSpecialistMsg(raw) {
     };
 }
 
-// ── Tools (parameterized — only 7 registered, well under the 128 limit) ──
+// ── Tools (parameterized — only 8 registered, well under the 128 limit) ──
 
 const SPECIALIST_PARAM = {
     type: "string",
@@ -1150,6 +1228,41 @@ const tools = [
             return report.markdown;
         },
     },
+    {
+        name: "cn_mcp_install",
+        description: "OPT-IN WRITER: Merge a Network-Desk-recommended MCP server snippet into ~/.copilot/m-mcp-servers.json with the user's per-call approval. Preserves all other servers, writes atomically, and keeps a timestamped .backup-* of the original. By default refuses to overwrite an existing server entry — pass `force: true` to replace it. Restart Copilot CLI after install to load the new tools. This is the ONLY Network Desk tool that writes to disk; every call requires the host's Approve/Deny prompt.",
+        parameters: {
+            type: "object",
+            properties: {
+                server: {
+                    type: "string",
+                    description: "MCP server key to install. Get the list of recommended/missing keys from `cn_mcp_doctor`.",
+                    enum: Object.keys(MCP_INSTALL_SNIPPETS).filter((k) => !Object.keys(MCP_INSTALL_SNIPPETS[k]).every((n) => n.startsWith("//"))),
+                },
+                force: { type: "boolean", description: "If true, overwrite an existing server entry with the same name. Default false (safe).", default: false },
+            },
+            required: ["server"],
+        },
+        // Per-call host approval prompt — the user must Approve each install.
+        skipPermission: false,
+        handler: async (args) => {
+            const result = await runMcpInstall({ server: args?.server, force: !!args?.force });
+            const lines = [];
+            if (result.ok && result.noop) {
+                lines.push(`✅ ${result.message}`);
+            } else if (result.ok) {
+                lines.push(`✅ ${result.message}`);
+                lines.push("");
+                lines.push("Changes:");
+                for (const c of result.changes) lines.push(`- \`${c.name}\` — **${c.action}**${c.reason ? ` (${c.reason})` : ""}`);
+                lines.push("");
+                lines.push("> Analysis only — verify against vendor MCP / documentation before applying.");
+            } else {
+                lines.push(`❌ ${result.message}`);
+            }
+            return lines.join("\n");
+        },
+    },
 ];
 
 // ── Startup registry validation (logs issues, never crashes) ───────────
@@ -1206,7 +1319,7 @@ async function validateRegistry(session) {
 const MENTION_RE = /(^|[^\w])@?network[\s_-]?desk\b/i;
 
 const TOOL_USAGE_NOTE =
-    "You MUST use ONLY these network-desk tools: `cn_route`, `cn_role`, `cn_orchestrate`, `cn_skill`, `cn_capabilities`, `cn_sources`, `cn_mcp_doctor`. " +
+    "You MUST use ONLY these network-desk tools: `cn_route`, `cn_role`, `cn_orchestrate`, `cn_skill`, `cn_capabilities`, `cn_sources`, `cn_mcp_doctor`, `cn_mcp_install`. " +
     "You MUST NOT read, open, list, or search the specialist files under `specialists/**` directly with any file/view/glob/grep/shell tool. " +
     "Always load specialist content via the registered `cn_role`, `cn_orchestrate`, and `cn_skill` tools — never by reading the `.md` files yourself. " +
     "Names like `cn_vnet_role` or `vnet_skill_address_planner` are NOT registered tools; select the specialist and skill via arguments, e.g. `cn_skill({ specialist: \"cn_vnet\", skill: \"address-planner\" })`. " +
@@ -1259,7 +1372,7 @@ const PRESENCE_NOTE =
     `It bundles ${PREFIXES.length} network-desk specialists: ${SPECIALIST_INLINE}. ` +
     "Discovery tools available right now: `cn_capabilities` (full specialist + skill map), `cn_route` (pick the right specialist for a query), " +
     "`cn_role` (load a specialist's role definition — call this FIRST before answering), `cn_orchestrate` (step-by-step workflow + skill catalog), " +
-    "`cn_skill` (deep guidance for a specific skill), `cn_sources` (MCP-first playbook), `cn_mcp_doctor` (which vendor MCPs are installed/missing). " +
+    "`cn_skill` (deep guidance for a specific skill), `cn_sources` (MCP-first playbook), `cn_mcp_doctor` (which vendor MCPs are installed/missing), `cn_mcp_install` (opt-in writer that installs a recommended MCP server with per-call user approval — Network Desk's only write tool). " +
     "When the user mentions VNets/VPCs, subnets/CIDR/IP planning, firewalls/NSGs/rule audits, load balancers, DNS, Private Link/private endpoints, " +
     "hybrid connectivity (VPN/ExpressRoute/Direct Connect/Interconnect), network security, connectivity troubleshooting/packet capture, " +
     "Virtual WAN/SD-WAN, network monitoring, multi-cloud networking, networking pricing/cost, IaC (Bicep/Terraform/Ansible) for networking, " +
@@ -1270,7 +1383,7 @@ const PRESENCE_NOTE =
     "load ALL specialist content via `cn_role` / `cn_orchestrate` / `cn_skill`. " +
     "Never claim network-desk is unavailable: it is loaded. " +
     "Network Desk is analysis-only: it never applies changes, modifies infrastructure, or runs commands against live environments. " +
-    "MCP DOCTOR: If you have not called `cn_mcp_doctor` yet this session, call it once to surface a structured report of which Network-Desk-recommended MCP servers are present, configured-but-not-loaded, or missing — and copy-pasteable JSON snippets the user can merge into `~/.copilot/m-mcp-servers.json`. Do not write that file yourself; surface the report to the user. " +
+    "MCP DOCTOR: If you have not called `cn_mcp_doctor` yet this session, call it once to surface a structured report of which Network-Desk-recommended MCP servers are present, configured-but-not-loaded, or missing — and copy-pasteable JSON snippets the user can merge into `~/.copilot/m-mcp-servers.json`. Do not write that file yourself unless the user explicitly asks; if they consent, use `cn_mcp_install` (which prompts the host for per-call approval) — never edit the config any other way. " +
     "MCP-FIRST SOURCE OF TRUTH (SHOULD): When answering, FIRST probe the agent's tool list for any vendor MCP server in scope " +
     "(Microsoft Learn, Azure MCP `azmcp_*`, AWS MCP `awslabs_*`, GCP MCP `gcp_*`, Terraform MCP `terraform_*`, GitHub MCP `github_*`, " +
     "Context7 `context7_*`, or firewall-vendor MCPs). If a relevant MCP is available, query it before relying on baked-in knowledge and " +

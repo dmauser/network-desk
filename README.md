@@ -377,6 +377,32 @@ the source of truth automatically. Verify each install command against the URL t
 doctor prints next to each missing server (network-desk does not auto-update those
 URLs; vendor packaging changes occasionally).
 
+### Optional: `cn_mcp_install` (one-step opt-in writer)
+
+If you'd rather not edit the JSON yourself, Network Desk also ships a single **opt-in
+writer**, `cn_mcp_install`, that merges a recommended snippet into
+`m-mcp-servers.json` for you. Every call requires the host CLI's **per-call
+Approve / Deny prompt** — Network Desk cannot bypass it.
+
+```text
+@network-desk run cn_mcp_install --server azure-mcp
+```
+
+What the install tool does:
+
+- Reads the existing config (or creates `~/.copilot/m-mcp-servers.json` if absent).
+- Saves a timestamped backup at `~/.copilot/m-mcp-servers.json.backup-<ISO>`.
+- Atomically writes the merged config (`*.tmp` + rename — no partial writes).
+- Refuses to overwrite an existing entry with the same name unless you pass
+  `force: true`.
+- Makes **no** network calls; it only inserts the JSON fragment shipped in this
+  extension. You still need to run any vendor-side install (e.g. `docker pull`,
+  `npm install`, authentication) yourself, and **restart the Copilot CLI** to load
+  the new tools.
+
+If you never want this capability, simply never approve the prompt — every other
+Network Desk tool stays read-only.
+
 ## Usage Examples
 
 Trigger the extension with **`@network-desk`** and describe what you need in plain language — the coordinator picks the right specialist automatically.

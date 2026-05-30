@@ -136,6 +136,37 @@ console.log(`\n=== ${pass} passed, ${fail} failed ===`);
         assert(/MCP availability for/i.test(text), "role output mentions 'MCP availability for'");
         assert(/Run `cn_mcp_doctor`/.test(text), "role output nudges user to run cn_mcp_doctor");
     }
+    // Case 7: planInstall is safe and additive.
+    header("Case 7: planInstall (cn_mcp_install pure logic)");
+    {
+        const { planInstall } = ext;
+        // Add to empty config.
+        const r1 = planInstall(null, "azure-mcp");
+        assert(r1.ok && r1.changes.find((c) => c.action === "added" && c.name === "azure-mcp"), "adds azure-mcp to empty config");
+        assert(r1.config.servers["azure-mcp"]?.command === "npx", "snippet wired correctly");
+
+        // Skip when already present (no force).
+        const existing = { servers: { "azure-mcp": { command: "old" }, filesystem: { builtin: true } } };
+        const r2 = planInstall(existing, "azure-mcp");
+        assert(r2.ok && r2.changes[0].action === "skipped", "skips existing entry without force");
+        assert(r2.config.servers["azure-mcp"].command === "old", "preserves existing entry");
+        assert(r2.config.servers.filesystem?.builtin === true, "preserves unrelated entries");
+
+        // Force overwrite.
+        const r3 = planInstall(existing, "azure-mcp", { force: true });
+        assert(r3.ok && r3.changes[0].action === "replaced", "replaces with force=true");
+        assert(r3.config.servers["azure-mcp"].command === "npx", "new snippet applied");
+        // Original object must NOT be mutated (planInstall returns a clone).
+        assert(existing.servers["azure-mcp"].command === "old", "input config not mutated");
+
+        // Refuse for placeholder-only keys.
+        const r4 = planInstall({ servers: {} }, "firewall-vendors");
+        assert(!r4.ok && /no machine-installable/i.test(r4.reason), "refuses firewall-vendors placeholder");
+
+        // Unknown key.
+        const r5 = planInstall({ servers: {} }, "not-a-real-mcp");
+        assert(!r5.ok, "refuses unknown key");
+    }
     if (fail !== 0) exitCode = 1;
     console.log(`\n=== final: ${pass} passed, ${fail} failed ===`);
 } finally {
