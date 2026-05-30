@@ -13,7 +13,6 @@ import { joinSession } from "@github/copilot-sdk/extension";
 import { readFile, writeFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
-import { homedir } from "node:os";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const SPECIALISTS = join(HERE, "specialists");
@@ -82,278 +81,6 @@ const MCP_REGISTRY = {
         install: "Vendor-published; check the vendor's developer site",
     },
 };
-
-// Case-insensitive substrings used to match a configured server's name (or
-// command/args) back to an MCP_REGISTRY key. Lets us detect a server even
-// when its tools[] array is empty (host hasn't loaded it yet).
-const MCP_NAME_ALIASES = {
-    "microsoft-learn": ["microsoft-learn", "learn-mcp", "mslearn", "microsoft.learn", "ms-learn"],
-    "azure-mcp": ["azure-mcp", "azmcp", "azure_mcp", "azure mcp"],
-    "aws-mcp": ["aws-mcp", "awslabs", "aws_labs", "aws-labs"],
-    "gcp-mcp": ["gcp-mcp", "cloudrun-mcp", "googlecloud", "google-cloud-mcp"],
-    "terraform-mcp": ["terraform-mcp", "hashicorp-terraform", "terraform_mcp"],
-    "github-mcp": ["github-mcp", "github_mcp", "gh-mcp"],
-    "context7": ["context7", "c7-mcp", "upstash-context7"],
-    "firewall-vendors": ["panos", "pan-os", "fortios", "fortigate", "checkpoint", "check-point", "ciscoasa", "cisco-ftd", "junos-srx"],
-};
-
-// Copy-pasteable JSON fragments for the user to merge into the `servers`
-// object of ~/.copilot/m-mcp-servers.json. We do NOT auto-write this file.
-// Each fragment is a single key:value pair. The exact command/args here are
-// the most common canonical install for each MCP at time of writing — the
-// user is told (via the rendered report) to verify against the install URL
-// in MCP_REGISTRY before applying.
-const MCP_INSTALL_SNIPPETS = {
-    "microsoft-learn": {
-        "microsoft-learn": {
-            command: "npx",
-            args: ["-y", "@microsoft/mcp-server-learn"],
-        },
-    },
-    "azure-mcp": {
-        "azure-mcp": {
-            command: "npx",
-            args: ["-y", "@azure/mcp@latest", "server", "start"],
-        },
-    },
-    "aws-mcp": {
-        "aws-docs-mcp": {
-            command: "uvx",
-            args: ["awslabs.aws-documentation-mcp-server@latest"],
-        },
-    },
-    "gcp-mcp": {
-        "gcp-cloudrun-mcp": {
-            command: "npx",
-            args: ["-y", "@google-cloud/cloud-run-mcp"],
-        },
-    },
-    "terraform-mcp": {
-        "terraform-mcp": {
-            command: "docker",
-            args: ["run", "-i", "--rm", "hashicorp/terraform-mcp-server"],
-        },
-    },
-    "github-mcp": {
-        "github-mcp": {
-            command: "docker",
-            args: ["run", "-i", "--rm", "-e", "GITHUB_PERSONAL_ACCESS_TOKEN", "ghcr.io/github/github-mcp-server"],
-            env: { GITHUB_PERSONAL_ACCESS_TOKEN: "<your_pat_here>" },
-        },
-    },
-    "context7": {
-        "context7": {
-            command: "npx",
-            args: ["-y", "@upstash/context7-mcp"],
-        },
-    },
-    "firewall-vendors": {
-        "// firewall-vendor-mcp": "Vendor-specific MCPs are emerging. Check your firewall vendor's developer portal (e.g. Palo Alto, Fortinet, Check Point). Until one is published, the firewall-engineer specialist falls back to context7.",
-    },
-};
-
-// ── MCP doctor ─────────────────────────────────────────────────────────
-// Read-only inspector of the host CLI's MCP config file. The Copilot CLI
-// stores the config at `~/.copilot/m-mcp-servers.json` on every platform
-// (Windows expands ~ to %USERPROFILE%). Each server entry includes a
-// `tools[]` array populated by the host once it successfully introspects
-// the server, which we use as the runtime tool registry — the SDK does
-// not expose a host-tool-list probe, so the config file IS the source.
-
-const MCP_CONFIG_PATH = join(homedir(), ".copilot", "m-mcp-servers.json");
-
-// Cache the rendered report for the lifetime of the session so the
-// greeting summary, an explicit cn_mcp_doctor call, and any follow-up
-// share one view. `refresh: true` invalidates the cache.
-let _doctorReport = null;
-
-function prefixMatches(toolName, prefix) {
-    if (!toolName) return false;
-    if (prefix.includes("*")) {
-        const stem = prefix.replace(/\*+$/, "").replace(/\*/g, "");
-        return stem.length > 0 && toolName.toLowerCase().startsWith(stem.toLowerCase());
-    }
-    return toolName.toLowerCase() === prefix.toLowerCase();
-}
-
-function nameMatches(serverName, serverDef, key) {
-    const aliases = MCP_NAME_ALIASES[key] || [];
-    const haystack = [
-        serverName,
-        serverDef?.command,
-        ...(Array.isArray(serverDef?.args) ? serverDef.args : []),
-    ]
-        .filter((s) => typeof s === "string")
-        .join(" ")
-        .toLowerCase();
-    return aliases.some((a) => haystack.includes(a.toLowerCase()));
-}
-
-// Pure: takes a parsed config object (or null) and returns
-// { present, configuredNotLoaded, missing, totalRecommended, builtins }.
-// Each item is { key, def, server?, serverName? }.
-// Exported for the standalone smoke-test script under scripts/.
-export function classifyMcpConfig(config) {
-    const servers = (config && typeof config === "object" && config.servers && typeof config.servers === "object")
-        ? config.servers
-        : {};
-    const serverEntries = Object.entries(servers);
-    const builtins = serverEntries.filter(([, v]) => v && v.builtin).map(([k]) => k);
-
-    const present = [];
-    const configuredNotLoaded = [];
-    const missing = [];
-
-    for (const [key, def] of Object.entries(MCP_REGISTRY)) {
-        let prefixHit = null;
-        let nameHit = null;
-        for (const [serverName, serverDef] of serverEntries) {
-            if (serverDef?.builtin) continue; // builtins (filesystem, playwright) are not network-desk-recognised MCPs
-            const tools = Array.isArray(serverDef?.tools) ? serverDef.tools : [];
-            const hasPrefix = def.prefixes.some((p) => tools.some((t) => prefixMatches(t, p)));
-            const hasName = nameMatches(serverName, serverDef, key);
-            if (hasPrefix && !prefixHit) prefixHit = { serverName, serverDef, toolCount: tools.length };
-            if (hasName && !nameHit) nameHit = { serverName, serverDef, toolCount: tools.length };
-        }
-        if (prefixHit) {
-            present.push({ key, def, ...prefixHit });
-        } else if (nameHit) {
-            configuredNotLoaded.push({ key, def, ...nameHit });
-        } else {
-            missing.push({ key, def });
-        }
-    }
-
-    return {
-        present,
-        configuredNotLoaded,
-        missing,
-        totalRecommended: Object.keys(MCP_REGISTRY).length,
-        builtins,
-    };
-}
-
-function renderSnippet(key) {
-    const snippet = MCP_INSTALL_SNIPPETS[key];
-    if (!snippet) return "";
-    return "```json\n" + JSON.stringify(snippet, null, 2) + "\n```";
-}
-
-// Exported for the smoke-test script.
-export function renderDoctorMarkdown(result, configReadError) {
-    const { present, configuredNotLoaded, missing, totalRecommended, builtins } = result;
-    const lines = [];
-    lines.push("# Network Desk · MCP Doctor");
-    lines.push("");
-    if (configReadError) {
-        lines.push(`> ⚠️ Could not read \`${MCP_CONFIG_PATH}\` — ${configReadError}. Treating all recommended MCPs as missing.`);
-        lines.push("");
-    }
-    lines.push(`**Detected ${present.length} of ${totalRecommended} recommended MCP servers** for Network Desk specialists.`);
-    if (builtins.length > 0) {
-        lines.push("");
-        lines.push(`Built-in CLI servers detected (not network-desk-specific): ${builtins.map((n) => `\`${n}\``).join(", ")}.`);
-    }
-    lines.push("");
-
-    lines.push("## ✅ Present (configured and loaded)");
-    if (present.length === 0) {
-        lines.push("");
-        lines.push("_None._");
-    } else {
-        lines.push("");
-        lines.push("| Network Desk class | Configured server | Tools loaded |");
-        lines.push("|---|---|---|");
-        for (const p of present) {
-            lines.push(`| \`${p.key}\` (${p.def.name}) | \`${p.serverName}\` | ${p.toolCount} |`);
-        }
-    }
-    lines.push("");
-
-    lines.push("## ⚠️ Configured but not loaded");
-    if (configuredNotLoaded.length === 0) {
-        lines.push("");
-        lines.push("_None._");
-    } else {
-        lines.push("");
-        lines.push("These servers are listed in your config but the host has not introspected any tools from them. Try restarting the Copilot CLI; if that doesn't help, check the `command` / `args` and any required env vars.");
-        lines.push("");
-        lines.push("| Network Desk class | Configured server | Tools loaded | Suggested fix |");
-        lines.push("|---|---|---|---|");
-        for (const c of configuredNotLoaded) {
-            lines.push(`| \`${c.key}\` (${c.def.name}) | \`${c.serverName}\` | ${c.toolCount} | Restart Copilot CLI; verify command/args and required env vars |`);
-        }
-    }
-    lines.push("");
-
-    lines.push("## ❌ Missing — recommended additions");
-    if (missing.length === 0) {
-        lines.push("");
-        lines.push("_None — your config covers every recommended MCP class._");
-    } else {
-        lines.push("");
-        lines.push(`To install, **merge** the JSON fragment under \`servers\` in \`${MCP_CONFIG_PATH}\` (do not replace existing servers — add alongside them), then restart the Copilot CLI. Network Desk will not write this file for you.`);
-        lines.push("");
-        for (const m of missing) {
-            lines.push(`### \`${m.key}\` — ${m.def.name}`);
-            lines.push("");
-            lines.push(`- **Good for:** ${m.def.good_for}`);
-            lines.push(`- **Install pointer:** ${m.def.install}`);
-            const snippet = renderSnippet(m.key);
-            if (snippet) {
-                lines.push("");
-                lines.push(snippet);
-            }
-            lines.push("");
-        }
-    }
-
-    lines.push("## Recommendation");
-    lines.push("");
-    if (missing.length === 0 && configuredNotLoaded.length === 0) {
-        lines.push("Your environment is fully covered. Network Desk specialists will prefer these MCPs as the source of truth automatically.");
-    } else {
-        lines.push("- Add the missing snippets above to enable MCP-first answers for the affected specialists.");
-        if (configuredNotLoaded.length > 0) {
-            lines.push("- Restart the Copilot CLI to reload servers that are configured but not yet introspected.");
-        }
-        lines.push("- Re-run `cn_mcp_doctor` after restarting to confirm.");
-        lines.push("- Until then, Network Desk gracefully falls back to baked-in knowledge with a *Not validated against live vendor MCP* disclaimer.");
-    }
-    lines.push("");
-    lines.push("> Analysis only — verify against vendor MCP / documentation before applying.");
-
-    return lines.join("\n");
-}
-
-async function readMcpConfig() {
-    try {
-        const raw = await readFile(MCP_CONFIG_PATH, "utf8");
-        try {
-            return { config: JSON.parse(raw), error: null };
-        } catch (e) {
-            return { config: null, error: `invalid JSON: ${e.message}` };
-        }
-    } catch (e) {
-        if (e && e.code === "ENOENT") return { config: null, error: "file not found" };
-        return { config: null, error: e?.message || "unreadable" };
-    }
-}
-
-async function runMcpDoctor({ refresh = false } = {}) {
-    if (_doctorReport && !refresh) return _doctorReport;
-    const { config, error } = await readMcpConfig();
-    const result = classifyMcpConfig(config);
-    const markdown = renderDoctorMarkdown(result, error);
-    _doctorReport = { result, markdown, error };
-    return _doctorReport;
-}
-
-function doctorSummaryLine({ result }) {
-    const { present, totalRecommended, configuredNotLoaded } = result;
-    const extra = configuredNotLoaded.length > 0 ? ` ${configuredNotLoaded.length} configured but not loaded.` : "";
-    return `ℹ️ network-desk works best with MCP servers. Detected ${present.length} of ${totalRecommended} recommended servers.${extra} Run \`cn_mcp_doctor\` for details and copy-pasteable install snippets.`;
-}
 
 // ── Update check ───────────────────────────────────────────────────────
 // Lightweight, async, throttled check against the GitHub repo for a newer
@@ -998,7 +725,7 @@ function unknownSpecialistMsg(raw) {
     };
 }
 
-// ── Tools (parameterized — only 7 registered, well under the 128 limit) ──
+// ── Tools (parameterized — only 6 registered, well under the 128 limit) ──
 
 const SPECIALIST_PARAM = {
     type: "string",
@@ -1095,21 +822,6 @@ const tools = [
         skipPermission: true,
         handler: async () => loadFile(SHARED_MCP_LOOKUP),
     },
-    {
-        name: "cn_mcp_doctor",
-        description: "Inspect the Copilot CLI MCP config (~/.copilot/m-mcp-servers.json) and report which Network-Desk-recommended MCP servers (microsoft-learn, azure-mcp, aws-mcp, gcp-mcp, terraform-mcp, github-mcp, context7, firewall-vendor MCPs) are Present, Configured-but-not-loaded, or Missing. For Missing servers, returns the install URL and a copy-pasteable JSON snippet to merge into m-mcp-servers.json. Read-only — never writes the config file. Pass { refresh: true } to bypass the per-session cache.",
-        parameters: {
-            type: "object",
-            properties: {
-                refresh: { type: "boolean", description: "If true, re-read the config file even if a cached report exists.", default: false },
-            },
-        },
-        skipPermission: true,
-        handler: async (args) => {
-            const report = await runMcpDoctor({ refresh: !!args?.refresh });
-            return report.markdown;
-        },
-    },
 ];
 
 // ── Startup registry validation (logs issues, never crashes) ───────────
@@ -1166,7 +878,7 @@ async function validateRegistry(session) {
 const MENTION_RE = /(^|[^\w])@?network[\s_-]?desk\b/i;
 
 const TOOL_USAGE_NOTE =
-    "You MUST use ONLY these network-desk tools: `cn_route`, `cn_role`, `cn_orchestrate`, `cn_skill`, `cn_capabilities`, `cn_sources`, `cn_mcp_doctor`. " +
+    "You MUST use ONLY these network-desk tools: `cn_route`, `cn_role`, `cn_orchestrate`, `cn_skill`, `cn_capabilities`, `cn_sources`. " +
     "You MUST NOT read, open, list, or search the specialist files under `specialists/**` directly with any file/view/glob/grep/shell tool. " +
     "Always load specialist content via the registered `cn_role`, `cn_orchestrate`, and `cn_skill` tools — never by reading the `.md` files yourself. " +
     "Names like `cn_vnet_role` or `vnet_skill_address_planner` are NOT registered tools; select the specialist and skill via arguments, e.g. `cn_skill({ specialist: \"cn_vnet\", skill: \"address-planner\" })`. " +
@@ -1180,21 +892,6 @@ const announcedPrefixes = new Set();
 // first user prompt, so the agent learns network-desk exists before it
 // decides it doesn't know about it.
 let presenceAnnounced = false;
-// MCP doctor advisory is appended to the first presence-note injection so
-// the user sees a one-line summary of MCP coverage on first contact.
-let doctorAdvisoryShown = false;
-
-async function buildPresenceNoteWithDoctor() {
-    if (doctorAdvisoryShown) return PRESENCE_NOTE;
-    doctorAdvisoryShown = true;
-    try {
-        const report = await runMcpDoctor();
-        return PRESENCE_NOTE + "\n\n" + doctorSummaryLine(report);
-    } catch {
-        // Never block the greeting on a doctor failure.
-        return PRESENCE_NOTE;
-    }
-}
 
 const SPECIALIST_INLINE = PREFIXES.map((p) => `${REGISTRY[p].icon} ${REGISTRY[p].domain} (${pub(p)})`).join(", ");
 
@@ -1219,7 +916,7 @@ const PRESENCE_NOTE =
     `It bundles ${PREFIXES.length} network-desk specialists: ${SPECIALIST_INLINE}. ` +
     "Discovery tools available right now: `cn_capabilities` (full specialist + skill map), `cn_route` (pick the right specialist for a query), " +
     "`cn_role` (load a specialist's role definition — call this FIRST before answering), `cn_orchestrate` (step-by-step workflow + skill catalog), " +
-    "`cn_skill` (deep guidance for a specific skill), `cn_sources` (MCP-first playbook), `cn_mcp_doctor` (which vendor MCPs are installed/missing). " +
+    "`cn_skill` (deep guidance for a specific skill). " +
     "When the user mentions VNets/VPCs, subnets/CIDR/IP planning, firewalls/NSGs/rule audits, load balancers, DNS, Private Link/private endpoints, " +
     "hybrid connectivity (VPN/ExpressRoute/Direct Connect/Interconnect), network security, connectivity troubleshooting/packet capture, " +
     "Virtual WAN/SD-WAN, network monitoring, multi-cloud networking, networking pricing/cost, IaC (Bicep/Terraform/Ansible) for networking, " +
@@ -1230,7 +927,6 @@ const PRESENCE_NOTE =
     "load ALL specialist content via `cn_role` / `cn_orchestrate` / `cn_skill`. " +
     "Never claim network-desk is unavailable: it is loaded. " +
     "Network Desk is analysis-only: it never applies changes, modifies infrastructure, or runs commands against live environments. " +
-    "MCP DOCTOR: If you have not called `cn_mcp_doctor` yet this session, call it once to surface a structured report of which Network-Desk-recommended MCP servers are present, configured-but-not-loaded, or missing — and copy-pasteable JSON snippets the user can merge into `~/.copilot/m-mcp-servers.json`. Do not write that file yourself; surface the report to the user. " +
     "MCP-FIRST SOURCE OF TRUTH (SHOULD): When answering, FIRST probe the agent's tool list for any vendor MCP server in scope " +
     "(Microsoft Learn, Azure MCP `azmcp_*`, AWS MCP `awslabs_*`, GCP MCP `gcp_*`, Terraform MCP `terraform_*`, GitHub MCP `github_*`, " +
     "Context7 `context7_*`, or firewall-vendor MCPs). If a relevant MCP is available, query it before relying on baked-in knowledge and " +
@@ -1262,7 +958,7 @@ const session = await joinSession({
             // session-level context so the agent knows network-desk exists
             // from turn 1 without waiting for a user prompt.
             presenceAnnounced = true;
-            return { additionalContext: await buildPresenceNoteWithDoctor() };
+            return { additionalContext: PRESENCE_NOTE };
         },
         onUserPromptSubmitted: async (input) => {
             if (!input?.prompt) return;
@@ -1272,7 +968,7 @@ const session = await joinSession({
             // Fallback in case onSessionStart didn't fire (older CLI builds).
             if (!presenceAnnounced) {
                 presenceAnnounced = true;
-                parts.push(await buildPresenceNoteWithDoctor());
+                parts.push(PRESENCE_NOTE);
             }
 
             // Strongest signal: the user literally named the extension. Always
