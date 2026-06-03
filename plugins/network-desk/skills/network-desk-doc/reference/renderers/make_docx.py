@@ -48,12 +48,32 @@ def add_toc_field(doc):
     instr.text = 'TOC \\o "1-3" \\h \\z \\u'
     fld_char_sep = OxmlElement("w:fldChar")
     fld_char_sep.set(qn("w:fldCharType"), "separate")
+    # Cached placeholder so viewers that don't recompute fields (Google Docs,
+    # LibreOffice, Word on the web) still show a hint instead of nothing.
+    placeholder = OxmlElement("w:r")
+    placeholder_t = OxmlElement("w:t")
+    placeholder_t.set(qn("xml:space"), "preserve")
+    placeholder_t.text = "Right-click and choose \u201cUpdate Field\u201d to build the table of contents."
+    placeholder.append(placeholder_t)
     fld_char_end = OxmlElement("w:fldChar")
     fld_char_end.set(qn("w:fldCharType"), "end")
     run._r.append(fld_char_begin)
     run._r.append(instr)
     run._r.append(fld_char_sep)
+    run._r.append(placeholder)
     run._r.append(fld_char_end)
+
+
+def enable_update_fields(doc):
+    """Force Word to recompute fields (the TOC) when the document is opened,
+    otherwise the inserted TOC field renders empty until manually updated."""
+    from docx.oxml.ns import qn
+    from docx.oxml import OxmlElement
+    settings = doc.settings.element
+    if settings.find(qn("w:updateFields")) is None:
+        el = OxmlElement("w:updateFields")
+        el.set(qn("w:val"), "true")
+        settings.insert(0, el)
 
 
 def style_headings(doc):
@@ -206,6 +226,7 @@ def main() -> int:
     doc.add_paragraph(f"Network Desk - {today}")
 
     add_toc_field(doc)
+    enable_update_fields(doc)
     doc.add_page_break()
 
     para_count = render_markdown(doc, md_text)
