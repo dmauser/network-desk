@@ -26,6 +26,7 @@
     "./agents"
   ],
   "skills": [
+    "./skills/network-desk-capabilities",
     "./skills/network-desk-vnet",
     "./skills/network-desk-fw",
     "./skills/network-desk-lb",

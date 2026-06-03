@@ -51,6 +51,7 @@ const info = (m) => console.log(`${DIM}${m}${RESET}`);
 
 const PREFIXES = Object.keys(REGISTRY);
 const skillName = (prefix) => `${PLUGIN_ID}-${prefix}`;
+const OVERVIEW_SKILL = `${PLUGIN_ID}-capabilities`;
 
 async function exists(p) {
     try { await access(p); return true; } catch { return false; }
@@ -115,7 +116,10 @@ function buildPluginManifest(pkg) {
         license: pkg.license || "MIT",
         keywords: pkg.keywords || ["copilot", "networking"],
         agents: ["./agents"],
-        skills: PREFIXES.map((p) => `./skills/${skillName(p)}`),
+        skills: [
+            `./skills/${OVERVIEW_SKILL}`,
+            ...PREFIXES.map((p) => `./skills/${skillName(p)}`),
+        ],
     };
 }
 
@@ -200,6 +204,73 @@ function buildCoordinatorAgent() {
     lines.push("---");
     lines.push("");
     lines.push(`*${GUARDRAIL}*`);
+    lines.push("");
+    return lines.join("\n");
+}
+
+// ── Capabilities overview skill ─────────────────────────────────────────────
+// The plugin analogue of the extension's `cn_capabilities` tool: a single skill
+// that emits the full emoji + friendly-name specialist map and example prompts,
+// so "what can Network Desk do?" / "give me examples" surfaces icons reliably.
+function buildOverviewSkill() {
+    const desc =
+        `🧭 Network Desk Capabilities — overview and index of all ${PREFIXES.length} ` +
+        "cloud-networking specialists (with emoji icons) plus example prompts. Load this " +
+        "whenever the user asks what Network Desk can do, its capabilities, the list of " +
+        "specialists/skills, or for examples of how to use the plugin.";
+
+    const examples = [
+        "🏗️ \"Plan a /16 hub-and-spoke address space for 3 spokes with no overlap.\"",
+        "🔥 \"Audit my Azure Firewall policy and migrate the rules to FortiGate.\"",
+        "⚖️ \"Compare Application Gateway vs Front Door for L7 with WAF.\"",
+        "🌐 \"Design a private DNS resolver setup for hybrid name resolution.\"",
+        "🔗 \"Set up a Private Endpoint for Azure Storage with private DNS.\"",
+        "🔐 \"Run a Zero Trust segmentation review of my NSGs against NIST.\"",
+        "🛠️ \"Troubleshoot intermittent TCP resets between two VNets.\"",
+        "💰 \"Estimate monthly egress + VPN cost for 5 TB cross-region traffic.\"",
+        "📄 \"Turn the analysis above into a polished PDF report.\"",
+    ];
+
+    const lines = [];
+    lines.push("---");
+    lines.push(`name: ${OVERVIEW_SKILL}`);
+    lines.push(`description: "${yaml1(desc)}"`);
+    lines.push("metadata:");
+    lines.push(`  displayName: "🧭 Network Desk Capabilities"`);
+    lines.push(`  icon: "🧭"`);
+    lines.push("---");
+    lines.push("");
+    lines.push("# 🧭 Network Desk — Capabilities");
+    lines.push("");
+    lines.push(
+        "When the user asks what Network Desk can do, its capabilities, or for examples, " +
+        "**reproduce the table and example prompts below verbatim, keeping every emoji icon.** " +
+        "Do not drop the icons or collapse specialists down to bare `network-desk-*` ids."
+    );
+    lines.push("");
+    lines.push(
+        `**${PREFIXES.length} cloud-networking specialists** spanning Azure, AWS, GCP and 14 ` +
+        "firewall vendors — analysis-only (no changes are applied)."
+    );
+    lines.push("");
+    lines.push("| Specialist | Domain | What it does |");
+    lines.push("| --- | --- | --- |");
+    for (const prefix of PREFIXES) {
+        const s = REGISTRY[prefix];
+        lines.push(`| ${s.icon} ${s.name} | ${s.domain} | ${yaml1(s.summary || "")} |`);
+    }
+    lines.push("");
+    lines.push("## Example prompts");
+    lines.push("");
+    for (const ex of examples) lines.push(`- ${ex}`);
+    lines.push("");
+    lines.push(
+        "Just describe your goal in plain language — the **Network Desk** coordinator routes " +
+        "to the right specialist automatically. For a polished deliverable, do the analysis " +
+        "with a specialist first, then ask the 📄 Report Builder to package it."
+    );
+    lines.push("");
+    lines.push("_Analysis only — verify against vendor documentation before applying._");
     lines.push("");
     return lines.join("\n");
 }
@@ -425,6 +496,11 @@ async function build() {
 
     // Coordinator agent
     await writeFile(join(STAGE, "agents", "network-desk.md"), buildCoordinatorAgent());
+
+    // Capabilities overview skill (emoji + friendly-name map; no reference docs)
+    const overviewDir = join(STAGE, "skills", OVERVIEW_SKILL);
+    await mkdir(overviewDir, { recursive: true });
+    await writeFile(join(overviewDir, "SKILL.md"), buildOverviewSkill());
 
     // Specialist skills
     let copiedRefs = 0;
