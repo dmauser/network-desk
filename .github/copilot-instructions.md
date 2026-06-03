@@ -8,16 +8,21 @@ This is a Copilot CLI extension pack (`@dmauser/network-desk`) providing 20 spec
 
 ```
 # No build step — pure ES modules
-node bin/cli.mjs init          # Install to ~/.copilot/extensions/
-node bin/cli.mjs init --project # Install to .github/extensions/ in current repo
+node bin/cli.mjs init          # Install extension to ~/.copilot/extensions/
+node bin/cli.mjs init --project # Install extension to .github/extensions/ in current repo
+node bin/cli.mjs init --plugin  # Install as a native Copilot CLI plugin (copilot plugin)
+node bin/cli.mjs plugin build   # (Re)generate the plugin bundle from the registry
 node bin/cli.mjs status        # Check installation
 node bin/cli.mjs uninstall     # Remove
 ```
 
 ## Architecture
 
-- `bin/cli.mjs` — CLI installer (init, status, uninstall)
-- `extensions/network-desk/extension.mjs` — Main extension: `REGISTRY` (single source of truth), parameterized tool handlers, session hooks via `@github/copilot-sdk/extension`
+- `bin/cli.mjs` — CLI installer (init, init --plugin, plugin build, update, status, uninstall)
+- `extensions/network-desk/registry.mjs` — **`REGISTRY` (single source of truth)**, exported as a dependency-free ES module (no SDK/`node:*` imports) so it can be shared by the extension runtime and the plugin generator
+- `extensions/network-desk/extension.mjs` — Main SDK extension: imports `REGISTRY` from `./registry.mjs`, defines parameterized tool handlers + session hooks via `@github/copilot-sdk/extension`
+- `extensions/network-desk/scripts/build-plugin.mjs` — Generator that emits the native Copilot CLI plugin (`plugins/network-desk/**` + repo-root `.github/plugin/marketplace.json`) from `REGISTRY` + the `specialists/**` files. Builds to a staging dir, validates, then swaps in. Run via `node bin/cli.mjs plugin build`.
+- `plugins/network-desk/` — **Generated, do not hand-edit.** One coordinator agent (`agents/network-desk.md`) + 20 namespaced specialist skills (`skills/network-desk-<prefix>/`), each bundling its deep sub-skill docs under `reference/`. Regenerate after editing `REGISTRY`.
 - `extensions/network-desk/specialists/<name>/` — Each specialist has:
   - `agents/<name>.md` — Agent role definition (persona, workflow, guardrails)
   - `skills/<skill-name>/SKILL.md` — Deep domain expertise for each skill
@@ -27,7 +32,7 @@ node bin/cli.mjs uninstall     # Remove
 
 - **5 tools only — hard 128-tool API limit.** The CLI/model rejects sessions exposing >128 tools (request fails with "transient API error. Retrying..."). With 20 specialists × (role + orchestrate + ~6 skills) this would be ~162 tools, so tools are **parameterized**, not registered per-specialist. NEVER register one tool per specialist/skill.
 - **The 5 tools:** `cn_capabilities`, `cn_route`, `cn_role({ specialist })`, `cn_orchestrate({ specialist })`, `cn_skill({ specialist, skill })`.
-- **Single source of truth:** the `REGISTRY` object (prefix → `{ dir, domain, icon, trigger, guidance, skills }`) generates routing, capabilities, orchestration prompts, and skill loading. Add specialists/skills by editing `REGISTRY` only.
+- **Single source of truth:** the `REGISTRY` object lives in `extensions/network-desk/registry.mjs` (prefix → `{ dir, domain, name, summary, icon, trigger, guidance, skills }`) and generates routing, capabilities, orchestration prompts, skill loading, **and the generated plugin bundle**. Add specialists/skills by editing `registry.mjs` only, then run `node bin/cli.mjs plugin build` to regenerate `plugins/network-desk/`.
 - **Specialist ids are `cn_`-prefixed:** `cn_vnet`, `cn_fw`, `cn_lb`, `cn_dns`, `cn_pl`, `cn_hyb`, `cn_nsec`, `cn_ntsh`, `cn_vwan`, `cn_nmon`, `cn_mcn`, `cn_price`, `cn_iac`, `cn_cnet`, `cn_cdn`, `cn_nauto`, `cn_sase`, `cn_ncap`, `cn_ipv6`. The `REGISTRY` is keyed by the bare prefix internally; `pub(prefix)` produces the `cn_` id, and `resolveSpecialist()` accepts the `cn_` id, the bare alias, or the directory name.
 - **Legacy names are references only:** strings like `cn_vnet_skill_address_planner` / `vnet_skill_address_planner` are NOT callable tools; they're tolerated as the `skill` argument to `cn_skill` (normalized to kebab-case).
 - **Routing:** Regex-based keyword detection in `onUserPromptSubmitted` injects MUST-language guidance pointing at the parameterized tools (throttled once per specialist per session); an `onSessionStart` presence note announces the extension from turn 1. The hook forbids reading `specialists/**` files directly and requires loading content via `cn_role`/`cn_orchestrate`/`cn_skill`.

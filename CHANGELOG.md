@@ -10,6 +10,27 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Added
 
+- **Native Copilot CLI plugin (second install option).** Network Desk can now be installed as a
+  native `copilot plugin` in addition to the SDK extension. The plugin ships **one coordinator
+  agent** (`Network Desk`) that routes to **20 specialist skills**, with each specialist's deep
+  sub-skill docs bundled under `reference/` for on-demand loading. Routing in plugin form is
+  LLM-driven (vs. the extension's deterministic regex hooks); both forms deliver the same
+  specialist depth.
+  - New CLI commands: `network-desk init --plugin` (registers a local marketplace then installs via
+    `copilot`), `network-desk plugin build` (regenerates the bundle), and
+    `network-desk uninstall --plugin`. `network-desk status` now reports plugin-bundle presence.
+  - The plugin bundle is **generated from the same single source of truth** as the extension:
+    `REGISTRY` was extracted into a dependency-free [`extensions/network-desk/registry.mjs`](extensions/network-desk/registry.mjs)
+    (imported by `extension.mjs`) and the generator
+    [`extensions/network-desk/scripts/build-plugin.mjs`](extensions/network-desk/scripts/build-plugin.mjs)
+    emits [`plugins/network-desk/`](plugins/network-desk/) and a repo-level
+    `.github/plugin/marketplace.json`. No specialist content is hand-forked.
+  - README: new "Install as a native Copilot CLI plugin" section + extension-vs-plugin comparison.
+  - Plugin skills carry their emoji icon and friendly specialist name in the skill `description`
+    and `metadata` (`displayName`/`icon`), and the coordinator agent is instructed to render skill
+    listings as an emoji + friendly-name table — so dumping the skill table reads cleanly instead of
+    showing bare `network-desk-*` ids.
+
 - **Privacy documentation** — added [`PRIVACY.md`](PRIVACY.md) describing exactly how the
   extension handles data: it collects no telemetry, transmits no prompts/code/files, and makes
   only a single optional once-per-24h GitHub version check (disable with

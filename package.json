@@ -9,6 +9,8 @@
   "files": [
     "bin/",
     "extensions/network-desk/",
+    "plugins/network-desk/",
+    ".github/plugin/marketplace.json",
     "LICENSE",
     "README.md",
     "CHANGELOG.md",

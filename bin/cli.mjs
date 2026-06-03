@@ -12,6 +12,14 @@ const EXTENSION_SRC = join(PKG_ROOT, "extensions", "network-desk");
 const COPILOT_DIR = join(homedir(), ".copilot");
 const EXT_DEST = join(COPILOT_DIR, "extensions", "network-desk");
 
+// Native Copilot CLI plugin bundle (generated from the same single source of
+// truth as the extension). Shipped prebuilt in the npm package.
+const PLUGIN_ID = "network-desk";
+const PLUGIN_BUNDLE = join(PKG_ROOT, "plugins", PLUGIN_ID);
+const PLUGIN_GENERATOR = join(EXTENSION_SRC, "scripts", "build-plugin.mjs");
+const MARKETPLACE_MANIFEST = join(PKG_ROOT, ".github", "plugin", "marketplace.json");
+const PLUGIN_MARKET_SPEC = "network-desk@network-desk";
+
 const GITIGNORE_ENTRY = ".github/extensions/network-desk/";
 
 // Legacy bundle directory names that registered the same cn_* tools and would
@@ -304,6 +312,19 @@ async function status() {
         info("  User-level:    network-desk init");
         info("  Project-level: network-desk init --project");
     }
+
+    // Plugin bundle awareness (the native Copilot CLI plugin form).
+    log("");
+    if (await exists(join(PLUGIN_BUNDLE, ".github", "plugin", "plugin.json"))) {
+        ok("Plugin bundle: present at plugins/network-desk/");
+        if (copilotAvailable()) {
+            info("  Check if installed: copilot plugin list");
+        } else {
+            info("  Install with: network-desk init --plugin");
+        }
+    } else {
+        info("Plugin bundle: not built (run 'network-desk plugin build')");
+    }
     log("");
 }
 
@@ -332,12 +353,172 @@ async function update() {
         }
     }
 
+    // Plugin form: if the Copilot CLI plugin is installed, rebuild the bundle and
+    // refresh it via `copilot plugin update`.
+    if (copilotAvailable() && pluginInstalled()) {
+        info("Copilot CLI plugin detected — rebuilding bundle and updating...");
+        log("");
+        if (await exists(PLUGIN_GENERATOR)) {
+            try { execSync(`node "${PLUGIN_GENERATOR}"`, { stdio: "inherit", cwd: PKG_ROOT }); } catch {}
+        }
+        try {
+            execSync(`copilot plugin update ${PLUGIN_ID}`, { stdio: "inherit" });
+            ok("Plugin updated.");
+        } catch {
+            err(`Could not update the plugin automatically — run: copilot plugin update ${PLUGIN_ID}`);
+        }
+        log("");
+        updated = true;
+    }
+
     if (!updated) {
         err("Nothing to update — extension is not installed.");
         info("  User-level:    network-desk init");
         info("  Project-level: network-desk init --project");
         log("");
     }
+}
+
+// ── Plugin (native Copilot CLI plugin) commands ───────────────────────
+
+function copilotAvailable() {
+    try {
+        execSync("copilot --version", { stdio: "ignore" });
+        return true;
+    } catch {
+        return false;
+    }
+}
+
+function pluginInstalled() {
+    try {
+        const out = execSync("copilot plugin list", { encoding: "utf8", stdio: ["pipe", "pipe", "pipe"] });
+        return /(^|\s)network-desk(\s|@|$)/m.test(out);
+    } catch {
+        return false;
+    }
+}
+
+async function pluginBuild() {
+    log("");
+    log(`${CYAN}Network Desk${RESET} — building Copilot CLI plugin bundle`);
+    log("");
+    if (!await exists(PLUGIN_GENERATOR)) {
+        err(`Generator not found: ${PLUGIN_GENERATOR}`);
+        process.exit(1);
+    }
+    try {
+        execSync(`node "${PLUGIN_GENERATOR}"`, { stdio: "inherit", cwd: PKG_ROOT });
+    } catch {
+        err("Plugin generation failed.");
+        process.exit(1);
+    }
+}
+
+async function initPlugin() {
+    log("");
+    log(`${CYAN}Network Desk${RESET} — installing as a Copilot CLI plugin`);
+    log("");
+
+    // Ensure the bundle exists; build it from source if missing.
+    if (!await exists(join(PLUGIN_BUNDLE, ".github", "plugin", "plugin.json"))) {
+        info("Plugin bundle not found — generating it...");
+        if (!await exists(PLUGIN_GENERATOR)) {
+            err("Cannot build: plugin generator is missing from this package.");
+            process.exit(1);
+        }
+        execSync(`node "${PLUGIN_GENERATOR}"`, { stdio: "inherit", cwd: PKG_ROOT });
+        log("");
+    }
+
+    if (!copilotAvailable()) {
+        info("Copilot CLI ('copilot') not found on PATH.");
+        printPluginInstallSteps();
+        log("");
+        return;
+    }
+
+    // Preferred: register the local marketplace and install by name (the direct
+    // path/repo install forms are deprecated in newer Copilot CLI releases).
+    const haveMarketplace = await exists(MARKETPLACE_MANIFEST);
+    if (haveMarketplace) {
+        info("Copilot CLI detected — registering the local marketplace...");
+        try {
+            execSync(`copilot plugin marketplace add "${PKG_ROOT}"`, { stdio: "inherit" });
+        } catch {
+            // Most likely already registered — continue to install.
+        }
+        try {
+            execSync(`copilot plugin install ${PLUGIN_MARKET_SPEC}`, { stdio: "inherit" });
+            log("");
+            ok("Plugin installed.");
+            info("  Verify with: copilot plugin list");
+            info("  The 'Network Desk' coordinator agent routes to 20 specialist skills.");
+            log("");
+            return;
+        } catch {
+            // Install can fail simply because it's already installed — treat that
+            // as success; otherwise fall back to a direct install.
+            if (pluginInstalled()) {
+                log("");
+                ok("Plugin already installed (run 'network-desk update' to refresh it).");
+                log("");
+                return;
+            }
+            info("Marketplace install failed — falling back to a direct local install...");
+        }
+    }
+
+    // Fallback: direct local-path install.
+    try {
+        execSync(`copilot plugin install "${PLUGIN_BUNDLE}"`, { stdio: "inherit" });
+        log("");
+        ok("Plugin installed.");
+        info("  Verify with: copilot plugin list");
+    } catch {
+        if (pluginInstalled()) {
+            log("");
+            ok("Plugin already installed.");
+        } else {
+            err("`copilot plugin install` failed — install manually with the steps below.");
+            printPluginInstallSteps();
+        }
+    }
+    log("");
+}
+
+function printPluginInstallSteps() {
+    log("");
+    log("Install the plugin with any of:");
+    log("");
+    log(`  ${DIM}# Recommended — register the local marketplace, then install by name:${RESET}`);
+    log(`  copilot plugin marketplace add "${PKG_ROOT}"`);
+    log(`  copilot plugin install ${PLUGIN_MARKET_SPEC}`);
+    log("");
+    log(`  ${DIM}# Or directly from GitHub once published:${RESET}`);
+    log(`  copilot plugin marketplace add dmauser/network-desk`);
+    log(`  copilot plugin install ${PLUGIN_MARKET_SPEC}`);
+    log("");
+    log(`  ${DIM}# Or a direct local-path install (deprecated in newer CLI releases):${RESET}`);
+    log(`  copilot plugin install "${PLUGIN_BUNDLE}"`);
+}
+
+async function uninstallPlugin() {
+    log("");
+    log(`${CYAN}Network Desk${RESET} — uninstalling plugin`);
+    log("");
+    if (copilotAvailable()) {
+        try {
+            execSync(`copilot plugin uninstall ${PLUGIN_ID}`, { stdio: "inherit" });
+            ok("Plugin uninstalled.");
+        } catch {
+            err(`Could not uninstall — run: copilot plugin uninstall ${PLUGIN_ID}`);
+        }
+    } else {
+        info("Copilot CLI not found on PATH.");
+        info(`  Run manually: copilot plugin uninstall ${PLUGIN_ID}`);
+    }
+    log("");
 }
 
 async function showVersion() {
@@ -358,10 +539,13 @@ function showHelp() {
     log("Commands:");
     log("  init              Install extensions to ~/.copilot/extensions/ (requires experimental mode)");
     log("  init --project    Install extensions to .github/extensions/ in current repo (no experimental mode needed)");
+    log("  init --plugin     Install as a native Copilot CLI plugin (copilot plugin install)");
+    log("  plugin build      (Re)generate the plugin bundle from the registry source");
     log("  update            Re-install over any existing user-level and/or project-level install (pulls latest)");
     log("  uninstall         Remove user-level extensions");
     log("  uninstall --project  Remove project-level extensions from current repo");
-    log("  status            Check installation status (both user-level and project-level)");
+    log("  uninstall --plugin   Remove the installed Copilot CLI plugin");
+    log("  status            Check installation status (extensions + plugin bundle)");
     log("  --version, -v     Print the installed CLI version");
     log("  help              Show this help");
     log("");
@@ -372,13 +556,24 @@ function showHelp() {
 const command = process.argv[2];
 const flags = process.argv.slice(3);
 const isProject = flags.includes("--project");
+const isPlugin = flags.includes("--plugin");
 
 switch (command) {
     case "init":
-        if (isProject) {
+        if (isPlugin) {
+            await initPlugin();
+        } else if (isProject) {
             await initProject();
         } else {
             await init();
+        }
+        break;
+    case "plugin":
+        if (flags[0] === "build" || process.argv[3] === "build") {
+            await pluginBuild();
+        } else {
+            err("Usage: network-desk plugin build");
+            process.exit(1);
         }
         break;
     case "update":
@@ -387,7 +582,11 @@ switch (command) {
         break;
     case "uninstall":
     case "remove":
-        await uninstall();
+        if (isPlugin) {
+            await uninstallPlugin();
+        } else {
+            await uninstall();
+        }
         break;
     case "status":
         await status();
