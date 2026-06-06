@@ -10,6 +10,30 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Added
 
+- **Pricing Analyst now fetches live prices as the source of truth (never hard-coded/cached rates).**
+  Every numeric cloud price MUST be retrieved from a live pricing API and cited before it is used in
+  any calculation; only clearly-flagged `INDICATIVE` values are allowed when an API is unreachable.
+  - **New `retail-prices-api` skill** documenting the **Azure Retail Prices API**
+    (`https://prices.azure.com/api/retail/prices`, anonymous): OData `$filter` patterns for
+    Bandwidth/egress, VPN/ExpressRoute gateways, Load Balancer/App Gateway, Azure Firewall, NAT
+    Gateway, Public IP, Front Door, Private Link, DNS; region/SKU/meter selection; `NextPageLink`
+    paging; tiered-egress + monthly-free-allowance modelling; response fields to cite
+    (`retailPrice`, `unitOfMeasure`, `armRegionName`, `armSkuName`, `meterName`, `effectiveStartDate`,
+    …); curl / PowerShell / Python examples; Consumption-vs-1yr-vs-3yr-RI comparison. Multi-cloud:
+    **AWS** Price List Query API (`GetProducts`) and **GCP** Cloud Billing Catalog API are
+    authoritative for their clouds.
+  - `registry.mjs`: registered the skill, rewrote `price.guidance` into a mandatory live-fetch
+    directive (echo `$filter`, region, SKU/meter, `retailPrice`, `effectiveStartDate`, currency,
+    retrieval timestamp), and extended `price.trigger` (retail price, list price, $/GB, per-GB,
+    hourly rate, egress price).
+  - Propagated a top-of-workflow "source all Azure rates from `retail-prices-api` before calculating;
+    do not embed static rates" line into the egress-calc, egress-architecture, vpn-pricing,
+    circuit-pricing, lb-pricing, firewall-pricing, cost-optimizer, and price-compare skills, plus the
+    Pricing Analyst agent guardrail.
+  - Report Builder XLSX cost-model guidance now requires the Inputs sheet's Azure rates to come from
+    `retail-prices-api`, recording `armSkuName`, region, `meterName`, currency, and
+    `effectiveStartDate` in a Source column (placeholders only when the API was unreachable, flagged).
+
 - **Validation-first: each cloud's official documentation MCP is now the primary source of truth.**
   When the relevant docs MCP server is configured, specialists MUST validate every networking fact
   (service SKUs/tiers, limits & quotas, regional availability, feature support, pricing dimensions,
