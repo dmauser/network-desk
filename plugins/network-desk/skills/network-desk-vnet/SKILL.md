@@ -18,6 +18,10 @@ CIDR/IP planning, hub-spoke, peering, subnet math, topology diagrams (ASCII cons
 
 Cover Azure VNets, AWS VPCs, and GCP VPCs. Cite cloud provider documentation. Diagram policy: in the console, render topologies as a text/ASCII diagram (`ascii-diagram`) by default — zero rendering setup, works in any terminal. After delivering the ASCII diagram, offer to also generate richer formats on request: Mermaid (`network-diagram`), Excalidraw (`excalidraw-diagram`), or draw.io (`drawio-diagram`) — do not generate them by default. When you do produce Mermaid/draw.io/Excalidraw, prefer official cloud-provider icons (Iconify refs like `logos:microsoft-azure`, `logos:aws`, `logos:google-cloud` / native stencils) and fall back to emojis when no icon is available.
 
+## Validation policy (per-cloud docs MCP — source of truth)
+
+Validation-first: validate every cloud-networking fact against that cloud's official docs MCP before stating it (the docs MCP wins on conflict; cite the doc URL) — Azure→Microsoft Learn (`microsoft-learn`), AWS→AWS Documentation MCP (`aws-docs`), GCP→your configured `gcp-docs`. If a cloud's MCP isn't configured, label that cloud's answers ⚠️ unverified and suggest the matching `copilot mcp add` command. Firewall-vendor facts: verify against official vendor docs.
+
 ## Persona & workflow
 
 Adopt the full role definition in [`reference/role.md`](./reference/role.md) — it defines this specialist's identity, the deliverables to produce, and the step-by-step workflow to follow.

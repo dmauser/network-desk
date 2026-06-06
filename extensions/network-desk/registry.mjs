@@ -214,9 +214,10 @@ export const REGISTRY = {
         name: "Pricing Analyst",
         summary: "Egress/VPN/circuit/LB/firewall pricing, cross-cloud cost compare & optimization",
         icon: "💰",
-        trigger: /\b(pric(e|ing)|cost\s+(estimat|compar|analy|optim|break)|egress\s+cost|data\s+transfer\s+cost|TCO|total\s+cost|network\s+cost|billing|budget|monthly\s+cost|how\s+much\s+(does|will|is)|cheaper|expensive|save\s+money|cost\s+saving|right[-\s]?siz)/i,
-        guidance: "Covers Azure, AWS, and GCP networking costs. Prices are indicative — always verify against current vendor pricing pages.",
+        trigger: /\b(pric(e|ing)|retail\s+price|list\s+price|\$\/GB|per[-\s]?GB|hourly\s+rate|egress\s+price|cost\s+(estimat|compar|analy|optim|break)|egress\s+cost|data\s+transfer\s+cost|TCO|total\s+cost|network\s+cost|billing|budget|monthly\s+cost|how\s+much\s+(does|will|is)|cheaper|expensive|save\s+money|cost\s+saving|right[-\s]?siz)/i,
+        guidance: "Covers Azure, AWS, and GCP networking costs. MANDATORY: every numeric price MUST be fetched from a live pricing API before it is quoted — never a hard-coded, cached, or model-recalled rate. Azure prices via the `retail-prices-api` skill (echo the $filter, region, SKU/meter, retailPrice, effectiveStartDate, currency, and retrieval timestamp); AWS prices via the AWS Price List Query API (GetProducts); GCP prices via the Cloud Billing Catalog API (services/.../skus) — each echoing the equivalent query, region/SKU, unit price, currency, and retrieval timestamp. Only fall back to values explicitly flagged 'INDICATIVE — not fetched from a live pricing API' when a provider's API is unreachable.",
         skills: {
+            "retail-prices-api": "Fetch authoritative live Azure network rates from the Azure Retail Prices API — OData $filter for Bandwidth/egress, VPN/ExpressRoute gateways, Load Balancer/App Gateway, Azure Firewall, NAT Gateway, Public IP, Front Door, Private Link, DNS; region/SKU/meter selection, paging, currency. Also covers AWS (Price List Query API) and GCP (Cloud Billing Catalog API) for non-Azure rates.",
             "egress-calc": "Data transfer and egress cost calculation across Azure, AWS, and GCP — tiered pricing, inter-region, peering costs.",
             "egress-architecture": "Architectural patterns to structurally reduce egress cost — PrivateLink/Gateway Endpoints, CDN offload, regional pinning, dedicated interconnects, commit discounts. Break-even modeling.",
             "vpn-pricing": "VPN gateway pricing comparison — per-hour costs, tunnel limits, data transfer charges across all three clouds.",
@@ -356,3 +357,120 @@ export const REGISTRY = {
         },
     },
 };
+
+// ── Per-cloud docs-MCP validation policy (shared, dependency-free) ───────────
+//
+// network-desk treats an official documentation MCP server as the primary source
+// of truth for EACH cloud's facts:
+//   • Azure → Microsoft Learn MCP (hosted HTTP, anonymous)
+//   • AWS   → AWS Documentation MCP (local stdio via uvx; awslabs)
+//   • GCP   → a configurable docs MCP (placeholder — swap when standardized)
+// Firewall-vendor facts have no docs MCP and keep the "verify against vendor
+// documentation" guardrail.
+//
+// MCP_PROVIDERS is the single source of truth for the wording below; both the
+// runtime extension (extension.mjs) and the plugin generator
+// (scripts/build-plugin.mjs) consume the derived MCP_VALIDATION_DIRECTIVE /
+// MCP_VALIDATION_NOTE so every surface stays identical.
+
+export const MCP_PROVIDERS = {
+    azure: {
+        cloud: "Azure",
+        label: "Microsoft Learn MCP",
+        serverName: "microsoft-learn",
+        transport: "http",
+        docDomain: "learn.microsoft.com",
+        toolHints: "`microsoft_docs_search`, `microsoft_docs_fetch`, `microsoft_code_sample_search`",
+        addCommand:
+            "copilot mcp add --transport http microsoft-learn https://learn.microsoft.com/api/mcp",
+        prereq: "",
+    },
+    aws: {
+        cloud: "AWS",
+        label: "AWS Documentation MCP",
+        serverName: "aws-docs",
+        transport: "stdio",
+        docDomain: "docs.aws.amazon.com",
+        toolHints: "`search_documentation`, `read_documentation`, `recommend`",
+        addCommand:
+            "copilot mcp add aws-docs --env FASTMCP_LOG_LEVEL=ERROR --env AWS_DOCUMENTATION_PARTITION=aws -- uvx awslabs.aws-documentation-mcp-server@latest",
+        prereq: "requires `uv`/`uvx` + Python ≥3.10 (https://docs.astral.sh/uv/)",
+    },
+    gcp: {
+        cloud: "GCP",
+        label: "GCP Documentation MCP (configure)",
+        serverName: "gcp-docs",
+        transport: "stdio",
+        docDomain: "cloud.google.com/docs",
+        toolHints: "the configured GCP docs search/fetch tools",
+        addCommand: "copilot mcp add gcp-docs -- <your-gcp-docs-mcp-command>",
+        prereq: "placeholder — substitute your chosen GCP docs MCP server command",
+    },
+};
+
+// Per-provider ⚠️ fallback banner (shown when that cloud's docs MCP is absent).
+export function mcpFallbackBanner(key) {
+    const p = MCP_PROVIDERS[key];
+    const prereq = p.prereq ? ` (${p.prereq})` : "";
+    return (
+        `> ⚠️ **Unverified — ${p.label} server not configured.**\n` +
+        `> This ${p.cloud} content is based on built-in/model knowledge and was NOT validated\n` +
+        `> against ${p.docDomain}. Specs, limits, SKUs, and availability may be outdated. Configure\n` +
+        `> the ${p.cloud} docs MCP server for authoritative validation${prereq}:\n` +
+        "> `" + p.addCommand + "`"
+    );
+}
+
+// Back-compat alias: the original Azure-only banner export.
+export const MCP_FALLBACK_BANNER = mcpFallbackBanner("azure");
+
+const _providerOrder = ["azure", "aws", "gcp"];
+
+const _primaryLines = _providerOrder
+    .map((k) => {
+        const p = MCP_PROVIDERS[k];
+        return (
+            `   • ${p.cloud}: the ${p.label} server (tools like ${p.toolHints}). ` +
+            `Cite the exact ${p.docDomain} URL(s) you validated against.`
+        );
+    })
+    .join("\n");
+
+const _fallbackBanners = _providerOrder.map((k) => mcpFallbackBanner(k)).join("\n>\n");
+
+const _addCommands = _providerOrder
+    .map((k) => {
+        const p = MCP_PROVIDERS[k];
+        const prereq = p.prereq ? `  — ${p.prereq}` : "";
+        return `   • ${p.cloud}: \`${p.addCommand}\`${prereq}`;
+    })
+    .join("\n");
+
+export const MCP_VALIDATION_DIRECTIVE =
+    "VALIDATION POLICY (each cloud's official docs MCP is the primary source of truth):\n" +
+    "1. PRIMARY — Before stating ANY cloud-networking fact (service SKUs/tiers, limits & quotas, " +
+    "regional availability, feature support, pricing dimensions, and API/CLI/IaC syntax & versions), " +
+    "you MUST validate it via THAT cloud's documentation MCP server:\n" +
+    _primaryLines + "\n" +
+    "   Treat the cloud's docs MCP as AUTHORITATIVE: if it contradicts internal specialist/skill " +
+    "content or your own knowledge, THE DOCS MCP WINS — correct the answer and note the correction.\n" +
+    "2. FALLBACK — Only if the relevant cloud's docs MCP is unavailable (tool absent, not configured, " +
+    "or the call fails): answer from specialist/skill + model knowledge, but PREPEND the matching " +
+    "banner below to your response and mark every numeric spec/limit \"indicative, unverified\". " +
+    "Configure the missing server with the matching `copilot mcp add` command:\n" +
+    _fallbackBanners + "\n" +
+    "   Install commands:\n" +
+    _addCommands + "\n" +
+    "3. NEVER silently rely on model knowledge for a cloud fact — the user must always be able to tell " +
+    "whether an answer was docs-MCP-validated (with URLs) or a fallback (with the ⚠️ banner).\n" +
+    "4. SCOPE — Each docs MCP covers its own cloud only. For firewall-vendor facts there is no docs " +
+    "MCP: validate against the official vendor documentation and keep the " +
+    "\"Analysis only — verify against vendor documentation before applying.\" guardrail.";
+
+// Compact one-liner for space-constrained surfaces (presence note, plugin scope blurbs).
+export const MCP_VALIDATION_NOTE =
+    "Validation-first: validate every cloud-networking fact against that cloud's official docs MCP " +
+    "before stating it (the docs MCP wins on conflict; cite the doc URL) — Azure→Microsoft Learn " +
+    "(`microsoft-learn`), AWS→AWS Documentation MCP (`aws-docs`), GCP→your configured `gcp-docs`. " +
+    "If a cloud's MCP isn't configured, label that cloud's answers ⚠️ unverified and suggest the " +
+    "matching `copilot mcp add` command. Firewall-vendor facts: verify against official vendor docs.";

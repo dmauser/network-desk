@@ -10,6 +10,30 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Added
 
+- **Validation-first: each cloud's official documentation MCP is now the primary source of truth.**
+  When the relevant docs MCP server is configured, specialists MUST validate every networking fact
+  (service SKUs/tiers, limits & quotas, regional availability, feature support, pricing dimensions,
+  API/CLI/IaC syntax & versions) against that cloud's docs **before** stating it, treat the docs MCP
+  as authoritative (it overrides built-in/model knowledge on conflict), and cite the exact doc URL(s).
+  - **Per-cloud servers + setup commands:**
+    - **Azure** → Microsoft Learn MCP (hosted HTTP):
+      `copilot mcp add --transport http microsoft-learn https://learn.microsoft.com/api/mcp`
+    - **AWS** → AWS Documentation MCP (local stdio; needs `uv`/`uvx` + Python ≥3.10):
+      `copilot mcp add aws-docs --env FASTMCP_LOG_LEVEL=ERROR --env AWS_DOCUMENTATION_PARTITION=aws -- uvx awslabs.aws-documentation-mcp-server@latest`
+    - **GCP** → configurable placeholder: `copilot mcp add gcp-docs -- <your-gcp-docs-mcp-command>`
+  - **Degraded (unverified) mode:** when a cloud's docs MCP is unreachable, that cloud's answers are
+    prepended with a ⚠️ "Unverified — <server> not configured" banner, numeric specs/limits are
+    marked *indicative, unverified*, and the response includes the matching `copilot mcp add` command.
+  - **Scope:** each docs MCP covers its own cloud only — firewall-vendor facts are validated against
+    official vendor docs and keep the standard analysis-only guardrail.
+  - The policy is centralized in `extensions/network-desk/registry.mjs` (`MCP_PROVIDERS` +
+    `MCP_VALIDATION_DIRECTIVE` + `mcpFallbackBanner()`/`MCP_FALLBACK_BANNER` + `MCP_VALIDATION_NOTE`)
+    and surfaced by both the SDK extension (`cn_role`/`cn_skill`/`cn_orchestrate` loads, the session
+    presence note, and the prompt hook on any specialist match) and the generated native plugin
+    (coordinator agent + every specialist `SKILL.md`). Regenerate the plugin via
+    `network-desk plugin build`. Network Desk never edits your MCP configuration — it is a per-user
+    CLI setting you manage yourself.
+
 - **Text/ASCII topology diagrams are now the console default (vnet-architect).** New
   `vnet_skill_ascii_diagram` skill renders network topologies as plain-text/ASCII using
   box-drawing characters — zero rendering setup, works in any terminal, SSH session, or

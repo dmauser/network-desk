@@ -6,6 +6,8 @@
 
 Egress is usually the largest, least-controllable line item on cloud network bills. This skill provides patterns that move workloads, traffic, or boundaries so that fewer bytes ever cross a paid egress meter. Covers cross-region transit, cross-AZ optimization, PrivateLink-style boundary collapses, CDN offload, peering, regional pinning, and tier discounts.
 
+> **Source all rates from a live pricing API before calculating** — Azure via the `retail-prices-api` skill, AWS via the AWS Price List Query API, GCP via the Cloud Billing Catalog API. Do not embed static rates. Any break-even or savings dollar figures must be computed from fetched prices; cite the query, region/SKU/meter, currency, `effectiveStartDate`, and retrieval timestamp. Flag any number you could not fetch as `INDICATIVE — not fetched from a live pricing API`.
+
 ---
 
 ## What "egress" means and where it's billed

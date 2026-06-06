@@ -10,7 +10,7 @@
 // report-builder
 
 import { joinSession } from "@github/copilot-sdk/extension";
-import { REGISTRY } from "./registry.mjs";
+import { REGISTRY, MCP_VALIDATION_DIRECTIVE, MCP_VALIDATION_NOTE } from "./registry.mjs";
 import { readFile, writeFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
@@ -98,6 +98,14 @@ async function loadFile(path) {
     } catch (err) {
         return { textResultForLlm: `Failed to load: ${err.message}`, resultType: "failure" };
     }
+}
+
+// Prepend the per-cloud docs-MCP validation policy to loaded specialist content
+// (role/skill markdown) so the directive travels with every engaged specialist.
+// Non-string content (load failures) passes through untouched.
+function withPolicy(content) {
+    if (typeof content !== "string") return content;
+    return `[VALIDATION POLICY — read first]\n${MCP_VALIDATION_DIRECTIVE}\n\n---\n\n${content}`;
 }
 
 // ── Specialist registry (single source of truth) ──────────────────────
@@ -201,7 +209,9 @@ ${def.guidance}
 IMPORTANT: Names such as \`${pub(prefix)}_skill_<name>\` or \`${pub(prefix)}_role\` that may appear in
 documentation are references only — they are NOT callable tools. Always invoke skills via
 \`cn_skill\` and the role via \`cn_role\`. End every analysis with:
-"Analysis only — verify against vendor documentation before applying."`;
+"Analysis only — verify against vendor documentation before applying."
+
+${MCP_VALIDATION_DIRECTIVE}`;
 }
 
 function routeQuery(query) {
@@ -278,7 +288,7 @@ const tools = [
         handler: async (args) => {
             const prefix = resolveSpecialist(args?.specialist);
             if (!prefix) return unknownSpecialistMsg(args?.specialist);
-            return loadFile(join(SPECIALISTS, REGISTRY[prefix].dir, "agents", `${REGISTRY[prefix].dir}.md`));
+            return withPolicy(await loadFile(join(SPECIALISTS, REGISTRY[prefix].dir, "agents", `${REGISTRY[prefix].dir}.md`)));
         },
     },
     {
@@ -322,7 +332,7 @@ const tools = [
                     resultType: "failure",
                 };
             }
-            return loadFile(join(SPECIALISTS, def.dir, "skills", skill, "SKILL.md"));
+            return withPolicy(await loadFile(join(SPECIALISTS, def.dir, "skills", skill, "SKILL.md")));
         },
     },
 ];
@@ -421,6 +431,7 @@ const PRESENCE_NOTE =
     "RESPONSE FOOTER (REQUIRED): at the end of EVERY assistant response that touches cloud networking — any turn where you called a `cn_*` tool, " +
     "or discussed any networking topic above — append the following line verbatim, on its own line after all other content:\n\n" +
     "> Analysis only — verify against vendor documentation before applying.\n\n" +
+    MCP_VALIDATION_NOTE + "\n\n" +
     OUTPUT_CONVENTION;
 
 const DIRECT_MENTION =
@@ -487,6 +498,10 @@ const session = await joinSession({
                     `networking questions from prior/general knowledge.\n\n` +
                     TOOL_USAGE_NOTE,
                 );
+            }
+
+            if (matches.length > 0) {
+                parts.push(MCP_VALIDATION_DIRECTIVE);
             }
 
             if (parts.length === 0) return;

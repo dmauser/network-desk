@@ -17,6 +17,7 @@
 | 📦 | [Installation](#installation) | 5 ways to install (npx user-level, npx project-level, npm, Copilot prompt, manual) |
 | 🖥️ | [CLI Reference](#cli-reference) | `init`, `status`, `uninstall`, `--version` |
 | ⚙️ | [How It Works](#how-it-works) | Architecture, routing, and workflow |
+| 📚 | [Validation-first: per-cloud documentation MCP](#validation-first-per-cloud-documentation-mcp) | Authoritative validation of Azure/AWS/GCP facts |
 | 📝 | [Usage Examples](#usage-examples) | Example prompts for every specialist |
 | 📁 | [Output files](#output-files) | Where generated diagrams, reports, and configs are saved |
 | 📂 | [Repository Structure](#repository-structure) | Full folder tree and conventions |
@@ -348,6 +349,35 @@ You: @network-desk design a hub-spoke VNet with Azure Firewall and
 ```
 
 You never need to call individual tools — just describe what you need after `@network-desk` and the coordinator handles the rest.
+
+## Validation-first: per-cloud documentation MCP
+
+Network Desk treats an **official documentation MCP server** as its **primary source of truth for each cloud**. When the relevant server is configured, specialists validate every networking fact — service SKUs/tiers, limits & quotas, regional availability, feature support, pricing dimensions, and API/CLI/IaC syntax & versions — against current docs **before** stating it, treat the docs MCP as authoritative (if it contradicts built-in knowledge, **the docs MCP wins**), and cite the exact doc URL(s).
+
+| Cloud | Server | Tools | Transport |
+|-------|--------|-------|-----------|
+| **Azure** | [Microsoft Learn MCP](https://github.com/MicrosoftDocs/mcp) | `microsoft_docs_search`, `microsoft_docs_fetch`, `microsoft_code_sample_search` | hosted HTTP (no account/API key) |
+| **AWS** | [AWS Documentation MCP](https://github.com/awslabs/mcp/tree/main/src/aws-documentation-mcp-server) | `search_documentation`, `read_documentation`, `recommend` | local stdio (`uvx`) |
+| **GCP** | *Configurable* `gcp-docs` placeholder | your chosen GCP docs MCP tools | local stdio |
+
+Add the servers with `copilot mcp add` (or run `/mcp` inside a Copilot CLI session and follow the wizard):
+
+```bash
+# Azure — Microsoft Learn (hosted HTTP)
+copilot mcp add --transport http microsoft-learn https://learn.microsoft.com/api/mcp
+
+# AWS — AWS Documentation MCP (local stdio; requires uv/uvx + Python ≥3.10 — https://docs.astral.sh/uv/)
+copilot mcp add aws-docs --env FASTMCP_LOG_LEVEL=ERROR --env AWS_DOCUMENTATION_PARTITION=aws -- uvx awslabs.aws-documentation-mcp-server@latest
+
+# GCP — placeholder: substitute your chosen GCP docs MCP server command
+copilot mcp add gcp-docs -- <your-gcp-docs-mcp-command>
+```
+
+If a cloud's docs MCP is **not** configured, Network Desk still works, but that cloud's answers run in a clearly-labelled **unverified** mode: the response is prepended with a ⚠️ warning banner, numeric specs and limits are marked *indicative, unverified*, and the matching setup command above is included. This guarantees you can always tell whether an answer was docs-MCP-validated (with URLs) or produced from built-in knowledge alone.
+
+**Scope:** Each docs MCP covers its own cloud only. For the **14 firewall vendors**, there is no docs MCP — Network Desk validates against the official vendor documentation and keeps its standard *"Analysis only — verify against vendor documentation before applying."* guardrail.
+
+This is a **per-user** Copilot CLI setting — it is configured at the CLI level, not by this extension. It is shared across all your sessions and repos, and uninstalling Network Desk does not change it. Network Desk never edits your MCP configuration; you add or remove the server yourself.
 
 ## Usage Examples
 

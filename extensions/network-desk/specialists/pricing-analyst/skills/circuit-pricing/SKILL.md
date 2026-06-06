@@ -2,6 +2,8 @@
 
 Pricing for dedicated private connectivity: Azure ExpressRoute, AWS Direct Connect, and GCP Cloud Interconnect. Includes port fees, data plans, partner costs, and break-even analysis against VPN.
 
+> **Source all rates from a live pricing API before calculating** — Azure via the `retail-prices-api` skill, AWS via the AWS Price List Query API, GCP via the Cloud Billing Catalog API. Do not embed static rates. Any port-fee or $/GB figures below are illustrative structure only; replace them with fetched values and cite the query, region/SKU/meter, currency, `effectiveStartDate`, and retrieval timestamp. Flag any number you could not fetch as `INDICATIVE — not fetched from a live pricing API`.
+
 ---
 
 ## Azure ExpressRoute Pricing
@@ -213,5 +215,5 @@ gcloud compute interconnects describe <interconnect-name> \
 - Pricing as of: [date]
 ```
 
-Pricing is indicative — verify against current vendor pricing pages before budgeting.
+Rates fetched live from the provider pricing API (Azure Retail Prices / AWS Price List Query / GCP Cloud Billing Catalog) — never hard-coded; cite query, region, SKU/meter, currency, and retrieval date.
 **Analysis only — verify against vendor documentation before applying.**

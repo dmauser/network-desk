@@ -2,6 +2,8 @@
 
 Strategies and checklists for reducing cloud networking costs. Covers egress reduction, right-sizing, reserved capacity, architecture patterns, and identifying unused resources.
 
+> **Source all rates from a live pricing API before calculating** — Azure via the `retail-prices-api` skill, AWS via the AWS Price List Query API, GCP via the Cloud Billing Catalog API. Do not embed static rates. Any savings figures must be computed from fetched prices; cite the query, region/SKU/meter, currency, `effectiveStartDate`, and retrieval timestamp. Flag any number you could not fetch as `INDICATIVE — not fetched from a live pricing API`.
+
 ---
 
 ## 1. Reduce Egress Costs
@@ -251,5 +253,5 @@ aws ce create-anomaly-monitor --anomaly-monitor '{
 }'
 ```
 
-Pricing is indicative — verify against current vendor pricing pages before budgeting.
+Rates fetched live from the provider pricing API (Azure Retail Prices / AWS Price List Query / GCP Cloud Billing Catalog) — never hard-coded; cite query, region, SKU/meter, currency, and retrieval date.
 **Analysis only — verify against vendor documentation before applying.**

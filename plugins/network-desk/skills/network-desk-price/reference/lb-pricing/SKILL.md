@@ -2,6 +2,8 @@
 
 Compare load balancer and traffic distribution pricing across Azure, AWS, and GCP. Covers L4/L7 load balancers, CDN/Front Door, and DNS-based routing.
 
+> **Source all rates from a live pricing API before calculating** — Azure via the `retail-prices-api` skill, AWS via the AWS Price List Query API, GCP via the Cloud Billing Catalog API. Do not embed static rates. Any figures below are illustrative structure only; replace them with fetched values and cite the query, region/SKU/meter, currency, `effectiveStartDate`, and retrieval timestamp. Flag any number you could not fetch as `INDICATIVE — not fetched from a live pricing API`.
+
 ---
 
 ## Azure Load Balancer Pricing
@@ -197,5 +199,5 @@ gcloud monitoring time-series list \
 4. **WAF costs** vary dramatically: Azure WAF on App Gateway is expensive ($323/month fixed); AWS WAF is separate ($5/month + $1/rule + $0.60/M requests); GCP Cloud Armor starts at $5/policy + $1/rule.
 5. **CDN + LB combined** — evaluate whether Front Door/CloudFront/Cloud CDN can replace a regional LB for globally distributed traffic.
 
-Pricing is indicative — verify against current vendor pricing pages before budgeting.
+Rates fetched live from the provider pricing API (Azure Retail Prices / AWS Price List Query / GCP Cloud Billing Catalog) — never hard-coded; cite query, region, SKU/meter, currency, and retrieval date.
 **Analysis only — verify against vendor documentation before applying.**
