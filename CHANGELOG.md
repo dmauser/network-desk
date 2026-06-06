@@ -8,6 +8,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [2.1.0] - 2026-06-05
+
 ### Added
 
 - **Pricing Analyst now fetches live prices as the source of truth (never hard-coded/cached rates).**
@@ -268,6 +270,8 @@ Orchestrator prompts (`ORCHESTRATORS.fw`, `.lb`, `.dns`, `.hyb`, `.nsec`, `.ntsh
 
 ---
 
-[Unreleased]: https://github.com/dmauser/network-desk/compare/v1.1.0...HEAD
+[Unreleased]: https://github.com/dmauser/network-desk/compare/v2.1.0...HEAD
+[2.1.0]: https://github.com/dmauser/network-desk/compare/v2.0.0...v2.1.0
+[2.0.0]: https://github.com/dmauser/network-desk/compare/v1.1.0...v2.0.0
 [1.1.0]: https://github.com/dmauser/network-desk/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/dmauser/network-desk/releases/tag/v1.0.0
