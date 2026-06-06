@@ -357,3 +357,46 @@ export const REGISTRY = {
         },
     },
 };
+
+// ── Microsoft Learn MCP validation policy (shared, dependency-free) ───────────
+//
+// network-desk treats the Microsoft Learn MCP server as the primary source of
+// truth for AZURE facts. These constants are exported so both the runtime
+// extension (extension.mjs) and the plugin generator (scripts/build-plugin.mjs)
+// surface identical wording. Learn only covers Azure/Microsoft docs, so the
+// "Learn wins" rule is scoped to Azure; AWS, GCP, and firewall-vendor facts keep
+// the existing "verify against vendor documentation" guardrail.
+
+export const MCP_FALLBACK_BANNER =
+    "> ⚠️ **Unverified — Microsoft Learn MCP server not configured.**\n" +
+    "> This Azure content is based on built-in/model knowledge and was NOT validated against\n" +
+    "> Microsoft Learn. Specs, limits, SKUs, and availability may be outdated. Configure the Learn\n" +
+    "> MCP server for authoritative Azure validation:\n" +
+    "> `copilot mcp add --transport http microsoft-learn https://learn.microsoft.com/api/mcp`";
+
+export const MCP_VALIDATION_DIRECTIVE =
+    "VALIDATION POLICY (Microsoft Learn is the primary source of truth for AZURE):\n" +
+    "1. PRIMARY — Before stating ANY Azure networking fact (service SKUs/tiers, limits & quotas, " +
+    "regional availability, feature support, pricing dimensions, and API/CLI/Bicep/Terraform syntax " +
+    "& versions), you MUST validate it via the Microsoft Learn MCP server (tools named like " +
+    "`microsoft_docs_search`, `microsoft_docs_fetch`, `microsoft_code_sample_search`, or whatever the " +
+    "configured Learn MCP server exposes). Treat Learn as AUTHORITATIVE: if Learn contradicts internal " +
+    "specialist/skill content or your own knowledge, LEARN WINS — correct the answer and note the " +
+    "correction. Cite the exact Microsoft Learn URL(s) you validated against.\n" +
+    "2. FALLBACK — Only if no Learn MCP server is available (tool absent, not configured, or the call " +
+    "fails): answer from specialist/skill + model knowledge, but PREPEND this exact banner to your " +
+    "response and mark every numeric spec/limit \"indicative, unverified\":\n" +
+    MCP_FALLBACK_BANNER + "\n" +
+    "3. NEVER silently rely on model knowledge for Azure — the user must always be able to tell whether " +
+    "an Azure answer was Learn-validated (with URLs) or a fallback (with the ⚠️ banner).\n" +
+    "4. SCOPE — Microsoft Learn covers Azure/Microsoft only. For AWS, GCP, and firewall-vendor facts " +
+    "there is no Learn equivalent: validate against the official vendor documentation and keep the " +
+    "\"Analysis only — verify against vendor documentation before applying.\" guardrail.";
+
+// Compact one-liner for space-constrained surfaces (presence note, plugin scope blurbs).
+export const MCP_VALIDATION_NOTE =
+    "Validation-first: validate every Azure fact against the Microsoft Learn MCP server before " +
+    "stating it (Learn wins on conflict; cite the Learn URL). If no Learn MCP server is configured, " +
+    "label Azure answers ⚠️ unverified and suggest " +
+    "`copilot mcp add --transport http microsoft-learn https://learn.microsoft.com/api/mcp`. " +
+    "AWS/GCP/firewall facts: verify against official vendor docs.";

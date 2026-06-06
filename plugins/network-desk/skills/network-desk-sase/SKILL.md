@@ -18,6 +18,10 @@ SASE architecture, ZTNA, SWG/CASB, SD-WAN integration, vendor comparison.
 
 Covers SASE/SSE architecture, Zero Trust Network Access, SWG, CASB, SD-WAN integration, and vendor comparison (Zscaler, Palo Alto Prisma, Netskope, Microsoft, Cisco, Fortinet).
 
+## Validation policy (Microsoft Learn MCP — Azure source of truth)
+
+Validation-first: validate every Azure fact against the Microsoft Learn MCP server before stating it (Learn wins on conflict; cite the Learn URL). If no Learn MCP server is configured, label Azure answers ⚠️ unverified and suggest `copilot mcp add --transport http microsoft-learn https://learn.microsoft.com/api/mcp`. AWS/GCP/firewall facts: verify against official vendor docs.
+
 ## Persona & workflow
 
 Adopt the full role definition in [`reference/role.md`](./reference/role.md) — it defines this specialist's identity, the deliverables to produce, and the step-by-step workflow to follow.

@@ -25,7 +25,7 @@
 //   node extensions/network-desk/scripts/build-plugin.mjs --check   # validate sources only
 // ─────────────────────────────────────────────────────────────────────────
 
-import { REGISTRY } from "../registry.mjs";
+import { REGISTRY, MCP_VALIDATION_NOTE } from "../registry.mjs";
 import { readFile, writeFile, rm, mkdir, cp, rename, access } from "node:fs/promises";
 import { resolve, join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -201,6 +201,10 @@ function buildCoordinatorAgent() {
         "- End every response with the guardrail below."
     );
     lines.push("");
+    lines.push("## Validation policy (Microsoft Learn MCP — Azure source of truth)");
+    lines.push("");
+    lines.push(MCP_VALIDATION_NOTE);
+    lines.push("");
     lines.push("---");
     lines.push("");
     lines.push(`*${GUARDRAIL}*`);
@@ -308,6 +312,10 @@ function buildSpecialistSkill(prefix) {
         lines.push(s.guidance);
         lines.push("");
     }
+    lines.push("## Validation policy (Microsoft Learn MCP — Azure source of truth)");
+    lines.push("");
+    lines.push(MCP_VALIDATION_NOTE);
+    lines.push("");
     lines.push("## Persona & workflow");
     lines.push("");
     lines.push(

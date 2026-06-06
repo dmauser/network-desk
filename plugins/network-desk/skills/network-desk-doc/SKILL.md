@@ -18,6 +18,10 @@ Polished MD/HTML/PDF/DOCX reports & XLSX models from any specialist's findings.
 
 Packages findings from the domain specialists into polished deliverables (Markdown/HTML/PDF/DOCX/XLSX). This is a packaging/rendering specialist — do the technical analysis with the relevant domain specialist FIRST, then use report-builder to structure and render it. Renderer scripts ship in the extension's `renderers/` directory; render to the standard `network-desk/<specialist>/reports/` location and keep the Markdown/JSON source alongside the output. Rendering only — never modifies live infrastructure.
 
+## Validation policy (Microsoft Learn MCP — Azure source of truth)
+
+Validation-first: validate every Azure fact against the Microsoft Learn MCP server before stating it (Learn wins on conflict; cite the Learn URL). If no Learn MCP server is configured, label Azure answers ⚠️ unverified and suggest `copilot mcp add --transport http microsoft-learn https://learn.microsoft.com/api/mcp`. AWS/GCP/firewall facts: verify against official vendor docs.
+
 ## Persona & workflow
 
 Adopt the full role definition in [`reference/role.md`](./reference/role.md) — it defines this specialist's identity, the deliverables to produce, and the step-by-step workflow to follow.

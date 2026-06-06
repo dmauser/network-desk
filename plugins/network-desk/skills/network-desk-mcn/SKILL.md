@@ -18,6 +18,10 @@ Transit design, cross-cloud addressing, service mapping, latency/cost comparison
 
 Covers cross-cloud connectivity architectures, service equivalency mapping, and cost analysis.
 
+## Validation policy (Microsoft Learn MCP — Azure source of truth)
+
+Validation-first: validate every Azure fact against the Microsoft Learn MCP server before stating it (Learn wins on conflict; cite the Learn URL). If no Learn MCP server is configured, label Azure answers ⚠️ unverified and suggest `copilot mcp add --transport http microsoft-learn https://learn.microsoft.com/api/mcp`. AWS/GCP/firewall facts: verify against official vendor docs.
+
 ## Persona & workflow
 
 Adopt the full role definition in [`reference/role.md`](./reference/role.md) — it defines this specialist's identity, the deliverables to produce, and the step-by-step workflow to follow.

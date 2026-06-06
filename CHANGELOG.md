@@ -10,6 +10,25 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Added
 
+- **Validation-first: Microsoft Learn MCP is now the primary source of truth for Azure.** When a
+  Microsoft Learn MCP server is configured, specialists MUST validate every Azure networking fact
+  (service SKUs/tiers, limits & quotas, regional availability, feature support, pricing dimensions,
+  API/CLI/Bicep/Terraform syntax & versions) against Learn **before** stating it, treat Learn as
+  authoritative (Learn overrides built-in/model knowledge on conflict), and cite the exact Learn
+  URL(s).
+  - **Degraded (unverified) mode:** when no Learn MCP server is reachable, Azure answers are
+    prepended with a ⚠️ "Unverified — Microsoft Learn MCP server not configured" banner, numeric
+    specs/limits are marked *indicative, unverified*, and the response includes the setup command
+    `copilot mcp add --transport http microsoft-learn https://learn.microsoft.com/api/mcp`.
+  - **Tri-cloud scope:** Learn covers Azure/Microsoft only — AWS, GCP, and firewall-vendor facts are
+    validated against official vendor docs and keep the standard analysis-only guardrail.
+  - The policy is centralized in `extensions/network-desk/registry.mjs` (`MCP_VALIDATION_DIRECTIVE`
+    + `MCP_FALLBACK_BANNER` + `MCP_VALIDATION_NOTE`) and surfaced by both the SDK extension
+    (`cn_role`/`cn_skill`/`cn_orchestrate` loads, the session presence note, and the prompt hook on
+    any specialist match) and the generated native plugin (coordinator agent + every specialist
+    `SKILL.md`). Regenerate the plugin via `network-desk plugin build`. Network Desk never edits your
+    MCP configuration — it is a per-user CLI setting you manage yourself.
+
 - **Text/ASCII topology diagrams are now the console default (vnet-architect).** New
   `vnet_skill_ascii_diagram` skill renders network topologies as plain-text/ASCII using
   box-drawing characters — zero rendering setup, works in any terminal, SSH session, or

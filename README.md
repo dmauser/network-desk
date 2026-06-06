@@ -17,6 +17,7 @@
 | 📦 | [Installation](#installation) | 5 ways to install (npx user-level, npx project-level, npm, Copilot prompt, manual) |
 | 🖥️ | [CLI Reference](#cli-reference) | `init`, `status`, `uninstall`, `--version` |
 | ⚙️ | [How It Works](#how-it-works) | Architecture, routing, and workflow |
+| 📚 | [Validation-first: Microsoft Learn MCP](#validation-first-microsoft-learn-mcp) | Authoritative validation of Azure facts |
 | 📝 | [Usage Examples](#usage-examples) | Example prompts for every specialist |
 | 📁 | [Output files](#output-files) | Where generated diagrams, reports, and configs are saved |
 | 📂 | [Repository Structure](#repository-structure) | Full folder tree and conventions |
@@ -348,6 +349,24 @@ You: @network-desk design a hub-spoke VNet with Azure Firewall and
 ```
 
 You never need to call individual tools — just describe what you need after `@network-desk` and the coordinator handles the rest.
+
+## Validation-first: Microsoft Learn MCP
+
+Network Desk treats the **[Microsoft Learn MCP server](https://github.com/MicrosoftDocs/mcp)** as its **primary source of truth for Azure**. When it is configured, specialists validate every Azure networking fact — service SKUs/tiers, limits & quotas, regional availability, feature support, pricing dimensions, and API/CLI/Bicep/Terraform syntax & versions — against current Learn content **before** stating it, treat Learn as authoritative (if Learn contradicts built-in knowledge, **Learn wins**), and cite the exact Learn URL(s). The server exposes `microsoft_docs_search`, `microsoft_docs_fetch`, and `microsoft_code_sample_search` (no account or API key required).
+
+Add the server with either:
+
+```
+copilot mcp add --transport http microsoft-learn https://learn.microsoft.com/api/mcp
+```
+
+- **Interactive wizard:** run `/mcp` inside a Copilot CLI session and follow the prompts (choose the `http` transport and the `https://learn.microsoft.com/api/mcp` URL).
+
+If **no** Learn MCP server is configured, Network Desk still works, but Azure answers run in a clearly-labelled **unverified** mode: the response is prepended with a ⚠️ warning banner, numeric specs and limits are marked *indicative, unverified*, and the setup command above is included. This guarantees you can always tell whether an Azure answer was Learn-validated (with URLs) or produced from built-in knowledge alone.
+
+**Scope:** Microsoft Learn covers Azure/Microsoft only. For **AWS, GCP, and the 14 firewall vendors**, there is no Learn equivalent — Network Desk validates against the official vendor documentation and keeps its standard *"Analysis only — verify against vendor documentation before applying."* guardrail.
+
+This is a **per-user** Copilot CLI setting — it is configured at the CLI level, not by this extension. It is shared across all your sessions and repos, and uninstalling Network Desk does not change it. Network Desk never edits your MCP configuration; you add or remove the server yourself.
 
 ## Usage Examples
 
