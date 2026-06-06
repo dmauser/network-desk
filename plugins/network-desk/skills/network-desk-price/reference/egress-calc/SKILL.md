@@ -2,6 +2,8 @@
 
 Calculate data transfer and egress costs across Azure, AWS, and GCP. Covers internet egress, inter-region, inter-AZ, VNet/VPC peering, and CDN offload savings.
 
+> **Source all rates from a live pricing API before calculating** — Azure via the `retail-prices-api` skill, AWS via the AWS Price List Query API, GCP via the Cloud Billing Catalog API. Do not embed static rates. Any per-GB/per-hour figures shown below are illustrative structure only; replace them with fetched values and cite the query, region/SKU/meter, currency, `effectiveStartDate`, and retrieval timestamp. Flag any number you could not fetch as `INDICATIVE — not fetched from a live pricing API`.
+
 ---
 
 ## Azure Data Transfer Pricing
@@ -204,5 +206,5 @@ Use this template for egress cost estimates:
 5. **NAT Gateway data processing** adds on top of egress — on AWS it is $0.045/GB processed, often overlooked.
 6. **Private endpoints / Private Link** — data processing charges apply (~$0.01/GB on Azure) but avoid internet egress pricing.
 
-Pricing is indicative — verify against current vendor pricing pages before budgeting.
+Rates fetched live from the provider pricing API (Azure Retail Prices / AWS Price List Query / GCP Cloud Billing Catalog) — never hard-coded; cite query, region, SKU/meter, currency, and retrieval date.
 **Analysis only — verify against vendor documentation before applying.**

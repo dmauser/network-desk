@@ -2,6 +2,8 @@
 
 Side-by-side pricing comparison of equivalent networking services across Azure, AWS, and GCP. Includes common workload scenarios, hidden costs, and pricing page references.
 
+> **Source all rates from a live pricing API before calculating** — Azure via the `retail-prices-api` skill, AWS via the AWS Price List Query API, GCP via the Cloud Billing Catalog API. Do not embed static rates. Every cell in the comparison tables below must be a fetched value; replace the placeholders and cite the query, region/SKU/meter, currency, `effectiveStartDate`, and retrieval timestamp. Flag any number you could not fetch as `INDICATIVE — not fetched from a live pricing API`.
+
 ---
 
 ## Service-by-Service Comparison
@@ -172,5 +174,5 @@ Side-by-side pricing comparison of equivalent networking services across Azure, 
 | NAT modeling | Verify per-cloud calculator | Include gateway uptime, data processing, public IP, and egress charges |
 | Cheapest DNS hosting | GCP Cloud DNS ($0.20/zone) | AWS/Azure both $0.50/zone |
 
-Pricing is indicative — verify against current vendor pricing pages before budgeting.
+Rates fetched live from the provider pricing API (Azure Retail Prices / AWS Price List Query / GCP Cloud Billing Catalog) — never hard-coded; cite query, region, SKU/meter, currency, and retrieval date.
 **Analysis only — verify against vendor documentation before applying.**

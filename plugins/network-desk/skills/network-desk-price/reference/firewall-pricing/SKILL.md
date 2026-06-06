@@ -2,6 +2,8 @@
 
 Compare firewall pricing across cloud-native services and third-party NVAs (Network Virtual Appliances). Covers Azure Firewall, AWS Network Firewall, GCP Cloud Armor, and marketplace NVAs.
 
+> **Source all rates from a live pricing API before calculating** — Azure via the `retail-prices-api` skill, AWS via the AWS Price List Query API, GCP via the Cloud Billing Catalog API. Do not embed static rates. Any $/hr or $/GB figures below are illustrative structure only; replace them with fetched values and cite the query, region/SKU/meter, currency, `effectiveStartDate`, and retrieval timestamp. Flag any number you could not fetch as `INDICATIVE — not fetched from a live pricing API`.
+
 ---
 
 ## Azure Firewall Pricing
@@ -166,5 +168,5 @@ Third-party firewalls on cloud marketplaces combine VM compute costs with softwa
 | Multi-cloud consistency | ❌ Different per cloud | ✅ Same vendor everywhere |
 | HA requirements | Built-in | Must design (active/passive, GWLB) |
 
-Pricing is indicative — verify against current vendor pricing pages before budgeting.
+Rates fetched live from the provider pricing API (Azure Retail Prices / AWS Price List Query / GCP Cloud Billing Catalog) — never hard-coded; cite query, region, SKU/meter, currency, and retrieval date.
 **Analysis only — verify against vendor documentation before applying.**

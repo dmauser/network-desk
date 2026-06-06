@@ -29,6 +29,7 @@ Required top-level fields: **`title`**, **`specialist`**, **`sheets`**. Rules:
 - A **formula** goes in `"formula": "=..."` — **never** put a formula string in `"value"` (it would render as text, not compute).
 - **Declare `named_ranges`** for every input that a computed cell depends on, and reference inputs **by name** in formulas. Do **not** point formulas at brittle `A1` coordinates — an off-by-one ref silently ships a wrong number. `named_ranges[].ref` must target a sheet that exists.
 - Put assumptions/inputs on an **`Inputs`** sheet; put results on **`Summary`** / **`Scenarios`**.
+- **Cost models — live rates only:** when the `Inputs` sheet contains cloud pricing rates, those rates MUST be fetched from a live pricing API (Azure → Azure Retail Prices API via the Pricing Analyst's `retail-prices-api` skill; AWS → AWS Price List Query API; GCP → Cloud Billing Catalog API) — never hard-coded or model-recalled. Add a **`Source`** column to the `Inputs` sheet recording, per rate, the `armSkuName`/SKU id, region, `meterName`, currency, and `effectiveStartDate` (or retrieval date). Use a placeholder rate **only** when the API was unreachable, and flag it explicitly (e.g. `INDICATIVE — API unreachable`) in the `Source` column.
 - Only use Excel functions you can verify exist in desktop Excel.
 
 ### Minimal valid example
