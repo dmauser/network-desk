@@ -5,13 +5,13 @@
   },
   "metadata": {
     "description": "Network Desk — cloud networking specialist plugin(s) for Copilot CLI.",
-    "version": "2.1.0"
+    "version": "2.2.0"
   },
   "plugins": [
     {
       "name": "network-desk",
       "description": "Your cloud networking AI team for GitHub Copilot CLI — 11 specialist agents, one install.",
-      "version": "2.1.0",
+      "version": "2.2.0",
       "source": "plugins/network-desk"
     }
   ]

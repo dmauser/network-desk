@@ -10,7 +10,19 @@ This skill governs **structure and quality**. The four renderer skills (`html-re
 
 Author the report as Markdown first — it is the source of truth that every renderer consumes.
 
+Start with an optional **YAML front-matter** block — the DOCX/PDF/HTML renderers turn it
+into a real **cover page** (title, subtitle, colored accent rule, metadata block). Cover
+precedence is **front-matter → CLI flag (`--title`/`--subtitle`/`--classification`/`--version`/`--author`) → first `# H1`**. The `--specialist` value is never used as the title.
+
 ```markdown
+---
+title: <Topic>
+subtitle: <Short descriptor, e.g. "Azure Firewall Rule Audit">
+classification: Confidential
+version: "1.0"
+author: <Author or team>
+---
+
 # <Specialist> — <Topic>
 <!-- e.g. "Firewall Engineering — Azure Firewall Rule Audit" -->
 
@@ -33,6 +45,14 @@ Use a table for anything enumerable (rules, costs, gaps, risks). Rank by severit
 ## Architecture / Topology
 Embed at least one Mermaid diagram for any design or topology. (Use the
 `cn_vnet` `network-diagram` skill to generate it.) Offer Excalidraw/draw.io on request.
+
+The DOCX, PDF, and HTML renderers render ```` ```mermaid ```` fences to an **embedded
+PNG** (centered, with a "Figure N." caption) using the **local Mermaid CLI** (`mmdc`,
+falling back to `npx -y @mermaid-js/mermaid-cli`); the `.mmd`/`.png` are saved under
+`network-desk/<specialist>/diagrams/`. If the CLI is unavailable the diagram is omitted
+gracefully (caption + an appendix listing the source + the install command) — the source
+is never dumped inline and no hosted service is called. Install with
+`npm install -g @mermaid-js/mermaid-cli` to enable embedding.
 
 ## Recommendations
 Numbered, prioritized, each with the concrete next step and the owner/effort.

@@ -8,7 +8,38 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
-## [2.1.0] - 2026-06-05
+## [2.2.0] - 2026-06-07
+
+### Changed
+
+- **Report Builder renderers refactored into professional whitepaper output.** The Word
+  renderer (`make_docx.py`) is no longer a Markdown dump — it now produces a real cover
+  page, true inline formatting, and embedded diagrams, with the PDF/HTML renderers brought
+  to parity.
+  - **New shared helper module `renderers/_common.py`** (dependency-free): HTML-entity
+    decoding, output-path/`diagrams/` resolution, a minimal `key: value` **YAML
+    front-matter** parser (no PyYAML), emoji stripping that **preserves technical arrows**
+    (`->`, `→`), cover-page resolution, and the local-only Mermaid → PNG bridge plus shared
+    cover/figure/appendix HTML builders.
+  - **Cover page** sourced by precedence **front-matter → `--title`/`--subtitle`/
+    `--classification`/`--version`/`--author` flags → first `# H1`** (never `--specialist`):
+    title + subtitle + colored accent rule + Classification/Version/Author/Date metadata.
+  - **Real inline runs everywhere:** `**bold**`, `*italic*`, `` `code` ``, `~~strike~~`,
+    and clickable `[text](url)` hyperlinks render as actual Word runs in paragraphs,
+    headings, list items, blockquotes, and table cells — no literal `**`, backticks, or
+    `[]()` survive. Entities are decoded.
+  - **Mermaid → embedded PNG** via the **local Mermaid CLI only** (`mmdc`, falling back to
+    `npx -y @mermaid-js/mermaid-cli`): centered ~6.3in image with a "Figure N." caption;
+    `.mmd`/`.png` saved under `network-desk/<specialist>/diagrams/`. When the CLI is
+    unavailable it emits "[diagram omitted]", lists the source in an **Appendix: Diagram
+    Sources**, and prints the exact install command — never an inline dump, never a hosted
+    service. HTML/PDF base64-embed the PNG so output stays self-contained.
+  - **Styling:** Calibri theme, navy Title/Heading 1, blue Heading 2/3 + subtitle + accent
+    rule, shaded navy table header rows; real Word styles (Heading 1/2/3, List
+    Bullet/Number, Quote, Table Grid); a TOC field and a footer **live PAGE field** (Word
+    rebuilds both on open via `updateFields`).
+  - DOCX dependencies remain **python-docx + markdown-it-py only**. Updated the
+    `docx-report` and `report-structure` skill docs accordingly.
 
 ### Added
 

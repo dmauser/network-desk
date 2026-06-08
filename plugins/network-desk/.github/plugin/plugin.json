@@ -1,7 +1,7 @@
 {
   "name": "network-desk",
   "description": "Your cloud networking AI team for GitHub Copilot CLI — one coordinator routing to 20 specialist skills across Azure, AWS, GCP and 14 firewall vendors (VNet/VPC design, firewall, load balancing, DNS, Private Link, hybrid, security, troubleshooting, vWAN/SD-WAN, monitoring, multi-cloud, pricing, IaC, containers, CDN, automation, SASE/SSE, capacity, IPv6, reporting).",
-  "version": "2.1.0",
+  "version": "2.2.0",
   "author": {
     "name": "dmauser"
   },
