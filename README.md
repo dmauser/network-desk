@@ -14,8 +14,8 @@
 | 🚀 | [Quick Start](#quick-start) | One-command install |
 | 💡 | [What is Network Desk?](#what-is-network-desk) | Overview and key concepts |
 | 👥 | [The Team](#the-team) | All 20 specialists at a glance |
-| 📦 | [Installation](#installation) | 5 ways to install (npx user-level, npx project-level, npm, Copilot prompt, manual) |
-| 🖥️ | [CLI Reference](#cli-reference) | `init`, `status`, `uninstall`, `--version` |
+| 📦 | [Installation](#installation) | 6 ways to install (npx user-level, npx project-level, npm, Copilot prompt, manual, native plugin) |
+| 🖥️ | [CLI Reference](#cli-reference) | `init`, `plugin build`, `update`, `status`, `uninstall`, `--version` |
 | ⚙️ | [How It Works](#how-it-works) | Architecture, routing, and workflow |
 | 📚 | [Validation-first: per-cloud documentation MCP](#validation-first-per-cloud-documentation-mcp) | Authoritative validation of Azure/AWS/GCP facts |
 | 📝 | [Usage Examples](#usage-examples) | Example prompts for every specialist |
