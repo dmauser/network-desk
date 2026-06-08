@@ -14,8 +14,8 @@
 | 🚀 | [Quick Start](#quick-start) | One-command install |
 | 💡 | [What is Network Desk?](#what-is-network-desk) | Overview and key concepts |
 | 👥 | [The Team](#the-team) | All 20 specialists at a glance |
-| 📦 | [Installation](#installation) | 5 ways to install (npx user-level, npx project-level, npm, Copilot prompt, manual) |
-| 🖥️ | [CLI Reference](#cli-reference) | `init`, `status`, `uninstall`, `--version` |
+| 📦 | [Installation](#installation) | 6 ways to install (npx user-level, npx project-level, npm, Copilot prompt, manual, native plugin) |
+| 🖥️ | [CLI Reference](#cli-reference) | `init`, `plugin build`, `update`, `status`, `uninstall`, `--version` |
 | ⚙️ | [How It Works](#how-it-works) | Architecture, routing, and workflow |
 | 📚 | [Validation-first: per-cloud documentation MCP](#validation-first-per-cloud-documentation-mcp) | Authoritative validation of Azure/AWS/GCP facts |
 | 📝 | [Usage Examples](#usage-examples) | Example prompts for every specialist |
@@ -358,7 +358,7 @@ Network Desk treats an **official documentation MCP server** as its **primary so
 |-------|--------|-------|-----------|
 | **Azure** | [Microsoft Learn MCP](https://github.com/MicrosoftDocs/mcp) | `microsoft_docs_search`, `microsoft_docs_fetch`, `microsoft_code_sample_search` | hosted HTTP (no account/API key) |
 | **AWS** | [AWS Documentation MCP](https://github.com/awslabs/mcp/tree/main/src/aws-documentation-mcp-server) | `search_documentation`, `read_documentation`, `recommend` | local stdio (`uvx`) |
-| **GCP** | *Configurable* `gcp-docs` placeholder | your chosen GCP docs MCP tools | local stdio |
+| **GCP** | [Developer Knowledge MCP](https://developers.google.com/knowledge/mcp) | `search_documents`, `get_documents`, `answer_query` | hosted HTTP (API key or ADC) |
 
 Add the servers with `copilot mcp add` (or run `/mcp` inside a Copilot CLI session and follow the wizard):
 
@@ -369,8 +369,10 @@ copilot mcp add --transport http microsoft-learn https://learn.microsoft.com/api
 # AWS — AWS Documentation MCP (local stdio; requires uv/uvx + Python ≥3.10 — https://docs.astral.sh/uv/)
 copilot mcp add aws-docs --env FASTMCP_LOG_LEVEL=ERROR --env AWS_DOCUMENTATION_PARTITION=aws -- uvx awslabs.aws-documentation-mcp-server@latest
 
-# GCP — placeholder: substitute your chosen GCP docs MCP server command
-copilot mcp add gcp-docs -- <your-gcp-docs-mcp-command>
+# GCP — Google Developer Knowledge MCP (hosted HTTP; needs an API key or ADC).
+#   Pass the key in the X-goog-api-key header (NOT Authorization: Bearer, NOT ?key=).
+copilot mcp add --transport http gcp-docs https://developerknowledge.googleapis.com/mcp --header "X-goog-api-key: YOUR_API_KEY"
+#   Prefer the /mcp wizard or JSON config? See "Configuring the GCP documentation MCP" below.
 ```
 
 If a cloud's docs MCP is **not** configured, Network Desk still works, but that cloud's answers run in a clearly-labelled **unverified** mode: the response is prepended with a ⚠️ warning banner, numeric specs and limits are marked *indicative, unverified*, and the matching setup command above is included. This guarantees you can always tell whether an answer was docs-MCP-validated (with URLs) or produced from built-in knowledge alone.
@@ -378,6 +380,14 @@ If a cloud's docs MCP is **not** configured, Network Desk still works, but that 
 **Scope:** Each docs MCP covers its own cloud only. For the **14 firewall vendors**, there is no docs MCP — Network Desk validates against the official vendor documentation and keeps its standard *"Analysis only — verify against vendor documentation before applying."* guardrail.
 
 This is a **per-user** Copilot CLI setting — it is configured at the CLI level, not by this extension. It is shared across all your sessions and repos, and uninstalling Network Desk does not change it. Network Desk never edits your MCP configuration; you add or remove the server yourself.
+
+### Configuring the GCP documentation MCP (Developer Knowledge MCP)
+
+GCP's docs MCP (Google's [Developer Knowledge MCP](https://developers.google.com/knowledge/mcp), `developerknowledge.googleapis.com`) requires an auth header, so it is registered via the `/mcp` wizard or a JSON config block rather than a one-line `copilot mcp add`. Register it under the **exact name `gcp-docs`** (the identifier Network Desk looks for); until it is present, GCP answers run in ⚠️ **unverified** mode.
+
+> ⚠️ **Auth gotcha:** the API key goes in the **`X-goog-api-key`** request header — **not** `Authorization: Bearer` and **not** a `?key=` query param. A `401 "missing OAuth2 credential"` means the wrong scheme.
+
+**See the full guide:** [Configuring the GCP documentation MCP →](docs/gcp-docs-mcp-setup.md) — API enablement, API-key vs. OAuth/ADC auth, JSON config, and verification steps.
 
 ## Usage Examples
 
