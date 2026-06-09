@@ -8,6 +8,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Changed
+
+- **`PRIVACY.md` updated for the per-cloud documentation MCP integration.** Clarified that the
+  MCP validation policy is **directive-only** — Network Desk recommends docs MCP servers but
+  does **not** install, configure, call, or store credentials for any of them. Added a new
+  **"Documentation MCP servers (optional)"** section (opt-in, Copilot-CLI-host-initiated,
+  governed by each provider's terms: Microsoft Learn / AWS `aws-docs` / your `gcp-docs`),
+  softened the "No API keys" bullet to clarify the GCP docs MCP may need your own
+  CLI-managed API key, cross-referenced it from "What leaves your machine", and bumped the
+  "Last updated" date. No change to the extension's runtime behavior.
+
 ## [2.2.0] - 2026-06-07
 
 ### Changed

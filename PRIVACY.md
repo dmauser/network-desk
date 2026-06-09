@@ -1,6 +1,6 @@
 # Privacy
 
-_Last updated: 2026-05-28 · Applies to: `@dmauser/network-desk` (the **Network Desk** Copilot CLI extension)_
+_Last updated: 2026-06-09 · Applies to: `@dmauser/network-desk` (the **Network Desk** Copilot CLI extension)_
 
 ## Summary (TL;DR)
 
@@ -40,12 +40,19 @@ As with **any** HTTPS request, GitHub (the host of `raw.githubusercontent.com`) 
 receives the network-level metadata inherent to the connection, such as your IP address. The
 extension itself adds **no** identifying information beyond the static user-agent above.
 
+> **Note:** This is the only request the **extension** makes. Separately, if you opt in to a
+> documentation MCP server, the **Copilot CLI host** (not the extension) may send doc-search
+> queries to that provider — see [Documentation MCP servers](#documentation-mcp-servers-optional).
+
 ## What the extension does NOT do
 
 - ❌ No telemetry, analytics, or usage tracking.
 - ❌ No transmission of your prompts, conversation, code, or generated files.
 - ❌ No collection or sale of personal data.
-- ❌ No accounts, no API keys, no credentials required or stored by the extension.
+- ❌ No accounts, no API keys, no credentials required or stored **by the extension**. (A
+  documentation MCP server you optionally configure may need its own credentials — for
+  example the GCP docs MCP uses a GCP API key — but those are configured and stored by the
+  Copilot CLI, not by this extension. See [Documentation MCP servers](#documentation-mcp-servers-optional).)
 - ❌ No external runtime dependencies — the extension uses only the GitHub Copilot SDK and
   Node.js built-in modules, which keeps the supply-chain surface minimal.
 - ❌ No changes to your cloud infrastructure. All tools are read-only and deliver analysis
@@ -62,6 +69,31 @@ These files stay on your machine and are **never transmitted**:
 - **Generated artifacts** you ask a specialist to produce (diagrams, reports, configs) are
   written only inside your current working directory, under
   `network-desk/<specialist>/{diagrams,reports,configs}/`, and only when you request them.
+
+## Documentation MCP servers (optional)
+
+To improve accuracy, Network Desk follows a **validation-first** policy: its specialists are
+instructed to verify cloud facts (specs, limits, SKUs, regional availability) against each
+cloud's **official documentation MCP server** before answering. This is **directive-only** —
+the extension emits guidance text recommending these servers; it does **not** install,
+configure, or call any MCP server itself, and it never edits your MCP configuration.
+
+- **Configuration is yours and opt-in.** Nothing happens unless **you** add a server with the
+  Copilot CLI (`copilot mcp add …`). The extension only suggests the command.
+- **Who sends the request.** When a configured docs MCP server is queried, it is the
+  **Copilot CLI host** — not this extension — that sends the request. Such a query may include
+  the relevant search terms from your prompt so the server can return matching documentation.
+- **Where it goes & whose terms apply.** Each server is operated by its respective provider and
+  governed by that provider's terms:
+  - **Azure** — Microsoft Learn MCP (`microsoft-learn`, hosted HTTP at `learn.microsoft.com`)
+  - **AWS** — AWS Documentation MCP (`aws-docs`, run **locally** via `uvx`)
+  - **GCP** — a docs MCP server **you** choose (`gcp-docs`); some options (e.g. Google's
+    Developer Knowledge API) require **your own GCP API key**, supplied through the CLI.
+- **No extension involvement in credentials.** Any API key or credential a docs MCP server
+  needs is configured and stored by the Copilot CLI, not by Network Desk.
+
+If a cloud's docs MCP server is **not** configured, the extension does not send anything extra
+— it simply labels affected answers as unverified.
 
 ## Controls and opt-out
 
