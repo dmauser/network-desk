@@ -1,6 +1,6 @@
 {
   "name": "@dmauser/network-desk",
-  "version": "2.2.0",
+  "version": "2.2.1",
   "description": "Your cloud networking AI team for GitHub Copilot CLI — 11 specialist agents, one install.",
   "type": "module",
   "bin": {
