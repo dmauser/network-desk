@@ -26,26 +26,215 @@
     "./agents"
   ],
   "skills": [
-    "./skills/network-desk-capabilities",
-    "./skills/network-desk-vnet",
-    "./skills/network-desk-fw",
-    "./skills/network-desk-lb",
-    "./skills/network-desk-dns",
-    "./skills/network-desk-pl",
-    "./skills/network-desk-hyb",
-    "./skills/network-desk-nsec",
-    "./skills/network-desk-ntsh",
-    "./skills/network-desk-vwan",
-    "./skills/network-desk-nmon",
-    "./skills/network-desk-mcn",
-    "./skills/network-desk-price",
-    "./skills/network-desk-iac",
-    "./skills/network-desk-cnet",
-    "./skills/network-desk-cdn",
-    "./skills/network-desk-nauto",
-    "./skills/network-desk-sase",
-    "./skills/network-desk-ncap",
-    "./skills/network-desk-ipv6",
-    "./skills/network-desk-doc"
+    {
+      "name": "network-desk-capabilities",
+      "path": "skills/network-desk-capabilities/SKILL.md",
+      "description": "🧭 Network Desk Capabilities — overview and index of all 20 cloud-networking specialists (with emoji icons) plus example prompts. Load this whenever the user asks what Network Desk can do, its capabilities, the list of specialists/skills, or for examples of how to use the plugin.",
+      "tools": [
+        "RunAzCliReadCommands",
+        "GetAzCliHelp",
+        "ExecutePythonCode"
+      ]
+    },
+    {
+      "name": "network-desk-cdn",
+      "path": "skills/network-desk-cdn/SKILL.md",
+      "description": "🌐 CDN & Edge Networking — CDN & Edge Networking. Front Door/CloudFront/Cloud CDN, edge routing, caching, edge WAF. Use for: CDN, content, delivery, Front, Door, CloudFront, Cloud, edge, routing, compute, cache, optim, strateg, key.",
+      "tools": [
+        "RunAzCliReadCommands",
+        "GetAzCliHelp",
+        "ExecutePythonCode"
+      ]
+    },
+    {
+      "name": "network-desk-cnet",
+      "path": "skills/network-desk-cnet/SKILL.md",
+      "description": "🐳 Container Networking — Container Networking. CNI selection, network policy, service mesh, ingress, multi-cluster (AKS/EKS/GKE). Use for: CNI, container, kubernetes, k8s, polic, ies, service, mesh, istio, linkerd, cilium, calico, ingress, controller.",
+      "tools": [
+        "RunAzCliReadCommands",
+        "GetAzCliHelp",
+        "ExecutePythonCode"
+      ]
+    },
+    {
+      "name": "network-desk-dns",
+      "path": "skills/network-desk-dns/SKILL.md",
+      "description": "🌐 DNS Specialist — DNS. Zone/resolver design, DNSSEC, record audits, migrations, resolution debugging. Use for: DNS, domain, name, resolution, Route, Cloud, Private, zone, resolver, forward, record, migration, split, horizon.",
+      "tools": [
+        "RunAzCliReadCommands",
+        "GetAzCliHelp",
+        "ExecutePythonCode"
+      ]
+    },
+    {
+      "name": "network-desk-doc",
+      "path": "skills/network-desk-doc/SKILL.md",
+      "description": "📄 Report Builder — Documentation & Reporting. Use ONLY to package cloud-networking findings produced by Network Desk specialists into polished deliverables (Markdown/HTML/PDF/DOCX/XLSX). Do the networking analysis with a domain specialist first, then use this to render it. Polished MD/HTML/PDF/DOCX reports & XLSX models from any specialist's findings.",
+      "tools": [
+        "RunAzCliReadCommands",
+        "GetAzCliHelp",
+        "ExecutePythonCode"
+      ]
+    },
+    {
+      "name": "network-desk-fw",
+      "path": "skills/network-desk-fw/SKILL.md",
+      "description": "🔥 Firewall Engineer — Firewall Engineering. Rule audits, policy design/test, vendor migration, config gen, HA, log analysis (14 vendors). Use for: firewall, rule, policy, PAN, FortiGate, FortiOS, Check, Point, CloudGuard, ASA, FTD, Firepower, SRX, Zscaler.",
+      "tools": [
+        "RunAzCliReadCommands",
+        "GetAzCliHelp",
+        "ExecutePythonCode"
+      ]
+    },
+    {
+      "name": "network-desk-hyb",
+      "path": "skills/network-desk-hyb/SKILL.md",
+      "description": "🔗 Hybrid Connectivity — Hybrid Connectivity. VPN, ExpressRoute/Direct Connect, BGP, bandwidth, failover/redundancy. Use for: ExpressRoute, Direct, Connect, Cloud, Interconnect, S2S, VPN, P2S, site, point, gateway, IPsec, IKEv, BGP.",
+      "tools": [
+        "RunAzCliReadCommands",
+        "GetAzCliHelp",
+        "ExecutePythonCode"
+      ]
+    },
+    {
+      "name": "network-desk-iac",
+      "path": "skills/network-desk-iac/SKILL.md",
+      "description": "📐 IaC Generator — IaC Generator. Bicep, Terraform, Ansible, ARM for networking resources. Use for: bicep, terraform, arm, template, ansible, infra, structure, code, IaC, generate, deployment, deploy, ing.",
+      "tools": [
+        "RunAzCliReadCommands",
+        "GetAzCliHelp",
+        "ExecutePythonCode"
+      ]
+    },
+    {
+      "name": "network-desk-ipv6",
+      "path": "skills/network-desk-ipv6/SKILL.md",
+      "description": "🔢 IPv6 Migration — IPv6 Migration. Dual-stack design, transition planning, addressing, NAT64/DNS64, troubleshooting. Use for: IPv6, dual, stack, NAT64, DNS64, XLAT, migrat, transition, address, compat, SLAAC, GUA, ULA, link.",
+      "tools": [
+        "RunAzCliReadCommands",
+        "GetAzCliHelp",
+        "ExecutePythonCode"
+      ]
+    },
+    {
+      "name": "network-desk-lb",
+      "path": "skills/network-desk-lb/SKILL.md",
+      "description": "⚖️ Load Balancer — Load Balancing. L4/L7 selection, health probes, TLS offload/certs, WAF rules, routing, troubleshooting. Use for: load, balanc, ALB, NLB, GLB, App, lication, Gateway, Front, Door, Traffic, Manager, health, probe.",
+      "tools": [
+        "RunAzCliReadCommands",
+        "GetAzCliHelp",
+        "ExecutePythonCode"
+      ]
+    },
+    {
+      "name": "network-desk-mcn",
+      "path": "skills/network-desk-mcn/SKILL.md",
+      "description": "☁️ Multi-Cloud Networking — Multi-Cloud Networking. Transit design, cross-cloud addressing, service mapping, latency/cost comparison. Use for: multi, cloud, connect, transit, cross, architecture, interconnect, service, mapping, across, between.",
+      "tools": [
+        "RunAzCliReadCommands",
+        "GetAzCliHelp",
+        "ExecutePythonCode"
+      ]
+    },
+    {
+      "name": "network-desk-nauto",
+      "path": "skills/network-desk-nauto/SKILL.md",
+      "description": "🔄 Network Automation & GitOps — Network Automation & GitOps. CI/CD pipelines, drift detection, policy-as-code, testing, rollback. Use for: automat, GitOps, pipeline, drift, detect, policy, code, testing, rollback, terraform, automation, bicep.",
+      "tools": [
+        "RunAzCliReadCommands",
+        "GetAzCliHelp",
+        "ExecutePythonCode"
+      ]
+    },
+    {
+      "name": "network-desk-ncap",
+      "path": "skills/network-desk-ncap/SKILL.md",
+      "description": "📏 Network Capacity Planning — Network Capacity Planning. Bandwidth forecasting, gateway sizing, throughput, scalability, growth. Use for: capacity, plan, bandwidth, forecast, gateway, siz, ing, throughput, calc, scalab, growth, model, limit, subscription.",
+      "tools": [
+        "RunAzCliReadCommands",
+        "GetAzCliHelp",
+        "ExecutePythonCode"
+      ]
+    },
+    {
+      "name": "network-desk-nmon",
+      "path": "skills/network-desk-nmon/SKILL.md",
+      "description": "📊 Network Monitor — Network Monitoring. Flow logs, traffic analytics, connection/synthetic monitors, alerts, dashboards. Use for: monitor, Connection, Monitor, traffic, analytics, flow, log, alert, dashboard, baseline, observ, NSG, VPC, metric.",
+      "tools": [
+        "RunAzCliReadCommands",
+        "GetAzCliHelp",
+        "ExecutePythonCode"
+      ]
+    },
+    {
+      "name": "network-desk-nsec",
+      "path": "skills/network-desk-nsec/SKILL.md",
+      "description": "🛡️ Network Security — Network Security. NSG/SG audits, segmentation, Zero Trust, WAF, DDoS, compliance (CIS/NIST/PCI). Use for: NSG, security, group, ASG, DDoS, micro, segment, zero, trust, flow, log, secur, compliance, CIS.",
+      "tools": [
+        "RunAzCliReadCommands",
+        "GetAzCliHelp",
+        "ExecutePythonCode"
+      ]
+    },
+    {
+      "name": "network-desk-ntsh",
+      "path": "skills/network-desk-ntsh/SKILL.md",
+      "description": "🔧 Network Troubleshooter — Network Troubleshooting. Connectivity tests, packet capture, PCAP analysis, latency, routing, NAT, MTU, TLS. Use for: troubleshoot, packet, capture, traceroute, Watcher, flow, verify, connection, latency, spike, routing, table, debug, MTU.",
+      "tools": [
+        "RunAzCliReadCommands",
+        "GetAzCliHelp",
+        "ExecutePythonCode"
+      ]
+    },
+    {
+      "name": "network-desk-pl",
+      "path": "skills/network-desk-pl/SKILL.md",
+      "description": "🔒 Private Link Engineer — Private Link / Endpoints. Endpoint design, private DNS integration, service exposure, security review. Use for: Private, Link, Endpoint, Service, Connect, PSC, service, endpoint, subnet, DNS, PrivateLink.",
+      "tools": [
+        "RunAzCliReadCommands",
+        "GetAzCliHelp",
+        "ExecutePythonCode"
+      ]
+    },
+    {
+      "name": "network-desk-price",
+      "path": "skills/network-desk-price/SKILL.md",
+      "description": "💰 Pricing Analyst — Network Pricing. Egress/VPN/circuit/LB/firewall pricing, cross-cloud cost compare & optimization. Use for: pric, ing, retail, price, list, per, hourly, rate, egress, cost, estimat, compar, analy, optim.",
+      "tools": [
+        "RunAzCliReadCommands",
+        "GetAzCliHelp",
+        "ExecutePythonCode"
+      ]
+    },
+    {
+      "name": "network-desk-sase",
+      "path": "skills/network-desk-sase/SKILL.md",
+      "description": "🛡️ SASE / SSE — SASE / SSE. SASE architecture, ZTNA, SWG/CASB, SD-WAN integration, vendor comparison. Use for: SASE, SSE, zero, trust, ZTNA, secure, web, gateway, SWG, CASB, cloud, access, security, FWaaS.",
+      "tools": [
+        "RunAzCliReadCommands",
+        "GetAzCliHelp",
+        "ExecutePythonCode"
+      ]
+    },
+    {
+      "name": "network-desk-vnet",
+      "path": "skills/network-desk-vnet/SKILL.md",
+      "description": "🏗️ VNet/Subnet Architect — VNet/Subnet Architecture. CIDR/IP planning, hub-spoke, peering, subnet math, topology diagrams (ASCII console default; Mermaid/Excalidraw/draw.io on request). Use for: VNet, VPC, virtual, subnet, address, space, plan, CIDR, hub, spoke, peering, topology, diagram.",
+      "tools": [
+        "RunAzCliReadCommands",
+        "GetAzCliHelp",
+        "ExecutePythonCode"
+      ]
+    },
+    {
+      "name": "network-desk-vwan",
+      "path": "skills/network-desk-vwan/SKILL.md",
+      "description": "🌍 Virtual WAN / SD-WAN — Virtual WAN / SD-WAN. vWAN/secured-hub design, routing intent, NVA, branch connectivity. Use for: Virtual, WAN, vWAN, VWAN, routing, intent, secured, hub, inter.",
+      "tools": [
+        "RunAzCliReadCommands",
+        "GetAzCliHelp",
+        "ExecutePythonCode"
+      ]
+    }
   ]
 }
