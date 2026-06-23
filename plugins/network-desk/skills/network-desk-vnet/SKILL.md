@@ -36,7 +36,7 @@ Each sub-skill below has a deep reference document under `reference/`. Read the 
 - **[subnet-calculator](./reference/subnet-calculator/SKILL.md)** — Subnet math — CIDR splits, available IPs, reserved addresses per cloud provider.
 - **[ascii-diagram](./reference/ascii-diagram/SKILL.md)** — Console-default text/ASCII topology diagrams using box-drawing characters. Zero rendering setup; works in any terminal. Use for every topology shown inline.
 - **[network-diagram](./reference/network-diagram/SKILL.md)** — Generate Mermaid network topology diagrams from infrastructure descriptions. Opt-in richer format; always prefers official cloud-provider icons.
-- **[excalidraw-diagram](./reference/excalidraw-diagram/SKILL.md)** — Generate Excalidraw (.excalidraw JSON) network topology diagrams. Prefers official Azure/AWS/GCP icon libraries from libraries.excalidraw.com.
+- **[excalidraw-diagram](./reference/excalidraw-diagram/SKILL.md)** — Generate crisp, technical Excalidraw (.excalidraw JSON) network topology scenes — no sketchy/hand-drawn defaults. Enforces roughness 0, Helvetica, solid fills, null arrow bindings, 10px-grid layout, and a fixed Azure/Gateway/Warning/Neutral palette. Prefers official Azure/AWS/GCP icon libraries from libraries.excalidraw.com.
 - **[drawio-diagram](./reference/drawio-diagram/SKILL.md)** — Generate draw.io (.drawio XML) network topology diagrams. Prefers native cloud-provider stencils (mxgraph.azure2, mxgraph.aws4, mxgraph.gcp2).
 - **[migration-planner](./reference/migration-planner/SKILL.md)** — Plan network migrations — on-prem to cloud, cloud-to-cloud address space.
 
