@@ -25,7 +25,7 @@ export const REGISTRY = {
             "subnet-calculator": "Subnet math — CIDR splits, available IPs, reserved addresses per cloud provider.",
             "ascii-diagram": "Console-default text/ASCII topology diagrams using box-drawing characters. Zero rendering setup; works in any terminal. Use for every topology shown inline.",
             "network-diagram": "Generate Mermaid network topology diagrams from infrastructure descriptions. Opt-in richer format; always prefers official cloud-provider icons.",
-            "excalidraw-diagram": "Generate Excalidraw (.excalidraw JSON) network topology diagrams. Prefers official Azure/AWS/GCP icon libraries from libraries.excalidraw.com.",
+            "excalidraw-diagram": "Generate crisp, technical Excalidraw (.excalidraw JSON) network topology scenes — no sketchy/hand-drawn defaults. Enforces roughness 0, Helvetica, solid fills, null arrow bindings, 10px-grid layout, and a fixed Azure/Gateway/Warning/Neutral palette. Prefers official Azure/AWS/GCP icon libraries from libraries.excalidraw.com.",
             "drawio-diagram": "Generate draw.io (.drawio XML) network topology diagrams. Prefers native cloud-provider stencils (mxgraph.azure2, mxgraph.aws4, mxgraph.gcp2).",
             "migration-planner": "Plan network migrations — on-prem to cloud, cloud-to-cloud address space.",
         },
