@@ -13,6 +13,12 @@
       "description": "Your cloud networking AI team for GitHub Copilot CLI — 11 specialist agents, one install.",
       "version": "2.3.0",
       "source": "plugins/network-desk"
+    },
+    {
+      "name": "netops",
+      "description": "Read-only Azure network operations for Azure SRE Agent (powered by Network Desk): hybrid/BGP health, private endpoint DNS, routing, NSG/firewall audit, exposure, SNAT, IP capacity, and flow insights, with managed-scope enforcement, an investigator agent, and scheduled tasks.",
+      "version": "0.1.0",
+      "source": "./plugins/netops"
     }
   ]
 }

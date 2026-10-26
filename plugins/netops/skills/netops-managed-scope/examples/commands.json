@@ -1,0 +1,7 @@
+[
+  "az network vnet-gateway list-bgp-peer-status -g rg-netops-hub -n vpngw-hub",
+  "az network nic show-effective-route-table -g rg-netops-spoke1 -n vm1-nic",
+  "az graph query -q \"Resources | where type =~ 'microsoft.network/privateendpoints' | project id, properties\"",
+  "az network route-table route create -g rg-netops-spoke1 --route-table-name rt -n r1",
+  "az rest --method put --url /subscriptions/x/resourceGroups/r/providers/Microsoft.Network/networkSecurityGroups/n?api-version=2024-05-01"
+]

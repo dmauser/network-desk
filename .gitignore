@@ -14,3 +14,7 @@ out/
 # Python bytecode
 __pycache__/
 *.pyc
+
+# NetOps local engine data
+.pytest_cache/
+tmp/netops-data/

@@ -1,0 +1,5 @@
+[
+  {"id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-hub/providers/Microsoft.Network/virtualNetworkGateways/vpngw-hub", "type": "microsoft.network/virtualnetworkgateways"},
+  {"id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-spoke1/providers/Microsoft.Network/virtualNetworks/vnet-spoke1", "type": "microsoft.network/virtualnetworks"},
+  {"id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-other/providers/Microsoft.Network/virtualNetworks/vnet-other", "type": "microsoft.network/virtualnetworks"}
+]

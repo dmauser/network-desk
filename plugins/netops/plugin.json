@@ -1,0 +1,9 @@
+{
+  "name": "netops",
+  "version": "0.1.0",
+  "description": "NetOps — Network Operations for Azure SRE Agent (powered by Network Desk). Read-only Azure network operations pack: ten skills (managed-scope enforcement, deterministic Live Report rendering, hybrid VPN/ExpressRoute/BGP health, private endpoint + DNS validation, routing/asymmetry analysis, NSG/Azure Firewall audit, exposure scan, SNAT/egress health, IP/gateway capacity forecast, flow-log insights), plus an installer that adds the netops-investigator agent and scheduled tasks (a plugin install alone imports only the skills). Remediation is emitted as scripts for a human to review and run; the agent executes no Azure writes and needs no write RBAC.",
+  "license": "MIT",
+  "skills": [
+    "skills/"
+  ]
+}

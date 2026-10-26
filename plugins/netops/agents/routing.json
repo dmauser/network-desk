@@ -1,0 +1,201 @@
+{
+  "_generated": "scripts/netops/build-netops.mjs from scripts/netops/netops-map.mjs — do not edit",
+  "plugin": "netops",
+  "version": "0.1.0",
+  "flags": "i",
+  "fallbackSkill": "netops-routing-analyzer",
+  "skills": [
+    {
+      "skill": "netops-hybrid-health",
+      "title": "Hybrid connectivity health (VPN / ExpressRoute / BGP)",
+      "order": 0,
+      "specialists": [
+        "cn_hyb"
+      ],
+      "symptoms": [
+        "\\bVPN\\b",
+        "express\\s?route",
+        "\\bER\\s+(circuit|gateway|connection)",
+        "\\bBGP\\b",
+        "\\btunnel",
+        "\\bIPsec\\b",
+        "\\bIKE(v1|v2)?\\b",
+        "on[-\\s]?prem",
+        "\\bbranch\\b",
+        "site[-\\s]to[-\\s]site",
+        "\\bS2S\\b",
+        "learned\\s+routes?",
+        "advertised\\s+routes?",
+        "\\bflap",
+        "\\bMSEE\\b",
+        "hybrid\\s+connectivity",
+        "gateway\\s+(disconnected|down)"
+      ]
+    },
+    {
+      "skill": "netops-private-endpoint-dns",
+      "title": "Private endpoint + private DNS validation",
+      "order": 1,
+      "specialists": [
+        "cn_pl",
+        "cn_dns"
+      ],
+      "symptoms": [
+        "private\\s+endpoint",
+        "private\\s?link",
+        "privatelink\\.",
+        "private\\s+DNS",
+        "DNS\\s+(resolution|resolves?|lookup)",
+        "\\bNXDOMAIN\\b",
+        "resolv(es|ing)\\s+to\\s+(a\\s+)?public",
+        "\\bnslookup\\b",
+        "\\bdig\\b",
+        "zone\\s+(group|link)",
+        "virtual\\s+network\\s+link",
+        "DNS\\s+(private\\s+)?resolver",
+        "conditional\\s+forward",
+        "PaaS\\s+(service\\s+)?(is\\s+)?unreachable"
+      ]
+    },
+    {
+      "skill": "netops-routing-analyzer",
+      "title": "Effective routes, UDRs, and asymmetric routing",
+      "order": 2,
+      "specialists": [
+        "cn_ntsh",
+        "cn_vnet"
+      ],
+      "symptoms": [
+        "\\bUDR",
+        "route\\s+table",
+        "effective\\s+routes?",
+        "next[-\\s]?hop",
+        "black[-\\s]?hol",
+        "asymmetr",
+        "\\bNVA\\b",
+        "network\\s+virtual\\s+appliance",
+        "return\\s+path",
+        "forced\\s+tunnel",
+        "0\\.0\\.0\\.0/0",
+        "\\bpeering\\b",
+        "hub[-\\s]?spoke",
+        "spoke[-\\s]to[-\\s]spoke",
+        "transit",
+        "routing\\s+loop"
+      ]
+    },
+    {
+      "skill": "netops-nsg-firewall-audit",
+      "title": "NSG and Azure Firewall rule audit",
+      "order": 3,
+      "specialists": [
+        "cn_nsec",
+        "cn_fw"
+      ],
+      "symptoms": [
+        "\\bNSGs?\\b",
+        "network\\s+security\\s+group",
+        "security\\s+rules?",
+        "firewall\\s+(rule|policy|polic)",
+        "azure\\s+firewall",
+        "deny\\s+rule",
+        "shadow(ed)?\\s+rule",
+        "overly\\s+(broad|permissive)",
+        "any[-\\s]?any",
+        "rule\\s+audit",
+        "blocked\\s+by\\s+(the\\s+)?(NSG|firewall)",
+        "denied\\s+by"
+      ]
+    },
+    {
+      "skill": "netops-exposure-scan",
+      "title": "Internet exposure scan",
+      "order": 4,
+      "specialists": [
+        "cn_nsec"
+      ],
+      "symptoms": [
+        "public\\s+IPs?",
+        "internet[-\\s](exposed|facing|exposure)",
+        "\\bexposure\\b",
+        "open\\s+to\\s+(the\\s+)?internet",
+        "public\\s?network\\s?access",
+        "attack\\s+surface",
+        "\\bWAF\\b",
+        "\\bDDoS\\b",
+        "(RDP|SSH)\\s+(open|exposed)",
+        "\\b(3389|22)\\s+(open|exposed)"
+      ]
+    },
+    {
+      "skill": "netops-snat-egress",
+      "title": "SNAT port exhaustion and egress health",
+      "order": 5,
+      "specialists": [
+        "cn_ntsh",
+        "cn_nmon",
+        "cn_lb"
+      ],
+      "symptoms": [
+        "\\bSNAT\\b",
+        "port\\s+exhaustion",
+        "\\boutbound\\b",
+        "\\begress\\b",
+        "NAT\\s+gateway",
+        "\\blatency\\b",
+        "packet\\s+(drop|loss)",
+        "dropped\\s+packets",
+        "time[-\\s]?outs?",
+        "intermittent",
+        "connection\\s+(failures?|resets?)",
+        "TCP\\s+reset"
+      ]
+    },
+    {
+      "skill": "netops-ip-capacity",
+      "title": "Subnet IP and gateway capacity forecast",
+      "order": 6,
+      "specialists": [
+        "cn_ncap",
+        "cn_vnet"
+      ],
+      "symptoms": [
+        "IP\\s+(address\\s+)?exhaust",
+        "address\\s+space",
+        "subnet\\s+(is\\s+)?full",
+        "available\\s+IPs?",
+        "out\\s+of\\s+(IP|addresses)",
+        "\\bcapacity\\b",
+        "\\bforecast",
+        "gateway\\s+(throughput|capacity|sku)",
+        "scale[-\\s]?out",
+        "\\bheadroom\\b"
+      ]
+    },
+    {
+      "skill": "netops-flow-insights",
+      "title": "VNet/NSG flow logs and Traffic Analytics",
+      "order": 7,
+      "specialists": [
+        "cn_nmon",
+        "cn_nsec"
+      ],
+      "symptoms": [
+        "flow\\s+logs?",
+        "traffic\\s+analytics",
+        "top\\s+talkers?",
+        "denied\\s+flows?",
+        "\\bNTA[A-Za-z]+",
+        "traffic\\s+pattern",
+        "bandwidth\\s+usage",
+        "telemetry\\s+gap",
+        "missing\\s+(logs|telemetry)",
+        "who\\s+is\\s+talking"
+      ]
+    }
+  ],
+  "utilitySkills": [
+    "netops-managed-scope",
+    "netops-report-renderer"
+  ]
+}

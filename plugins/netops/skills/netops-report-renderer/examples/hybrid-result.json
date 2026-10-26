@@ -1,0 +1,17 @@
+{
+  "skill": "netops-hybrid-health",
+  "findings": [
+    {
+      "id": "HYB-BGP-NOT-CONNECTED:vpngw-hub:10.100.0.4",
+      "severity": "critical",
+      "resource_id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-hub/providers/Microsoft.Network/virtualNetworkGateways/vpngw-hub",
+      "title": "BGP peer 10.100.0.4 is not Connected",
+      "evidence": {"state": "Connecting", "routesReceived": 0},
+      "recommendation": "Check the on-premises BGP speaker, ASN and the VPN connection state.",
+      "remediation_script": "# Human review required. Read-only verification:\naz network vnet-gateway list-bgp-peer-status -g rg-netops-hub -n vpngw-hub -o table",
+      "citations": ["https://learn.microsoft.com/azure/vpn-gateway/bgp-diagnostics"]
+    }
+  ],
+  "evidence_gaps": [],
+  "kpis": {"tunnels_connected_pct": 50.0, "bgp_peers_connected_pct": 0.0}
+}
