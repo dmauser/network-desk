@@ -1,0 +1,80 @@
+{
+  "id": "SC-02",
+  "title": "IKE blocked by on-prem outside NSG",
+  "source": "https://github.com/dmauser/azure-sre-netops",
+  "injected_fault": "NSG rule sc02-block-ike (priority 100) denies UDP 500/4500 on the on-prem outside subnet; the tunnel drops at the next rekey.",
+  "symptom": "On-prem cannot reach Azure after a change window: IKE negotiation times out and the VPN tunnel will not come back up.",
+  "expected_skill": "netops-hybrid-health",
+  "followup_skills": [
+    "netops-nsg-firewall-audit"
+  ],
+  "input": {
+    "managed_scopes": [
+      "/subscriptions/00000000-0000-0000-0000-000000000001"
+    ],
+    "gateways": [
+      {
+        "id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-hub/providers/Microsoft.Network/virtualNetworkGateways/vpngw-hub",
+        "name": "vpngw-hub",
+        "properties": {
+          "gatewayType": "Vpn",
+          "enableBgp": true
+        }
+      }
+    ],
+    "connections": [
+      {
+        "id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-hub/providers/Microsoft.Network/connections/cn-hub-to-onprem",
+        "name": "cn-hub-to-onprem",
+        "properties": {
+          "connectionType": "IPsec",
+          "connectionStatus": "NotConnected",
+          "virtualNetworkGateway1": {
+            "id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-hub/providers/Microsoft.Network/virtualNetworkGateways/vpngw-hub"
+          },
+          "egressBytesTransferred": 0,
+          "ingressBytesTransferred": 0
+        }
+      }
+    ],
+    "bgp_peers": [
+      {
+        "gateway_id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-hub/providers/Microsoft.Network/virtualNetworkGateways/vpngw-hub",
+        "value": [
+          {
+            "neighbor": "10.100.0.4",
+            "state": "Connecting",
+            "asn": 65010,
+            "routesReceived": 0
+          }
+        ]
+      }
+    ],
+    "tunnel_events": [
+      {
+        "OperationName": "TunnelConnected",
+        "remoteIP_s": "20.50.0.10",
+        "instance_s": "GatewayTenantWorker_IN_0",
+        "TimeGenerated": "2025-01-14T06:00:00Z",
+        "ResourceId": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-hub/providers/Microsoft.Network/virtualNetworkGateways/vpngw-hub"
+      },
+      {
+        "OperationName": "TunnelDisconnected",
+        "remoteIP_s": "20.50.0.10",
+        "instance_s": "GatewayTenantWorker_IN_0",
+        "TimeGenerated": "2025-01-14T07:13:58Z",
+        "ResourceId": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-hub/providers/Microsoft.Network/virtualNetworkGateways/vpngw-hub"
+      }
+    ],
+    "metrics": []
+  },
+  "expect": {
+    "finding_prefixes": [
+      "HYB-CONN-NOT-CONNECTED:",
+      "HYB-BGP-NOT-CONNECTED:",
+      "HYB-TUNNEL-FLAP:"
+    ],
+    "top_severity": "critical",
+    "partial": false
+  }
+}

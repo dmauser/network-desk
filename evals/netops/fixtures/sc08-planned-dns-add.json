@@ -1,0 +1,159 @@
+{
+  "id": "SC-08",
+  "title": "Planned on-prem DNS record add (CHG-0016)",
+  "source": "https://github.com/dmauser/azure-sre-netops",
+  "injected_fault": "Change ticket CHG-0016 adds A record payments to the private DNS zone. A planned change: no alert should fire.",
+  "symptom": "CHG-0016: verify the planned add of the payments A record in the private DNS zone and confirm nothing else changed.",
+  "expected_skill": "netops-private-endpoint-dns",
+  "input": {
+    "managed_scopes": [
+      "/subscriptions/00000000-0000-0000-0000-000000000001"
+    ],
+    "resolver_vnets": [
+      "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-hub/providers/Microsoft.Network/virtualNetworks/vnet-hub",
+      "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-spoke/providers/Microsoft.Network/virtualNetworks/vnet-spoke1"
+    ],
+    "private_endpoints": [
+      {
+        "id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-spoke/providers/Microsoft.Network/privateEndpoints/pe-stnetopsapp-blob",
+        "name": "pe-stnetopsapp-blob",
+        "properties": {
+          "subnet": {
+            "id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-spoke/providers/Microsoft.Network/virtualNetworks/vnet-spoke1/subnets/snet-pe"
+          },
+          "privateLinkServiceConnections": [
+            {
+              "name": "stnetopsapp-blob",
+              "properties": {
+                "privateLinkServiceId": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-spoke/providers/Microsoft.Storage/storageAccounts/stnetopsapp",
+                "groupIds": [
+                  "blob"
+                ],
+                "privateLinkServiceConnectionState": {
+                  "status": "Approved",
+                  "description": "Auto-Approved",
+                  "actionsRequired": "None"
+                }
+              }
+            }
+          ],
+          "customDnsConfigs": [
+            {
+              "fqdn": "stnetopsapp.blob.core.windows.net",
+              "ipAddresses": [
+                "10.1.2.4"
+              ]
+            }
+          ]
+        }
+      }
+    ],
+    "dns_zone_groups": [
+      {
+        "private_endpoint_id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-spoke/providers/Microsoft.Network/privateEndpoints/pe-stnetopsapp-blob",
+        "value": [
+          {
+            "name": "default",
+            "properties": {
+              "provisioningState": "Succeeded",
+              "privateDnsZoneConfigs": [
+                {
+                  "name": "blob",
+                  "properties": {
+                    "privateDnsZoneId": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-dns/providers/Microsoft.Network/privateDnsZones/privatelink.blob.core.windows.net",
+                    "recordSets": [
+                      {
+                        "recordType": "A",
+                        "recordSetName": "stnetopsapp",
+                        "fqdn": "stnetopsapp.privatelink.blob.core.windows.net",
+                        "ipAddresses": [
+                          "10.1.2.4"
+                        ]
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    ],
+    "private_dns_zones": [
+      {
+        "id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-dns/providers/Microsoft.Network/privateDnsZones/privatelink.blob.core.windows.net",
+        "name": "privatelink.blob.core.windows.net"
+      },
+      {
+        "id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-dns/providers/Microsoft.Network/privateDnsZones/contoso.internal",
+        "name": "contoso.internal"
+      }
+    ],
+    "vnet_links": [
+      {
+        "id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-dns/providers/Microsoft.Network/privateDnsZones/privatelink.blob.core.windows.net/virtualNetworkLinks/link-hub",
+        "name": "link-hub",
+        "properties": {
+          "virtualNetwork": {
+            "id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-hub/providers/Microsoft.Network/virtualNetworks/vnet-hub"
+          },
+          "virtualNetworkLinkState": "Completed",
+          "registrationEnabled": false,
+          "resolutionPolicy": "Default"
+        }
+      },
+      {
+        "id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-dns/providers/Microsoft.Network/privateDnsZones/privatelink.blob.core.windows.net/virtualNetworkLinks/link-spoke1",
+        "name": "link-spoke1",
+        "properties": {
+          "virtualNetwork": {
+            "id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-spoke/providers/Microsoft.Network/virtualNetworks/vnet-spoke1"
+          },
+          "virtualNetworkLinkState": "Completed",
+          "registrationEnabled": false
+        }
+      }
+    ],
+    "a_records": [
+      {
+        "id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-dns/providers/Microsoft.Network/privateDnsZones/privatelink.blob.core.windows.net/A/stnetopsapp",
+        "name": "stnetopsapp",
+        "properties": {
+          "aRecords": [
+            {
+              "ipv4Address": "10.1.2.4"
+            }
+          ]
+        }
+      },
+      {
+        "id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-dns/providers/Microsoft.Network/privateDnsZones/contoso.internal/A/payments",
+        "name": "payments",
+        "properties": {
+          "aRecords": [
+            {
+              "ipv4Address": "10.200.0.10"
+            }
+          ]
+        }
+      }
+    ],
+    "resolution_checks": [
+      {
+        "fqdn": "stnetopsapp.blob.core.windows.net",
+        "resolved_ips": [
+          "10.1.2.4"
+        ],
+        "from": "vm-spoke1-app"
+      }
+    ]
+  },
+  "expect": {
+    "max_severity": "info",
+    "absent_prefixes": [
+      "PE-DNS-RECORD-MISSING:",
+      "PE-ZONE-NOT-LINKED:"
+    ],
+    "partial": false
+  }
+}

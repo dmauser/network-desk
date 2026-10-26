@@ -1,0 +1,114 @@
+{
+  "managed_scopes": [
+    "/subscriptions/00000000-0000-0000-0000-000000000001"
+  ],
+  "resolver_vnets": [
+    "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-hub/providers/Microsoft.Network/virtualNetworks/vnet-hub",
+    "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-spoke/providers/Microsoft.Network/virtualNetworks/vnet-spoke1"
+  ],
+  "private_endpoints": [
+    {
+      "id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-spoke/providers/Microsoft.Network/privateEndpoints/pe-stnetopsapp-blob",
+      "name": "pe-stnetopsapp-blob",
+      "properties": {
+        "subnet": {
+          "id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-spoke/providers/Microsoft.Network/virtualNetworks/vnet-spoke1/subnets/snet-pe"
+        },
+        "privateLinkServiceConnections": [
+          {
+            "name": "stnetopsapp-blob",
+            "properties": {
+              "privateLinkServiceId": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-spoke/providers/Microsoft.Storage/storageAccounts/stnetopsapp",
+              "groupIds": [
+                "blob"
+              ],
+              "privateLinkServiceConnectionState": {
+                "status": "Approved",
+                "description": "Auto-Approved",
+                "actionsRequired": "None"
+              }
+            }
+          }
+        ],
+        "customDnsConfigs": [
+          {
+            "fqdn": "stnetopsapp.blob.core.windows.net",
+            "ipAddresses": [
+              "10.1.2.4"
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "dns_zone_groups": [
+    {
+      "private_endpoint_id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-spoke/providers/Microsoft.Network/privateEndpoints/pe-stnetopsapp-blob",
+      "value": [
+        {
+          "name": "default",
+          "properties": {
+            "provisioningState": "Succeeded",
+            "privateDnsZoneConfigs": [
+              {
+                "name": "blob",
+                "properties": {
+                  "privateDnsZoneId": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-dns/providers/Microsoft.Network/privateDnsZones/privatelink.blob.core.windows.net",
+                  "recordSets": [
+                    {
+                      "recordType": "A",
+                      "recordSetName": "stnetopsapp",
+                      "fqdn": "stnetopsapp.privatelink.blob.core.windows.net",
+                      "ipAddresses": [
+                        "10.1.2.4"
+                      ]
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "private_dns_zones": [
+    {
+      "id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-dns/providers/Microsoft.Network/privateDnsZones/privatelink.blob.core.windows.net",
+      "name": "privatelink.blob.core.windows.net"
+    }
+  ],
+  "vnet_links": [
+    {
+      "id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-dns/providers/Microsoft.Network/privateDnsZones/privatelink.blob.core.windows.net/virtualNetworkLinks/link-hub",
+      "name": "link-hub",
+      "properties": {
+        "virtualNetwork": {
+          "id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-hub/providers/Microsoft.Network/virtualNetworks/vnet-hub"
+        },
+        "virtualNetworkLinkState": "Completed",
+        "registrationEnabled": false,
+        "resolutionPolicy": "Default"
+      }
+    },
+    {
+      "id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-dns/providers/Microsoft.Network/privateDnsZones/privatelink.blob.core.windows.net/virtualNetworkLinks/link-spoke1",
+      "name": "link-spoke1",
+      "properties": {
+        "virtualNetwork": {
+          "id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-spoke/providers/Microsoft.Network/virtualNetworks/vnet-spoke1"
+        },
+        "virtualNetworkLinkState": "Completed",
+        "registrationEnabled": false
+      }
+    }
+  ],
+  "a_records": [],
+  "resolution_checks": [
+    {
+      "fqdn": "stnetopsapp.blob.core.windows.net",
+      "resolved_ips": [],
+      "from": "vm-spoke1-app"
+    }
+  ]
+}

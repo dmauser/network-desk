@@ -1,0 +1,16 @@
+{
+  "id": "SC-01",
+  "title": "On-prem VPN appliance stopped",
+  "source": "https://github.com/dmauser/azure-sre-netops",
+  "injected_fault": "strongSwan stopped on the simulated on-premises VPN appliance; IPsec SAs and the BGP session drop.",
+  "symptom": "Users in the branch office cannot reach Azure: the site-to-site VPN tunnel is down and BGP shows no learned routes.",
+  "expected_skill": "netops-hybrid-health",
+  "input_ref": "plugins/netops/skills/netops-hybrid-health/examples/sc01-vpn-down-input.json",
+  "expect": {
+    "finding_prefixes": [
+      "HYB-CONN-NOT-CONNECTED:",
+      "HYB-BGP-NOT-CONNECTED:"
+    ],
+    "top_severity": "critical"
+  }
+}

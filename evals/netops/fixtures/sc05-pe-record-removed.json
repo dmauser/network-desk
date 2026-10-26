@@ -1,0 +1,16 @@
+{
+  "id": "SC-05",
+  "title": "Private endpoint A record deleted",
+  "source": "https://github.com/dmauser/azure-sre-netops",
+  "injected_fault": "The storage account's A record is deleted from privatelink.blob.core.windows.net; clients get NXDOMAIN.",
+  "symptom": "The storage account is unreachable from the spoke VM through its private endpoint; nslookup returns NXDOMAIN.",
+  "expected_skill": "netops-private-endpoint-dns",
+  "input_ref": "plugins/netops/skills/netops-private-endpoint-dns/examples/sc05-record-removed-input.json",
+  "expect": {
+    "finding_prefixes": [
+      "PE-DNS-RECORD-MISSING:privatelink.blob.core.windows.net:stnetopsapp",
+      "PE-RESOLVE-NXDOMAIN:"
+    ],
+    "top_severity": "critical"
+  }
+}

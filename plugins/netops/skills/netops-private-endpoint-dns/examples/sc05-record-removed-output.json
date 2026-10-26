@@ -1,0 +1,56 @@
+{
+  "evidence_gaps": [],
+  "findings": [
+    {
+      "citations": [
+        "https://learn.microsoft.com/azure/private-link/private-endpoint-dns"
+      ],
+      "evidence": {
+        "fqdn": "stnetopsapp.blob.core.windows.net",
+        "from": "vm-spoke1-app",
+        "resolved_ips": []
+      },
+      "id": "PE-RESOLVE-NXDOMAIN:stnetopsapp.blob.core.windows.net:vm-spoke1-app",
+      "recommendation": "Name resolution failed: check the A record and the zone link for the client's resolver VNet.",
+      "remediation_script": "# Human review required. Read-only verification (the agent never runs writes):\nnslookup stnetopsapp.blob.core.windows.net",
+      "resource_id": "",
+      "severity": "critical",
+      "skill": "netops-private-endpoint-dns",
+      "title": "stnetopsapp.blob.core.windows.net did not resolve from vm-spoke1-app"
+    },
+    {
+      "citations": [
+        "https://learn.microsoft.com/azure/private-link/private-endpoint-dns"
+      ],
+      "evidence": {
+        "expected_from": "zone-group recordSets",
+        "expected_ips": [
+          "10.1.2.4"
+        ],
+        "record": "stnetopsapp",
+        "zone": "privatelink.blob.core.windows.net"
+      },
+      "id": "PE-DNS-RECORD-MISSING:privatelink.blob.core.windows.net:stnetopsapp",
+      "recommendation": "Clients get NXDOMAIN (or the public IP with NxDomainRedirect). Recreate the A record or re-create the zone group so it re-registers (human-run).",
+      "remediation_script": "# Human review required. Read-only verification (the agent never runs writes):\naz network private-dns record-set a list -g rg-netops-dns -z privatelink.blob.core.windows.net --query \"[].{name:name,ips:aRecords[].ipv4Address}\" -o table\n# Change (review before running):\n# az network private-dns record-set a add-record -g <zone-rg> -z privatelink.blob.core.windows.net -n stnetopsapp --ipv4-address 10.1.2.4",
+      "resource_id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-spoke/providers/Microsoft.Network/privateEndpoints/pe-stnetopsapp-blob",
+      "severity": "critical",
+      "skill": "netops-private-endpoint-dns",
+      "title": "A record stnetopsapp.privatelink.blob.core.windows.net for pe-stnetopsapp-blob is missing"
+    }
+  ],
+  "kpis": {
+    "pe_dns_healthy_pct": 0.0
+  },
+  "metrics": [
+    {
+      "detail": "approved, zone linked, A record matches",
+      "label": "Private endpoints healthy",
+      "tone": "critical",
+      "value": "0/1"
+    }
+  ],
+  "partial": false,
+  "skill": "netops-private-endpoint-dns",
+  "warnings": []
+}

@@ -1,0 +1,99 @@
+{
+  "evidence_gaps": [],
+  "findings": [
+    {
+      "citations": [
+        "https://learn.microsoft.com/azure/vpn-gateway/monitor-vpn-gateway-reference",
+        "https://learn.microsoft.com/azure/vpn-gateway/troubleshoot-vpn-with-azure-diagnostics"
+      ],
+      "evidence": {
+        "connectionStatus": "NotConnected",
+        "connectionType": "IPsec",
+        "gateway": "vpngw-hub",
+        "tunnels": [
+          {
+            "status": "NotConnected",
+            "tunnel": "vpngw-hub_20.1.1.1"
+          },
+          {
+            "status": "NotConnected",
+            "tunnel": "vpngw-hub_20.1.1.2"
+          }
+        ]
+      },
+      "id": "HYB-CONN-NOT-CONNECTED:cn-hub-to-onprem",
+      "recommendation": "Confirm the on-premises VPN device / service is running and reachable on UDP 500/4500, shared key and IKE/IPsec parameters match, then review IKEDiagnosticLog / TunnelDiagnosticLog for the disconnect reason.",
+      "remediation_script": "# Human review required. Read-only verification (the agent never runs writes):\naz network vpn-connection show -g rg-netops-hub -n cn-hub-to-onprem --query \"{status:connectionStatus,tunnels:tunnelConnectionStatus}\"\n# KQL: AzureDiagnostics | where Category in (\"TunnelDiagnosticLog\",\"IKEDiagnosticLog\")",
+      "resource_id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-hub/providers/Microsoft.Network/connections/cn-hub-to-onprem",
+      "severity": "critical",
+      "skill": "netops-hybrid-health",
+      "title": "IPsec connection cn-hub-to-onprem is NotConnected"
+    },
+    {
+      "citations": [
+        "https://learn.microsoft.com/rest/api/network-gateway/virtual-network-gateways/get-bgp-peer-status",
+        "https://learn.microsoft.com/troubleshoot/azure/vpn-gateway/vpn-gateway-troubleshoot-bgp"
+      ],
+      "evidence": {
+        "asn": 65010,
+        "localAddress": "10.0.0.4",
+        "messagesReceived": 0,
+        "routesReceived": 0,
+        "state": "Connecting"
+      },
+      "id": "HYB-BGP-NOT-CONNECTED:vpngw-hub:10.100.0.4",
+      "recommendation": "BGP runs over the IPsec tunnel: fix the tunnel first, then verify peer IP / ASN on both sides and that the on-premises BGP speaker is running.",
+      "remediation_script": "# Human review required. Read-only verification (the agent never runs writes):\naz network vnet-gateway list-bgp-peer-status -g rg-netops-hub -n vpngw-hub -o table",
+      "resource_id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-hub/providers/Microsoft.Network/virtualNetworkGateways/vpngw-hub",
+      "severity": "critical",
+      "skill": "netops-hybrid-health",
+      "title": "BGP peer 10.100.0.4 on vpngw-hub is Connecting"
+    },
+    {
+      "citations": [
+        "https://learn.microsoft.com/azure/vpn-gateway/troubleshoot-vpn-with-azure-diagnostics"
+      ],
+      "evidence": {
+        "disconnects": 2,
+        "failover_pairs": 0,
+        "first": "2025-01-14T07:13:58Z",
+        "instances": [
+          "GatewayTenantWorker_IN_0",
+          "GatewayTenantWorker_IN_1"
+        ],
+        "last": "2025-01-14T07:14:02Z",
+        "last_event": "TunnelDisconnected",
+        "pattern": "disconnected with no reconnect observed",
+        "same_instance": 0
+      },
+      "id": "HYB-TUNNEL-FLAP:vpngw-hub:20.50.0.10",
+      "recommendation": "Disconnect on one instance followed by connect on the other is failover/maintenance; repeated disconnect/reconnect on the same instance points to DPD, packet loss or the on-premises device. Correlate with GatewayDiagnosticLog and IKEDiagnosticLog.",
+      "remediation_script": "# Human review required. Read-only verification (the agent never runs writes):\n# KQL (Log Analytics):\nAzureDiagnostics | where Category == \"TunnelDiagnosticLog\" | where remoteIP_s == \"20.50.0.10\" | project TimeGenerated, OperationName, instance_s, remoteIP_s | order by TimeGenerated asc",
+      "resource_id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-hub/providers/Microsoft.Network/virtualNetworkGateways/vpngw-hub",
+      "severity": "high",
+      "skill": "netops-hybrid-health",
+      "title": "Tunnel to 20.50.0.10 on vpngw-hub: 2 disconnect(s) and still down"
+    }
+  ],
+  "kpis": {
+    "bgp_peers_connected_pct": 0.0,
+    "tunnels_connected_pct": 0.0
+  },
+  "metrics": [
+    {
+      "detail": "connectionStatus == Connected",
+      "label": "Connections connected",
+      "tone": "critical",
+      "value": "0/1"
+    },
+    {
+      "detail": "state == Connected (or BgpPeerStatus metric = 1)",
+      "label": "BGP peers connected",
+      "tone": "critical",
+      "value": "0/1"
+    }
+  ],
+  "partial": false,
+  "skill": "netops-hybrid-health",
+  "warnings": []
+}

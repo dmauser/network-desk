@@ -1,0 +1,77 @@
+{
+  "managed_scopes": [
+    "/subscriptions/00000000-0000-0000-0000-000000000001"
+  ],
+  "gateways": [
+    {
+      "id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-hub/providers/Microsoft.Network/virtualNetworkGateways/vpngw-hub",
+      "name": "vpngw-hub",
+      "properties": {
+        "enableBgp": true,
+        "gatewayType": "Vpn",
+        "vpnType": "RouteBased",
+        "activeActive": true
+      }
+    }
+  ],
+  "connections": [
+    {
+      "id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-hub/providers/Microsoft.Network/connections/cn-hub-to-onprem",
+      "name": "cn-hub-to-onprem",
+      "properties": {
+        "egressBytesTransferred": 0,
+        "virtualNetworkGateway1": {
+          "id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-hub/providers/Microsoft.Network/virtualNetworkGateways/vpngw-hub"
+        },
+        "connectionType": "IPsec",
+        "connectionStatus": "NotConnected",
+        "tunnelConnectionStatus": [
+          {
+            "lastConnectionEstablishedUtcTime": "2025-01-14T06:58:00Z",
+            "connectionStatus": "NotConnected",
+            "tunnel": "vpngw-hub_20.1.1.1"
+          },
+          {
+            "lastConnectionEstablishedUtcTime": "2025-01-14T06:58:00Z",
+            "connectionStatus": "NotConnected",
+            "tunnel": "vpngw-hub_20.1.1.2"
+          }
+        ],
+        "ingressBytesTransferred": 0
+      }
+    }
+  ],
+  "bgp_peers": [
+    {
+      "gateway_id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-hub/providers/Microsoft.Network/virtualNetworkGateways/vpngw-hub",
+      "value": [
+        {
+          "neighbor": "10.100.0.4",
+          "localAddress": "10.0.0.4",
+          "state": "Connecting",
+          "messagesReceived": 0,
+          "asn": 65010,
+          "messagesSent": 12,
+          "routesReceived": 0
+        }
+      ]
+    }
+  ],
+  "tunnel_events": [
+    {
+      "OperationName": "TunnelDisconnected",
+      "remoteIP_s": "20.50.0.10",
+      "instance_s": "GatewayTenantWorker_IN_0",
+      "TimeGenerated": "2025-01-14T07:13:58Z",
+      "ResourceId": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-hub/providers/Microsoft.Network/virtualNetworkGateways/vpngw-hub"
+    },
+    {
+      "OperationName": "TunnelDisconnected",
+      "remoteIP_s": "20.50.0.10",
+      "instance_s": "GatewayTenantWorker_IN_1",
+      "TimeGenerated": "2025-01-14T07:14:02Z",
+      "ResourceId": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-hub/providers/Microsoft.Network/virtualNetworkGateways/vpngw-hub"
+    }
+  ],
+  "metrics": []
+}
