@@ -116,10 +116,22 @@ function buildPluginManifest(pkg) {
         license: pkg.license || "MIT",
         keywords: pkg.keywords || ["copilot", "networking"],
         agents: ["./agents"],
+        // Object form (name/path/description/tools) so Azure SRE Agent discovers each skill.
         skills: [
-            `./skills/${OVERVIEW_SKILL}`,
-            ...PREFIXES.map((p) => `./skills/${skillName(p)}`),
-        ],
+            skillEntry(OVERVIEW_SKILL, overviewDescription()),
+            ...PREFIXES.map((p) => skillEntry(skillName(p), specialistDescription(p))),
+        ].sort((a, b) => a.name.localeCompare(b.name)),
+    };
+}
+
+const SRE_AGENT_SKILL_TOOLS = ["RunAzCliReadCommands", "GetAzCliHelp", "ExecutePythonCode"];
+
+function skillEntry(name, description) {
+    return {
+        name,
+        path: `skills/${name}/SKILL.md`,
+        description: yaml1(description),
+        tools: [...SRE_AGENT_SKILL_TOOLS],
     };
 }
 
@@ -216,12 +228,17 @@ function buildCoordinatorAgent() {
 // The plugin analogue of the extension's `cn_capabilities` tool: a single skill
 // that emits the full emoji + friendly-name specialist map and example prompts,
 // so "what can Network Desk do?" / "give me examples" surfaces icons reliably.
-function buildOverviewSkill() {
-    const desc =
+function overviewDescription() {
+    return (
         `🧭 Network Desk Capabilities — overview and index of all ${PREFIXES.length} ` +
         "cloud-networking specialists (with emoji icons) plus example prompts. Load this " +
         "whenever the user asks what Network Desk can do, its capabilities, the list of " +
-        "specialists/skills, or for examples of how to use the plugin.";
+        "specialists/skills, or for examples of how to use the plugin."
+    );
+}
+
+function buildOverviewSkill() {
+    const desc = overviewDescription();
 
     const examples = [
         "🏗️ \"Plan a /16 hub-and-spoke address space for 3 spokes with no overlap.\"",
@@ -280,16 +297,21 @@ function buildOverviewSkill() {
 }
 
 // ── Specialist skill SKILL.md ───────────────────────────────────────────────
-function buildSpecialistSkill(prefix) {
+function specialistDescription(prefix) {
     const s = REGISTRY[prefix];
-    const lines = [];
     const friendly = `${s.icon} ${s.name}`;
-    const desc = prefix === "doc"
+    return prefix === "doc"
         ? `${friendly} — ${s.domain}. Use ONLY to package cloud-networking findings produced by ` +
           `Network Desk specialists into polished deliverables (Markdown/HTML/PDF/DOCX/XLSX). ` +
           `Do the networking analysis with a domain specialist first, then use this to render it. ` +
           `${s.summary}.`
         : `${friendly} — ${s.domain}. ${s.summary}. Use for: ${triggerKeywords(s.trigger, 14)}.`;
+}
+
+function buildSpecialistSkill(prefix) {
+    const s = REGISTRY[prefix];
+    const lines = [];
+    const desc = specialistDescription(prefix);
     lines.push("---");
     lines.push(`name: ${skillName(prefix)}`);
     lines.push(`description: "${yaml1(desc)}"`);
@@ -410,7 +432,17 @@ function buildPluginReadme(pkg) {
 }
 
 // ── marketplace.json ────────────────────────────────────────────────────────
-function buildMarketplace(pkg) {
+// Other plugins listed in the repo marketplace (e.g. the `netops` SRE Agent
+// plugin) are preserved verbatim; only the network-desk entry is regenerated.
+function buildMarketplace(pkg, existing) {
+    const ours = {
+        name: PLUGIN_ID,
+        description: yaml1(pkg.description || "Cloud networking AI team."),
+        version: pkg.version,
+        source: `plugins/${PLUGIN_ID}`,
+    };
+    const others = (existing && Array.isArray(existing.plugins) ? existing.plugins : [])
+        .filter((p) => p && p.name !== PLUGIN_ID);
     return {
         name: "network-desk",
         owner: { name: pkg.author || "dmauser" },
@@ -418,14 +450,7 @@ function buildMarketplace(pkg) {
             description: "Network Desk — cloud networking specialist plugin(s) for Copilot CLI.",
             version: pkg.version,
         },
-        plugins: [
-            {
-                name: PLUGIN_ID,
-                description: yaml1(pkg.description || "Cloud networking AI team."),
-                version: pkg.version,
-                source: `plugins/${PLUGIN_ID}`,
-            },
-        ],
+        plugins: [ours, ...others],
     };
 }
 
@@ -435,8 +460,8 @@ async function validateOutput(baseDir, manifest) {
     if (!(await exists(join(baseDir, "agents", "network-desk.md")))) {
         problems.push("missing coordinator agent agents/network-desk.md");
     }
-    for (const rel of manifest.skills) {
-        const skillMd = join(baseDir, rel.replace(/^\.\//, ""), "SKILL.md");
+    for (const entry of manifest.skills) {
+        const skillMd = join(baseDir, entry.path);
         if (!(await exists(skillMd))) {
             problems.push(`missing emitted skill: ${skillMd}`);
             continue;
@@ -473,7 +498,9 @@ async function swapIntoPlace(from, to) {
     }
 }
 
-async function build() {
+async function build(outRoot = REPO_ROOT) {
+    const PLUGIN_DIR = join(outRoot, "plugins", PLUGIN_ID);
+    const MARKETPLACE_DIR = join(outRoot, ".github", "plugin");
     console.log("");
     console.log(`${CYAN}Network Desk${RESET} — generating Copilot CLI plugin`);
     console.log("");
@@ -568,10 +595,17 @@ async function build() {
     await swapIntoPlace(STAGE, PLUGIN_DIR);
 
     // Repo-level marketplace manifest (written after the bundle is in place).
+    // Merge with the repo's current manifest so sibling plugins are preserved.
+    let existingMarketplace = null;
+    try {
+        existingMarketplace = JSON.parse(
+            await readFile(join(REPO_ROOT, ".github", "plugin", "marketplace.json"), "utf8")
+        );
+    } catch { /* first build */ }
     await mkdir(MARKETPLACE_DIR, { recursive: true });
     await writeFile(
         join(MARKETPLACE_DIR, "marketplace.json"),
-        JSON.stringify(buildMarketplace(pkg), null, 2) + "\n"
+        JSON.stringify(buildMarketplace(pkg, existingMarketplace), null, 2) + "\n"
     );
     ok("Wrote .github/plugin/marketplace.json");
 
@@ -583,6 +617,8 @@ async function build() {
 
 // ── Entry ─────────────────────────────────────────────────────────────────
 const checkOnly = process.argv.includes("--check");
+const outIdx = process.argv.indexOf("--out");
+const outRoot = outIdx > -1 && process.argv[outIdx + 1] ? resolve(process.argv[outIdx + 1]) : REPO_ROOT;
 try {
     if (checkOnly) {
         const problems = await validateSources();
@@ -594,7 +630,7 @@ try {
         ok(`Source validation passed (${PREFIXES.length} specialists, ` +
             `${PREFIXES.reduce((n, p) => n + Object.keys(REGISTRY[p].skills).length, 0)} sub-skills)`);
     } else {
-        await build();
+        await build(outRoot);
     }
 } catch (e) {
     err(e.message);

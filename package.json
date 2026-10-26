@@ -6,6 +6,14 @@
   "bin": {
     "network-desk": "./bin/cli.mjs"
   },
+  "scripts": {
+    "test": "npm run test:extension && npm run test:netops",
+    "test:extension": "node --import ./tests/extension/register-stub.mjs --test \"tests/extension/*.test.mjs\"",
+    "test:netops": "python -m pytest -q tests/netops evals/netops",
+    "build:plugin": "node extensions/network-desk/scripts/build-plugin.mjs",
+    "build:netops": "node scripts/netops/build-netops.mjs",
+    "check:netops": "node scripts/netops/build-netops.mjs --check"
+  },
   "files": [
     "bin/",
     "extensions/network-desk/",

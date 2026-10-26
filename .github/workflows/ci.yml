@@ -1,0 +1,29 @@
+name: CI
+
+on:
+  push:
+    branches: [master, main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  extension:
+    name: Copilot CLI extension + plugin
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Syntax check
+        run: |
+          node --check bin/cli.mjs
+          node --check extensions/network-desk/extension.mjs
+          node --check extensions/network-desk/registry.mjs
+          node --check extensions/network-desk/scripts/build-plugin.mjs
+      - name: Validate specialist sources
+        run: node extensions/network-desk/scripts/build-plugin.mjs --check
+      - name: Extension tests (behavior golden + plugin drift)
+        run: npm run test:extension

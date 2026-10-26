@@ -1,0 +1,343 @@
+{
+  "tools": [
+    {
+      "name": "cn_capabilities",
+      "description": "Returns a structured map of all 20 cloud networking specialists and their skills, plus how to invoke them via cn_role/cn_orchestrate/cn_skill. Use to discover what networking capabilities are available.",
+      "parameters": {
+        "type": "object",
+        "properties": {}
+      },
+      "skipPermission": true
+    },
+    {
+      "name": "cn_route",
+      "description": "Given a cloud networking query, returns the recommended specialist(s) and the exact cn_role/cn_orchestrate/cn_skill calls to make. Use when unsure which specialist handles a request.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "The user's networking query or task description"
+          }
+        },
+        "required": [
+          "query"
+        ]
+      },
+      "skipPermission": true
+    },
+    {
+      "name": "cn_role",
+      "description": "Load a cloud networking specialist's role definition (persona, workflow, guardrails). Call this first when engaging a specialist. Select the specialist via the `specialist` argument — there are no per-specialist role tools.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "specialist": {
+            "type": "string",
+            "enum": [
+              "cn_vnet",
+              "cn_fw",
+              "cn_lb",
+              "cn_dns",
+              "cn_pl",
+              "cn_hyb",
+              "cn_nsec",
+              "cn_ntsh",
+              "cn_vwan",
+              "cn_nmon",
+              "cn_mcn",
+              "cn_price",
+              "cn_iac",
+              "cn_cnet",
+              "cn_cdn",
+              "cn_nauto",
+              "cn_sase",
+              "cn_ncap",
+              "cn_ipv6",
+              "cn_doc"
+            ],
+            "description": "The specialist to engage. One of: cn_vnet (VNet/Subnet Architecture); cn_fw (Firewall Engineering); cn_lb (Load Balancing); cn_dns (DNS); cn_pl (Private Link / Endpoints); cn_hyb (Hybrid Connectivity); cn_nsec (Network Security); cn_ntsh (Network Troubleshooting); cn_vwan (Virtual WAN / SD-WAN); cn_nmon (Network Monitoring); cn_mcn (Multi-Cloud Networking); cn_price (Network Pricing); cn_iac (IaC Generator); cn_cnet (Container Networking); cn_cdn (CDN & Edge Networking); cn_nauto (Network Automation & GitOps); cn_sase (SASE / SSE); cn_ncap (Network Capacity Planning); cn_ipv6 (IPv6 Migration); cn_doc (Documentation & Reporting). Bare forms (vnet, fw, …) are also accepted as aliases."
+          }
+        },
+        "required": [
+          "specialist"
+        ]
+      },
+      "skipPermission": true
+    },
+    {
+      "name": "cn_orchestrate",
+      "description": "Return the step-by-step orchestration workflow and skill catalog for a cloud networking specialist. Select the specialist via the `specialist` argument.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "specialist": {
+            "type": "string",
+            "enum": [
+              "cn_vnet",
+              "cn_fw",
+              "cn_lb",
+              "cn_dns",
+              "cn_pl",
+              "cn_hyb",
+              "cn_nsec",
+              "cn_ntsh",
+              "cn_vwan",
+              "cn_nmon",
+              "cn_mcn",
+              "cn_price",
+              "cn_iac",
+              "cn_cnet",
+              "cn_cdn",
+              "cn_nauto",
+              "cn_sase",
+              "cn_ncap",
+              "cn_ipv6",
+              "cn_doc"
+            ],
+            "description": "The specialist to engage. One of: cn_vnet (VNet/Subnet Architecture); cn_fw (Firewall Engineering); cn_lb (Load Balancing); cn_dns (DNS); cn_pl (Private Link / Endpoints); cn_hyb (Hybrid Connectivity); cn_nsec (Network Security); cn_ntsh (Network Troubleshooting); cn_vwan (Virtual WAN / SD-WAN); cn_nmon (Network Monitoring); cn_mcn (Multi-Cloud Networking); cn_price (Network Pricing); cn_iac (IaC Generator); cn_cnet (Container Networking); cn_cdn (CDN & Edge Networking); cn_nauto (Network Automation & GitOps); cn_sase (SASE / SSE); cn_ncap (Network Capacity Planning); cn_ipv6 (IPv6 Migration); cn_doc (Documentation & Reporting). Bare forms (vnet, fw, …) are also accepted as aliases."
+          }
+        },
+        "required": [
+          "specialist"
+        ]
+      },
+      "skipPermission": true
+    },
+    {
+      "name": "cn_skill",
+      "description": "Load deep domain guidance for a specific specialist skill. Provide `specialist` (e.g. \"cn_vnet\") and `skill` (e.g. \"address-planner\"). Legacy names like \"cn_vnet_skill_address_planner\" are also accepted as the `skill` value. Call cn_capabilities or cn_orchestrate to see valid skills.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "specialist": {
+            "type": "string",
+            "enum": [
+              "cn_vnet",
+              "cn_fw",
+              "cn_lb",
+              "cn_dns",
+              "cn_pl",
+              "cn_hyb",
+              "cn_nsec",
+              "cn_ntsh",
+              "cn_vwan",
+              "cn_nmon",
+              "cn_mcn",
+              "cn_price",
+              "cn_iac",
+              "cn_cnet",
+              "cn_cdn",
+              "cn_nauto",
+              "cn_sase",
+              "cn_ncap",
+              "cn_ipv6",
+              "cn_doc"
+            ],
+            "description": "The specialist to engage. One of: cn_vnet (VNet/Subnet Architecture); cn_fw (Firewall Engineering); cn_lb (Load Balancing); cn_dns (DNS); cn_pl (Private Link / Endpoints); cn_hyb (Hybrid Connectivity); cn_nsec (Network Security); cn_ntsh (Network Troubleshooting); cn_vwan (Virtual WAN / SD-WAN); cn_nmon (Network Monitoring); cn_mcn (Multi-Cloud Networking); cn_price (Network Pricing); cn_iac (IaC Generator); cn_cnet (Container Networking); cn_cdn (CDN & Edge Networking); cn_nauto (Network Automation & GitOps); cn_sase (SASE / SSE); cn_ncap (Network Capacity Planning); cn_ipv6 (IPv6 Migration); cn_doc (Documentation & Reporting). Bare forms (vnet, fw, …) are also accepted as aliases. May be omitted if `skill` is a legacy full name like \"cn_vnet_skill_address_planner\"."
+          },
+          "skill": {
+            "type": "string",
+            "description": "The skill name, e.g. \"address-planner\". Underscores and legacy \"<specialist>_skill_\" prefixes are tolerated."
+          }
+        },
+        "required": [
+          "skill"
+        ]
+      },
+      "skipPermission": true
+    }
+  ],
+  "capabilities": "9785e567d7787f51ee2aa143966cb032f9cffe73ced58c1063b4aa1c399c64fa",
+  "route": {
+    "design a hub-spoke VNet topology across 3 regions": "cbe2568c757a9d36a46a7ebf6b09482f4080e18d3d12a15dc09c1b6a19aebfda",
+    "audit my Azure Firewall rules for shadowed entries": "6973fa6d9926e870756d8cccd07199cce27638e634af11940a53e0aaa9f5857d",
+    "my site-to-site VPN BGP session keeps flapping": "bf692776b4c72dc642a71b7e012d4affe860db4879255194674c731ed5cb71ad",
+    "private endpoint DNS resolution returns public IP": "5df7c96e690b521935f503aee5af7cea5de618605532479e649f0ddb3d07a251",
+    "SNAT port exhaustion on the load balancer": "7fc79c840b7c6651bb818c2720a36e2a56902e4dc9f6e82d3256b9aeab824f57",
+    "what's the weather": "fac11e3bfdae1af68e11c7e131aadc667fff628867f5b6c1f8bebba11a69b86a"
+  },
+  "role": {
+    "vnet": "a6f48f32047e8c0eaebd92d915c4f99d84567f4807bc8ca53543a9bc283bb682",
+    "fw": "da046e0005276c382582552b1047b5bf0eb9627c901008c9042c5009c90f038a",
+    "lb": "c9bebb38c8b306d21768c08acf0819ae50491543e4e5c42f0b61048935fcdb03",
+    "dns": "15716e0fac3a679a15a2ccd6c5a8a70e79d66f8bcdbcf6e370e4b55c71d206f3",
+    "pl": "17d2fa6255c17014d8ec81cbaec587df9b707e6be5af22abe97eeac59203cc9f",
+    "hyb": "00f335dfb3912ee029169a1b480158aa1cca1390967aa252a69bad23d2b4b52d",
+    "nsec": "4e0c1b87d517a30281acd977504f023da06fa03739d4b793489fd70d5598554b",
+    "ntsh": "4f3845e228a63867a5263988f6def7c4f8e2ddf3d63d1a3b28456e41cfc91195",
+    "vwan": "f6a07510e1c225396bdf6895cd2dc58cd24f678a0c9d921a7c7cc6d7282b76e0",
+    "nmon": "dfbf4fc2aa58d6360007804e62143d02aa5905a1d614bd3fb4c4667dc49cbe95",
+    "mcn": "91a1e10fc7ed60c14dba3f234e6810117fdc883d62933af1a2e62f72ddb8333a",
+    "price": "7d065dcbf50f799d6d759ac56ccde40138544525c69f5fd92628aa782e619fc7",
+    "iac": "a682134f4efd6cfa13cd2935923a76bfae08a604ea9173d4a54ee634466a8c54",
+    "cnet": "0c0213a7ccc784189719f499fd921c1d5f8485bbae8fef25294c17ce98365009",
+    "cdn": "a0771a1d555a0e7c202e1ccd1da5e77bb85fe010d269fc4260cda9eb7c2881cf",
+    "nauto": "04b0e9eed8b442e2f3576fa0c7df87758d9f2940dfc924ebf649e0190613e8a5",
+    "sase": "64155369e79170033029b16fd4ee3feedc02c94e1361252c30f07d8d58e6f37a",
+    "ncap": "e7392ec19c4e8adfa363e685fad5d7b80e098e7049fc5feda27834a558020f6c",
+    "ipv6": "910bc5a426dbb763de90dd8de6157c3b4b8851cd6535cb179af7a58067f5d36c",
+    "doc": "0cf93e130fc768de3589ae129175522822e5c9eb7c9e665a0fea6d678b5a5b4f"
+  },
+  "orchestrate": {
+    "vnet": "c41edc7f5dbd4b6d36514ee70d7c571b81e4df7f35494aab42e9cb6a08fa6ff6",
+    "fw": "0b3ff003c77e5452630825dc2a04dfdee93e2bd13e086957c85a4509d41db6a5",
+    "lb": "64775851cd027ea1fee95a7598f0adf40faa49023c889eb22ae407c1cd83d051",
+    "dns": "c04ef2c2095bf2f5f53c7db8edba3f9a6a392d9538cec4389bb8795c10a48a67",
+    "pl": "043766f8f61dbc17dd0d8dca40cf8e8a572d571e6636a325617de27543a28520",
+    "hyb": "72b68d60e6146fde64d848c240a32c74bac5ecc9646f006796f126d82b7f2aa7",
+    "nsec": "f71f1337844bd54d857fd43f47702f64b5aa2c9faa5b3bb393baaa41f47da409",
+    "ntsh": "2909ec50959ac279379e2cd154a281850045da6a9db221c358f2fd611185b5cc",
+    "vwan": "de6d500f258721f0fad46cb1fdb45718153709e3d977c39660ecb6218bc68bbf",
+    "nmon": "135cfd5323c1bcd08d7924742a75da44560a32e341ff0e326b07df0134215463",
+    "mcn": "deef0165ff9e8868474f4d536a0928a5673b180469e500bbfa39b74b9e5242d0",
+    "price": "51e1fd922f387e13908f94610cd68d7e844a72fad0ac04a902e6f96ca8226e73",
+    "iac": "d0728d3fb1a8b0ebe8c82362517eac1fc76c4b89f8835b9089d589e2e6cf2d21",
+    "cnet": "004d8085e64b02f11f22654a368f8c9515c94150ed2e75e094a17f976ceafa39",
+    "cdn": "6b15632439b2a5ec1b852b12440d8b2dbf33b567f1a054c8040b445932f4b49b",
+    "nauto": "a54aad409b186091fb3eecb069a9cf1f99007aa2d45373059f24302788294b7b",
+    "sase": "d1ae5c2c7225dde6802b6f48f0763d6504b5c8c8fa38509551105c3e567ba021",
+    "ncap": "46b3e8d60add1cfa56a88651919c0e481802e079f56092dde75781e1d1831dfc",
+    "ipv6": "bee71d8f2e4ef73551f0d78256aa012792d1e8bbef8705c21530319467ad4136",
+    "doc": "24414f261e58a879d0bc345aee88056e7122fc4e90a9b87d6368f88243a19be6"
+  },
+  "skill": {
+    "vnet/address-planner": "65ca4e4e9e040e0e0a42bf98ce4554b2c144d4fc871e2caecbdb50e2fd218074",
+    "vnet/hub-spoke-design": "c927b1f691ee1addc8cc106a8ff48f126074a3d41e29722649041c09f12182ef",
+    "vnet/peering-advisor": "017093e5c113c6cb1f64816d1994c3efd8686c40b40c2d6335ffb101d486b72e",
+    "vnet/subnet-calculator": "99eac3a5cba1b470333bd5a58c9753a1ceffd78e633ef0458def7b1a70f65c58",
+    "vnet/ascii-diagram": "a6d9b8c457451429f1a0e61c28ce06eb0118a6cdc237b7cd1863905a97789963",
+    "vnet/network-diagram": "df6a143363c0a57348c726c76e347990a6129aaa1c38ddbd4ff2fa45523126a5",
+    "vnet/excalidraw-diagram": "a30f08bdf808d18fdfbb32383c236972556d5bcf330752211d311ab3af78c077",
+    "vnet/drawio-diagram": "d51963fd4f7c56de33621ded5401489e5b0b6469c31f5f6be3023c85af2419ae",
+    "vnet/migration-planner": "ac899b58f4632a269fa26979b7921a5edce1f556fee4cb55d48b842bfbe494ba",
+    "fw/rule-audit": "6237e7e5a19aabd9cd78bb36c841c84ee38b49c908db36d27db20b782c07199d",
+    "fw/policy-design": "1a57e556a893c8ae3943611fedbe0630f86bf809d20197c8c99be0fdb3e0048a",
+    "fw/policy-test": "aafbb488be7261bd83522b1688bb2cd2d1a5d8e419940ef46c6595c29f972beb",
+    "fw/vendor-migrate": "d1a1ba52c28e0c95766c0da6e0aaa86f295b2660f80ca00aa6ec3f5d25d9cc8c",
+    "fw/config-gen": "263eb2d9c0f7d4e6c92bfe0e8c2ba2693dddad6d3d22b1e69be71e27b4cbf867",
+    "fw/hardening-check": "6e1675f21fc92470b41c0fd52964d42c038ce1e4b5436dec6d3d35ccb32d514a",
+    "fw/ha-design": "8be08030faddfeec019744878ec134377afe8cf363d9049695673253d1d01ccf",
+    "fw/log-analysis": "0bbf27db4358cc6e0f0c7057506fe40ff5ca12b65bae3fbc33acaf7659b0ee46",
+    "fw/troubleshoot": "09bbe33579b179b9c03c7a8c80f39d5ade8f0cef194aaceb99ae9fa7aec749d6",
+    "lb/lb-selector": "24f1b10f0bbf81cf7c8bd5595dfa822d1ee650e7503209a52dbcf7b3185b3b54",
+    "lb/health-probe-design": "354bec76e19044792779714745198dc9f73e2ba0bf7b8890cd4d44cf4ecbfa2d",
+    "lb/ssl-offload": "6f0a57a1c8abf94da33f459bad715d68353bd0bc3e46696aabba68b8bb3bf6a7",
+    "lb/tls-cert-mgmt": "974a88e1ace0c266e3d9a6c16d3bf31178a477a791f6ee961e69672c78cad66f",
+    "lb/waf-rules": "0942903710b3d30bf334ad63224e2fc3c9fa1866e185d56daec564b0b12e954e",
+    "lb/traffic-routing": "36b266e2db8fa5361a5b17a0723c77b3fe9b7ae155be959a08ddb3c49aa3c6c2",
+    "lb/troubleshoot": "517169d26de3dada4592742e7c99994f9dbf83587a672dd4523aaa2175e1efd5",
+    "dns/zone-design": "2cc3e7fd884d9b42e46ef44a627fabebea9d7abefb4e5c16b75ff8527be79f04",
+    "dns/resolver-design": "6c1023105e54cbcc2c080fa66617a013de7ff35c1a94be2535954960da24df91",
+    "dns/record-audit": "bd88ce6aa5d272f38d69d94ece21c52998e4ac06d9d4be20525d7ae5d06d8fd0",
+    "dns/dnssec-design": "5a4e1bdba3049f9c407c935951e1ccb8c9a9d6045a75376a67167461d8694bea",
+    "dns/migration-plan": "ef0a4385880854fae981efe7f94ca6133bb6293c3f64249165e89feff3c2a18c",
+    "dns/troubleshoot": "60521e3812d43b7b4e68b7fe3b221ced88c25d2a2b642bbf24eadb25ffac1785",
+    "pl/endpoint-design": "0107ad76a74757a958dcdff924e523d149b7b3703672daf65127b1b2530f20a5",
+    "pl/dns-integration": "563b9d45beab5cb0357fb500d18ca3224eac4f890dea86f092902c8d0ba62807",
+    "pl/service-exposure": "44f3b111653c51bbaa8b341e02f7a4497866b7342f2bfd3cf8b74547f3502453",
+    "pl/security-review": "38db2fee51bd06de0cf522452252ed019d91f7d4f12f6fa3a937f5a2f7962adc",
+    "pl/troubleshoot": "d3d6eb0282428101698b6c45f617d9eed306087fa062c58301cde2ed5c04c5e6",
+    "hyb/vpn-design": "9a449716169f98e19f846bd0a45de09a0e41cd15e8ab3529145308e42d377930",
+    "hyb/expressroute-design": "25b7ab56e89cda50612218356334dc79e6a0773c4f6692c86bbd1456d5ec7c5c",
+    "hyb/bgp-design": "ca18af641609ace7193a92db5c0f1831f273a5e97f946eaf618cc7d4730fcd27",
+    "hyb/bandwidth-calc": "1ffcdc685a0c68b93541a185b08b7a2f3308ee42665b6167601fd2348e95a001",
+    "hyb/routing-design": "7c1c5a6e6c92e7219b1e94a98fd71d3d1c9b643687c07461554c032ee7d37c5d",
+    "hyb/failover-design": "6018d6aa391a925e65e149b87019259bdd9c55a36fcdd5e98680862e877af05d",
+    "hyb/troubleshoot": "eb92ec8ba4a1261ab16201db8a596e748f0240722cb471b9bb42cf3d90ae53eb",
+    "nsec/nsg-audit": "39b7c3834ad5931ba7a8f0c620b07f6477a702c7e1e27cd445762b1a16b9fc04",
+    "nsec/segmentation-design": "43b5d2587fc3deab2e082f4e942d7ee5165e952e585d95d5bb9308c3f851075c",
+    "nsec/zero-trust-architecture": "23bd93ee45cbd200c05c35b7832e8e991816e276fa9d4b321827aa46f208fdf7",
+    "nsec/waf-policy-design": "a84ea44788209db329b228a6ad201fd8da4ec70efb547bd88e9bd5d2c462d58e",
+    "nsec/ddos-design": "c7d0ebdc3ee33fdbaf5351e018d402472579dd0623bb27f596ce87001d075594",
+    "nsec/flow-analysis": "3a27a3b3ecf2575565ac021802047d8d5df79d8cfe0735f97f30bb2074fd6c8a",
+    "nsec/compliance-check": "350e6a4bfd209b2a66b9d47d0e5cf8f0b1bdda297b728696b77e5301f58592dd",
+    "nsec/troubleshoot": "10d936cae8e34b0612cecf232ff1ddb5b676bcca6f87a001f0e7d2ee6e234c55",
+    "ntsh/connectivity-test": "5a9446209ffa39d4d1c6e83460901d2929bdb77b0907de61f251db2d2015b4a8",
+    "ntsh/packet-capture": "2bb7f4dbe0085588164e94a33ee03cc8a7953ab2f9f1903cf8088d54e0e83358",
+    "ntsh/pcap-analysis": "6487fcab4bc6cdcde32be44be5dc3541bbabea453f77d7112a441cbe6463efe8",
+    "ntsh/latency-analysis": "b5f4fb7c4f175189b16143ed91a63c707418b28065be709d0534ea82b311a27c",
+    "ntsh/routing-debug": "6165ea1692b2184e3f2329b0ccdf93ec059cec99e20211d282b1bb472f1fc1f8",
+    "ntsh/nat-debug": "9a6f20971aafdda96dbb3b00cdcf43793d9ae8e675d0386248b9cbc99bc10643",
+    "ntsh/mtu-path-discovery": "7c205abfb9c890a923473f6b13fc407ffce4b6e6c9da05905fe09943ff5dc786",
+    "ntsh/tls-handshake-debug": "42ed3c2f847a624234437042a3eb05a53b64d875e36dc9b86394e05225fc9ff6",
+    "vwan/vwan-design": "ea6d014782640224b01350e0f52e21850f556e78e2ea6328968fe056d4027d28",
+    "vwan/secured-vhub-design": "4a0277a783bb2dd10bd44586f1cf029e2e73b6ef724310802175390ce7366663",
+    "vwan/routing-intent": "de32b6d0539e6de80c02c6a849443d51f0a79ea06c999ce93e9c6a57a9da9a66",
+    "vwan/nva-integration": "b579eb79a45a288f902bca8543604ca92710962f5bd76fbffd5c3807db6cf0ba",
+    "vwan/branch-connectivity": "69e9ce5e2c91a170be8e29efd6f9a4bc519a4e7de8c8c680efefaf54188ba095",
+    "vwan/troubleshoot": "dab649a7ddefa7489b4da2bdb946026e550f24b4c055f96a484fd5b442a8989f",
+    "nmon/flow-log-setup": "c353ad2fb0f2bca6c7d641df34f0d6cfbb66bd3a5142083ef0b41882bae7cb81",
+    "nmon/traffic-analytics": "2e2d6e2d5128a5fcf3437e23dfcc480471db3bcd073709298d3cc942deb058f5",
+    "nmon/connection-monitor": "dc439a178b6691f70742e47bd8f43c53fca0e831bee8f1256307c0f78cf5a440",
+    "nmon/synthetic-monitoring": "84e1696d4ffff98bf6698c79c8f27a47da2ab3b8c648ac5f54589c2aba8d7e7b",
+    "nmon/alert-design": "4fcd940e2afc26f838197c5d9ddf4b58db95cc9de61b65b38fd273b596afaf47",
+    "nmon/dashboard-build": "f7fc0e42366a99db8863d932b894ba6fec16ece527573cde3a910d23acfabe13",
+    "nmon/baseline-analysis": "eecf28540d9a65d10e7f876747e4eb0e9085725e687cbda074ddc5cb6bdc7097",
+    "mcn/transit-design": "b6a97e4ed34dbfd56e1477a0928c5d12ffbe9e45dcfaf056be6d66d3e518a780",
+    "mcn/addressing-plan": "9d364fffe4722bb3fc795185fd74d7c7f36f64050257d7d4dc2b15b8406827e6",
+    "mcn/service-mapping": "6a43a9a98ce3a15d78f6913ce33056d1c01af10c32c0581712f4253284006c0e",
+    "mcn/latency-optimization": "b9727250bf5fc7cccba21ec205263ffb60c76d3f76915644d3b3e65a5700c6ff",
+    "mcn/cost-comparison": "a60529c39bc2de1463db5222820c2177b03eabaa196b1fac14f382acd06d58f8",
+    "price/retail-prices-api": "f10aed9b1aa1d9d89bb50fc67d5fceaf21af8413d0a8ac48c171a797e39be4d3",
+    "price/egress-calc": "3df0bd6e7bd6df9331d0de62579e1d18530cc52e4d2e2ad021522c002678130d",
+    "price/egress-architecture": "44f96d402f168c33bfd52d90e702dbb6296db66cda3e264a573f9eebeb5622ac",
+    "price/vpn-pricing": "affee1c5b10b32efdbcda1cd4781680591cd12f0c5304d24353b580d46c0ae95",
+    "price/circuit-pricing": "29cf0dce2200fd97e7088a886cd01f04a87f972642a1ba92b1a079c7e8519e2b",
+    "price/lb-pricing": "d8a119d9c106ac239eff4d9abbec45aeb480e6078fc37cbf7a5b4098e9a26739",
+    "price/firewall-pricing": "c5a8dc41a5f465ef62c46f2d9ac919e6ac4d1a03187deb9b78efcf4bdce9a35a",
+    "price/cost-optimizer": "d86e666e3eaa18328251e46dc0fec1d9d6dda7a88c4fa5f5744e7e2ce2226bc1",
+    "price/price-compare": "c70bfbf24b47a1a608fde355bc7e8d4fe63aeb083122f6ea84c09a80fa93df97",
+    "iac/bicep-gen": "98f434076ea54ca06ad6bcaba1f0642ab98d4facf2e9e25132a96e6ac331b85a",
+    "iac/terraform-gen": "ddd279888bea2f10ce052b160e2c9eef1dcb621c4f081c04889a30423315f741",
+    "iac/ansible-gen": "6ee5b51003b37b3e7f115b3763e201295f9ddf1a00f4644da06347509c3752ab",
+    "iac/arm-gen": "813ce6fdbc22168baa20e182dc25b9fe48a69e260ac217cb49020dc9d2b1af93",
+    "cnet/cni-selection": "289183b4f33242d7286939cde535201694fcc3a4ad7d16482f33ad60e9560279",
+    "cnet/network-policy": "601d286cc9c0be6548784b02edd047b2e843e2dd80bd41c2019e1504bcd04462",
+    "cnet/service-mesh": "c25c20ec40a9b2af978b4950f9251ed72cff35c8e26e62e09d0b4f773ada6af4",
+    "cnet/ingress-design": "5e104ac4636fa39fa34da63b7a4ea156202b1c6d4fa1e881acf76bd1c52dc4ec",
+    "cnet/cross-cluster": "ef9e633287c9d29c1d66587bf04a8f9cde19704886ca9e525085aab1bd9469c4",
+    "cnet/troubleshoot": "03421cb26a2c984c01a0e136673844e1022c0484c73df8ae8ede87aa2d8a5571",
+    "cdn/cdn-design": "616888416a23dba000a976b29b88504f0743498eb16488bbbfe27d3d200f4885",
+    "cdn/edge-routing": "4b49e088034867ea227d301d5a03947fc0b5dde1e3187f38ac6a89b6e7f35cc1",
+    "cdn/cache-optimization": "7cf5de79377e2940050b16d97f9638b40458aec7954fcaae05e83a6e01fd4c68",
+    "cdn/waf-edge": "0549810ec798cd1638d3d3b3ee405768b47938b410ced663880ae2377431338a",
+    "cdn/troubleshoot": "66809d4fecf5f443b1ee8d33eb7d52a59d4ed8c97d1afa8ff2d041be47300d7d",
+    "nauto/pipeline-design": "402542a0b5c1727a1a6fd8e327201098b9da574bc0aa0dd1452df05a70dd5a8a",
+    "nauto/drift-detection": "100df8638471653c980b02a2c1b4f037414a9a546ede1aa524ae49388237c960",
+    "nauto/policy-as-code": "6921d81e8ce951b9ee75da1b14efaa0c1ec2fc871603805e076dfc87ffe3612c",
+    "nauto/testing": "07f1fe513a528f5a199972f1b330d8db8c24dedc001726c3c33ee23c6e0ddffc",
+    "nauto/rollback": "b9ab20fb445c880c484dd02a359acbce09f312c2bc991cb832c00780c77929dc",
+    "sase/architecture": "21138e24c3296bec207cc6aba8dbad31f11f60ab4b05f1c3ad6e85470ba994f2",
+    "sase/ztna-design": "b498eb0bfa99795927066ba60b177e7a5dd5828e68c360682fee90b522d2b727",
+    "sase/swg-casb": "ccecdceab1abb534ec43041464001c5cf0687ce69822426f095a774bee61a5b5",
+    "sase/sdwan-integration": "8d8866b3223cf5e7f632d2c609656e2fcd91ef099ac9455826ea00be145d2277",
+    "sase/vendor-compare": "eddaf30936afc9994135a4edb8a0df502c0b66b0606f1198d4a4a94a4e777748",
+    "ncap/bandwidth-forecast": "524bee014d2801f07c701e58e9daf331b5d71ec8b52f8cf3b68f224e3d6e5d59",
+    "ncap/gateway-sizing": "0cdd95e5f748a07016fc21a1a451ce30f390835a46cb050cb573b3f8911b4abe",
+    "ncap/throughput-calc": "d5a5e20d3bc2f1598f2db83f04d1d4a1fce319913845844f72cfc3251b71346b",
+    "ncap/scalability-design": "e656c25960a414caec435fa70a2fb49675d74d26034a468c752cd0efc2cd808d",
+    "ncap/growth-model": "c6032f52c4de1f37a03dd706ec0e968a7bc7650656d9f9b3aef8595cd3f38c23",
+    "ipv6/dual-stack": "6156924b57b23eac4aabc991dd4afdce00051c7a4158006cc60ae60ea65ed0b2",
+    "ipv6/transition-plan": "089a3b1fd39b98d588bdbd978426827eb0be17e2f1ba48c8f07187078b52a55c",
+    "ipv6/addressing": "9101738de060859b23e01a2afdaa1b6f0754bdf1e5c5edecef5641dc313e1de0",
+    "ipv6/compatibility": "1a804d40cb497733eb71cf1b9925638785dc64132a666c676b3a6f9797597a3d",
+    "ipv6/troubleshoot": "294a727bcf1939a43770e268f769af0d135fdb5e561daae00e3ccde2d673e454",
+    "doc/report-structure": "ee080c3f3f3cf260d086ab2586b9a62782672de2d21490ea828aa6142c205896",
+    "doc/html-report": "fe1a3407d1067e76c1764f846f0aa031b9aab1d94d14d38e1c68255f112099d4",
+    "doc/pdf-report": "01e2e0e3035e4707160f7f126630dda122d53a3c908b733387a528ea94aadc67",
+    "doc/docx-report": "e29032d421edd54faf8ee0399b9f3b4fbc85415e1cd2a57ab60e05f2d5c83302",
+    "doc/xlsx-workbook": "ebf8bb2f31786e113cf9a81aa097af4e03442740d438fcf614238d3f49f8629f"
+  },
+  "skillLegacy": "65ca4e4e9e040e0e0a42bf98ce4554b2c144d4fc871e2caecbdb50e2fd218074",
+  "unknownSpecialist": "9faacdd50b68b2aaa81b9b4751b55e4fd1ba131fd53c99478a655449c570e273",
+  "unknownSkill": "28ab04693842137f9c9f69ff2dac2eb5c5544cff1f1f52f42565c1971a217a2b",
+  "sessionStart": "ca1fcc9fa4da17d4bff84618b44248547bc8b876ab4d3dd8e32a81dd3a7e465c",
+  "prompts": [
+    null,
+    "47b7f6cbcf8de81095aa85d34b9caec1a3203104338845947f325051d9349cf2",
+    "59f5a4ea58b9d9c8bc21d5d0c7336071d613fb30b5c9c0a5c21896e02c78d449",
+    "f8e6fd3962685e00327e4442a9e7ca0d7bc2734b130c0e205a45dffd707df6c4",
+    "59155d8b923dcc8bfc8e6c28080141a57d23b5da72ecbfcea32ef5824c60fb33"
+  ]
+}
