@@ -1,0 +1,132 @@
+{
+  "schemaVersion": 1,
+  "retiredTasks": [],
+  "tasks": [
+    {
+      "id": "hybrid-health",
+      "yaml": "hybrid-health-daily.yaml",
+      "nameEnv": "HYBRID_TASK_NAME",
+      "defaultName": "NetOps: Hybrid Connectivity Health (Daily)",
+      "description": "Part of the NetOps plugin (powered by Network Desk) — daily read-only check of VPN and ExpressRoute gateways, connections, BGP peers and learned/advertised routes; always refreshes the Hybrid Health Live Report and emails only when a critical or high finding is detected.",
+      "cronEnv": "HYBRID_CRON",
+      "defaultCron": "0 6 * * *",
+      "modelEnv": "HYBRID_MODEL_TIER",
+      "reportNameEnv": "HYBRID_REPORT_NAME",
+      "defaultReportName": "NetOps: Hybrid Health",
+      "prompt": "prompts/hybrid-health.txt",
+      "emailSubject": "NetOps hybrid connectivity alert — <date>",
+      "emailImportance": "High",
+      "emailWhen": "critical-high",
+      "tags": [
+        "netops",
+        "netops-hybrid-health",
+        "netops-live-report"
+      ]
+    },
+    {
+      "id": "nsg-firewall-audit",
+      "yaml": "nsg-firewall-audit-weekly.yaml",
+      "nameEnv": "NSG_AUDIT_TASK_NAME",
+      "defaultName": "NetOps: NSG & Firewall Audit (Weekly)",
+      "description": "Part of the NetOps plugin (powered by Network Desk) — weekly read-only audit of NSG and Azure Firewall rules: overly broad, shadowed and unused rules and risky management ports. Recommends only; never changes rules.",
+      "cronEnv": "NSG_AUDIT_CRON",
+      "defaultCron": "0 7 * * 1",
+      "modelEnv": "NSG_AUDIT_MODEL_TIER",
+      "reportNameEnv": "NSG_AUDIT_REPORT_NAME",
+      "defaultReportName": "NetOps: NSG & Firewall Audit",
+      "prompt": "prompts/nsg-firewall-audit.txt",
+      "emailSubject": "Weekly NetOps NSG & firewall audit — <date>",
+      "emailImportance": "Normal",
+      "emailWhen": "always",
+      "tags": [
+        "netops",
+        "netops-nsg-firewall-audit",
+        "netops-live-report"
+      ]
+    },
+    {
+      "id": "pe-dns-validation",
+      "yaml": "pe-dns-validation-weekly.yaml",
+      "nameEnv": "PEDNS_TASK_NAME",
+      "defaultName": "NetOps: Private Endpoint DNS Validation (Weekly)",
+      "description": "Part of the NetOps plugin (powered by Network Desk) — weekly read-only validation of private endpoints, private DNS zone VNet links and A records. Recommends only; never changes DNS.",
+      "cronEnv": "PEDNS_CRON",
+      "defaultCron": "30 7 * * 1",
+      "modelEnv": "PEDNS_MODEL_TIER",
+      "reportNameEnv": "PEDNS_REPORT_NAME",
+      "defaultReportName": "NetOps: Private Endpoint DNS",
+      "prompt": "prompts/pe-dns-validation.txt",
+      "emailSubject": "Weekly NetOps private endpoint DNS validation — <date>",
+      "emailImportance": "Normal",
+      "emailWhen": "always",
+      "tags": [
+        "netops",
+        "netops-private-endpoint-dns",
+        "netops-live-report"
+      ]
+    },
+    {
+      "id": "exposure-scan",
+      "yaml": "exposure-scan-weekly.yaml",
+      "nameEnv": "EXPOSURE_TASK_NAME",
+      "defaultName": "NetOps: Exposure Scan (Weekly)",
+      "description": "Part of the NetOps plugin (powered by Network Desk) — weekly read-only scan of public IPs, internet-open ports, PaaS public network access and missing WAF. Recommends only; never changes exposure.",
+      "cronEnv": "EXPOSURE_CRON",
+      "defaultCron": "0 8 * * 1",
+      "modelEnv": "EXPOSURE_MODEL_TIER",
+      "reportNameEnv": "EXPOSURE_REPORT_NAME",
+      "defaultReportName": "NetOps: Exposure",
+      "prompt": "prompts/exposure-scan.txt",
+      "emailSubject": "Weekly NetOps exposure scan — <date>",
+      "emailImportance": "Normal",
+      "emailWhen": "always",
+      "tags": [
+        "netops",
+        "netops-exposure-scan",
+        "netops-live-report"
+      ]
+    },
+    {
+      "id": "capacity-forecast",
+      "yaml": "capacity-forecast-monthly.yaml",
+      "nameEnv": "CAPACITY_TASK_NAME",
+      "defaultName": "NetOps: IP & Gateway Capacity Forecast (Monthly)",
+      "description": "Part of the NetOps plugin (powered by Network Desk) — monthly read-only forecast of subnet IP exhaustion and gateway capacity headroom. Recommends only; never resizes.",
+      "cronEnv": "CAPACITY_CRON",
+      "defaultCron": "0 7 1 * *",
+      "modelEnv": "CAPACITY_MODEL_TIER",
+      "reportNameEnv": "CAPACITY_REPORT_NAME",
+      "defaultReportName": "NetOps: IP & Gateway Capacity",
+      "prompt": "prompts/capacity-forecast.txt",
+      "emailSubject": "Monthly NetOps capacity forecast — <month>",
+      "emailImportance": "Normal",
+      "emailWhen": "always",
+      "tags": [
+        "netops",
+        "netops-ip-capacity",
+        "netops-live-report"
+      ]
+    },
+    {
+      "id": "kpi-scorecard",
+      "yaml": "kpi-scorecard-monthly.yaml",
+      "nameEnv": "SCORECARD_TASK_NAME",
+      "defaultName": "NetOps: Monthly Review (KPI Scorecard)",
+      "description": "Part of the NetOps plugin (powered by Network Desk) — the monthly NetOps review saved as a Live Report: KPI scorecard across hybrid health, private endpoint DNS, routing, rule hygiene, exposure, SNAT, IP capacity and flow-log coverage, with one prioritized action list.",
+      "cronEnv": "SCORECARD_CRON",
+      "defaultCron": "0 9 1 * *",
+      "modelEnv": "SCORECARD_MODEL_TIER",
+      "reportNameEnv": "SCORECARD_REPORT_NAME",
+      "defaultReportName": "NetOps: Monthly Review",
+      "prompt": "prompts/kpi-scorecard.txt",
+      "emailSubject": "Monthly NetOps review — <month>",
+      "emailImportance": "Normal",
+      "emailWhen": "always",
+      "tags": [
+        "netops",
+        "netops-live-report",
+        "netops-kpi-scorecard"
+      ]
+    }
+  ]
+}

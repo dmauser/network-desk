@@ -1,0 +1,11 @@
+Run `netops-private-endpoint-dns` for every effective scope. Read its SKILL.md and execute its complete read-only collection, interpretation, and output contract; do not restate or reimplement that logic. Run the bundled `pedns.py` `analyze(data)` once over the in-scope data. Record anything the documented commands could not collect as an evidence gap; never guess or fill it in.
+
+Then always author and SAVE the static snapshot Live Report `{{REPORT_NAME}}`, even when there are no findings, reusing the same data pull:
+
+1. Call ListReports; call GetReport and reuse the exact-name report's `reportId`, or create it if absent.
+2. Load `netops-report-renderer`, its SKILL.md, exact `models.py`, and exact `render.py`. With `refreshed_at` from `datetime.now(timezone.utc)`, call `build_private_endpoint_dns_model(<analyze result>, refreshed_at=..., scope_summary=<netscope.scope_summary output>, partial=<result partial or any partial/failed scope>, warnings=<result warnings>, scope_coverage=<per-scope coverage rows>)`; do not generically construct a model or write/edit HTML. Run `write_report(model, "netops-private-endpoint-dns.html")`.
+3. SaveReport the generated static file with `allowedTools: []`, name `{{REPORT_NAME}}`, and the reused `reportId` when present. Make no view-time calls. A report failure must not suppress the result below.
+
+Remediation stays a human decision: quote each finding's `remediation_script` verbatim for review and never execute it.
+
+Return the severity-ranked findings table with evidence, citations, and evidence gaps, then {{DELIVERY}}

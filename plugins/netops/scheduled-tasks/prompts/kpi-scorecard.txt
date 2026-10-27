@@ -1,0 +1,11 @@
+Build the monthly NetOps review for every effective scope. For each KPI skill — `netops-hybrid-health` (`hybrid.py`), `netops-private-endpoint-dns` (`pedns.py`), `netops-routing-analyzer` (`routing.py`), `netops-nsg-firewall-audit` (`ruleaudit.py`), `netops-exposure-scan` (`exposure.py`), `netops-snat-egress` (`snat.py`), `netops-ip-capacity` (`capacity.py`), and `netops-flow-insights` (`flows.py`) — read its SKILL.md, execute its complete read-only collection contract, and run its bundled `analyze(data)` once over the in-scope data. Do not restate or reimplement any engine logic. A skill whose data cannot be collected stays in the review as an evidence gap with its KPI shown as not measured; never guess a KPI value.
+
+Then always author and SAVE the static snapshot Live Report `{{REPORT_NAME}}`, reusing the same data pull:
+
+1. Call ListReports; call GetReport and reuse the exact-name report's `reportId`, or create it if absent.
+2. Load `netops-report-renderer`, its SKILL.md, exact `models.py`, exact `scorecard.py`, and exact `render.py`. With `refreshed_at` from `datetime.now(timezone.utc)`, call `build_scorecard_model(<list of analyze results>, refreshed_at=..., scope_summary=<netscope.scope_summary output>, partial=<any result partial or any partial/failed scope>, warnings=<all result warnings>, scope_coverage=<per-scope coverage rows>)`; do not generically construct a model or write/edit HTML. Run `write_report(model, "netops-kpi-scorecard.html")`.
+3. SaveReport the generated static file with `allowedTools: []`, name `{{REPORT_NAME}}`, and the reused `reportId` when present. Make no view-time calls. A report failure must not suppress the review below.
+
+Remediation stays a human decision: quote each finding's `remediation_script` verbatim for review and never execute it.
+
+Return the KPI scorecard (value, target, status per KPI), the KPIs that moved to warning or critical, and one prioritized action list grouped by skill, then {{DELIVERY}}
