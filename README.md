@@ -20,6 +20,7 @@
 | 📚 | [Validation-first: per-cloud documentation MCP](#validation-first-per-cloud-documentation-mcp) | Authoritative validation of Azure/AWS/GCP facts |
 | 📝 | [Usage Examples](#usage-examples) | Example prompts for every specialist |
 | 📁 | [Output files](#output-files) | Where generated diagrams, reports, and configs are saved |
+| 🛰️ | [NetOps for Azure SRE Agent](#netops-for-azure-sre-agent) | Read-only runtime network operations plugin for live Azure |
 | 📂 | [Repository Structure](#repository-structure) | Full folder tree and conventions |
 | 🔧 | [Troubleshooting](#troubleshooting) | Common issues and fixes |
 | 🔒 | [Privacy](#privacy) | How the extension handles your data |
@@ -684,11 +685,41 @@ network-desk/
 
 The bundled Python renderers (`extensions/network-desk/renderers/make_{html,pdf,docx,xlsx}.py`) honor this layout: pass `--specialist <kebab-dir>` and they resolve the output path automatically (override with `--output`/`--outdir`). The [Report Builder](#-report-builder) specialist orchestrates these renderers for high-quality reports.
 
+## NetOps for Azure SRE Agent
+
+**NetOps — Network Operations for Azure SRE Agent (powered by Network Desk)** is a second product
+in this repo. It is an [Azure SRE Agent](https://learn.microsoft.com/azure/sre-agent/overview)
+plugin (`plugins/netops/`) that runs **read-only operations against live Azure**. It ships:
+
+- 10 skills with deterministic Python engines
+- the `netops-investigator` subagent
+- daily, weekly and monthly scheduled tasks
+- incident response plan specs
+
+Network Desk stays the multi-cloud, design-time advisor. NetOps is Azure-only and reuses the same
+specialist knowledge, which `scripts/netops/build-netops.mjs` generates from
+`extensions/network-desk/` (single source of truth).
+
+- Remediation is generated as scripts for a human to run.
+- The agent needs no write RBAC: Reader, Monitoring Reader, Log Analytics Reader and a read-only
+  diagnostics custom role.
+- It is distributed through this repo's marketplace (`.github/plugin/marketplace.json`, entry
+  `netops`) and is not part of the npm package.
+
+- 📘 [plugins/netops/README.md](plugins/netops/README.md): skills, agent, tasks, response plans, development
+- 🚀 [docs/netops/ONBOARDING.md](docs/netops/ONBOARDING.md): automated (`deploy.sh`) and manual portal setup, RBAC
+
+---
+
 ## Repository Structure
 
 ```
 network-desk/
 ├── README.md                              # This file
+├── plugins/netops/                        # NetOps Azure SRE Agent plugin (skills, agent, tasks, response plans, deploy/)
+├── scripts/netops/build-netops.mjs        # Generates NetOps skill reference/ from the specialists
+├── tests/netops/  evals/netops/           # NetOps unit tests and fault-scenario evals
+├── docs/netops/ONBOARDING.md              # NetOps onboarding (automated + portal)
 ├── LICENSE                                # MIT license
 ├── package.json                           # npm package config (name, bin, engines)
 ├── bin/

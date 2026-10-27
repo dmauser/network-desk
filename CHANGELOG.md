@@ -8,6 +8,37 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Added
+
+- **NetOps 0.1.0: Network Operations for Azure SRE Agent (powered by Network Desk).** This is a
+  new Azure-only, read-only SRE Agent plugin in `plugins/netops/`, published as the `netops`
+  entry in `.github/plugin/marketplace.json`. The npm package is unchanged.
+  - **Ten skills**, each with a deterministic Python engine, a Learn-cited `SKILL.md` and
+    examples: managed-scope, report-renderer, hybrid-health, private-endpoint-dns,
+    routing-analyzer, nsg-firewall-audit, exposure-scan, snat-egress, ip-capacity and
+    flow-insights.
+  - **`netops-investigator` subagent** with symptom routing (YAML/JSON rendered from
+    `routing.json`).
+  - **Six scheduled tasks**: daily hybrid health; weekly NSG/firewall audit, PE-DNS validation
+    and exposure scan; monthly capacity forecast and KPI scorecard.
+  - **Four incident response plan specs**: hybrid down, PaaS unreachable via PE, latency/SNAT,
+    and asymmetric NVA routing.
+  - **Managed-scope enforcement** with the same semantics as the FinOps pack. Scheduled tasks
+    fail closed.
+  - **Remediation** is emitted as commented-out scripts for a human to review and run.
+  - **Install tooling**: `install-api.sh` and `deploy/` (Bicep + `deploy.sh`). These grant only
+    Reader, Monitoring Reader, Log Analytics Reader and a custom *NetOps Network Diagnostics
+    Reader* role.
+  - **Docs**: `docs/netops/ONBOARDING.md`.
+- **Single source of truth.** `scripts/netops/build-netops.mjs` generates the NetOps skill
+  `reference/` content from `extensions/network-desk/registry.mjs` and `specialists/**`.
+  Extension behavior is unchanged and covered by a golden behavior test.
+- **Tests and evals.** `tests/netops/` covers engines, manifests/YAML, managed scope, deploy and
+  RBAC. `evals/netops/` holds 13 fault scenarios modeled on azure-sre-netops (SC-xx) and
+  az-srenetops-microhack (MH-xx).
+- **CI.** A new `netops` job runs drift checks (generated reference, tasks, agent, response
+  plans), `bash -n` on the installers, pytest and the evals.
+
 ## [2.3.0] - 2026-06-22
 
 ### Changed
