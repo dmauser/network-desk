@@ -1,0 +1,16 @@
+{
+  "id": "CAP-01",
+  "title": "Subnet IP exhaustion in spoke",
+  "source": "https://github.com/dmauser/azure-sre-netops",
+  "injected_fault": "snet-app at 118/123 IPs and snet-data growing ~0.4 IPs/day; GatewaySubnet /28",
+  "symptom": "Private endpoint and VM scale-out deployments in vnet-spoke1 fail because the subnet is full; IP address exhaustion with no available IPs left, and we need a capacity forecast and address space headroom.",
+  "expected_skill": "netops-ip-capacity",
+  "input_ref": "plugins/netops/skills/netops-ip-capacity/examples/subnet-exhaustion-input.json",
+  "expect": {
+    "finding_prefixes": [
+      "CAP-SUBNET-UTIL:",
+      "CAP-SUBNET-FORECAST:"
+    ],
+    "top_severity": "critical"
+  }
+}

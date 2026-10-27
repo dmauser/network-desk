@@ -1,0 +1,226 @@
+{
+  "app_gateways": [
+    {
+      "id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-spoke/providers/Microsoft.Network/applicationGateways/agw-netops",
+      "name": "agw-netops",
+      "properties": {
+        "frontendIPConfigurations": [
+          {
+            "name": "appGwPublicFrontendIp",
+            "properties": {
+              "publicIPAddress": {
+                "id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-spoke/providers/Microsoft.Network/publicIPAddresses/pip-appgw"
+              }
+            }
+          }
+        ],
+        "sku": {
+          "capacity": 2,
+          "name": "Standard_v2",
+          "tier": "Standard_v2"
+        }
+      }
+    }
+  ],
+  "bastions": [],
+  "managed_scopes": [
+    "/subscriptions/00000000-0000-0000-0000-000000000001"
+  ],
+  "nics": [
+    {
+      "id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-spoke/providers/Microsoft.Network/networkInterfaces/nic-vm-jump",
+      "name": "nic-vm-jump",
+      "properties": {
+        "ipConfigurations": [
+          {
+            "id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-spoke/providers/Microsoft.Network/networkInterfaces/nic-vm-jump/ipConfigurations/ipconfig1",
+            "name": "ipconfig1",
+            "properties": {
+              "privateIPAddress": "10.1.1.4",
+              "publicIPAddress": {
+                "id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-spoke/providers/Microsoft.Network/publicIPAddresses/pip-vm-jump"
+              },
+              "subnet": {
+                "id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-spoke/providers/Microsoft.Network/virtualNetworks/vnet-spoke1/subnets/snet-app"
+              }
+            }
+          }
+        ],
+        "networkSecurityGroup": {
+          "id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-spoke/providers/Microsoft.Network/networkSecurityGroups/nsg-vm-jump"
+        }
+      }
+    },
+    {
+      "id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-spoke/providers/Microsoft.Network/networkInterfaces/nic-vm-app",
+      "name": "nic-vm-app",
+      "properties": {
+        "ipConfigurations": [
+          {
+            "id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-spoke/providers/Microsoft.Network/networkInterfaces/nic-vm-app/ipConfigurations/ipconfig1",
+            "name": "ipconfig1",
+            "properties": {
+              "privateIPAddress": "10.1.1.5",
+              "subnet": {
+                "id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-spoke/providers/Microsoft.Network/virtualNetworks/vnet-spoke1/subnets/snet-app"
+              }
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "nsgs": [
+    {
+      "id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-spoke/providers/Microsoft.Network/networkSecurityGroups/nsg-netops-app",
+      "name": "nsg-netops-app",
+      "properties": {
+        "securityRules": [
+          {
+            "id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-spoke/providers/Microsoft.Network/networkSecurityGroups/nsg-netops-app/securityRules/allow-web-and-ssh",
+            "name": "allow-web-and-ssh",
+            "properties": {
+              "access": "Allow",
+              "destinationAddressPrefix": "*",
+              "destinationPortRanges": [
+                "22",
+                "443"
+              ],
+              "direction": "Inbound",
+              "priority": 200,
+              "protocol": "Tcp",
+              "sourceAddressPrefix": "Internet",
+              "sourcePortRange": "*"
+            }
+          },
+          {
+            "id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-spoke/providers/Microsoft.Network/networkSecurityGroups/nsg-netops-app/securityRules/allow-rdp-any",
+            "name": "allow-rdp-any",
+            "properties": {
+              "access": "Allow",
+              "destinationAddressPrefix": "*",
+              "destinationPortRanges": [
+                "3389"
+              ],
+              "direction": "Inbound",
+              "priority": 210,
+              "protocol": "Tcp",
+              "sourceAddressPrefix": "*",
+              "sourcePortRange": "*"
+            }
+          }
+        ],
+        "subnets": [
+          {
+            "id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-spoke/providers/Microsoft.Network/virtualNetworks/vnet-spoke1/subnets/snet-app"
+          }
+        ]
+      }
+    },
+    {
+      "id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-spoke/providers/Microsoft.Network/networkSecurityGroups/nsg-vm-jump",
+      "name": "nsg-vm-jump",
+      "properties": {
+        "networkInterfaces": [
+          {
+            "id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-spoke/providers/Microsoft.Network/networkInterfaces/nic-vm-jump"
+          }
+        ],
+        "securityRules": [
+          {
+            "id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-spoke/providers/Microsoft.Network/networkSecurityGroups/nsg-vm-jump/securityRules/allow-any-inbound",
+            "name": "allow-any-inbound",
+            "properties": {
+              "access": "Allow",
+              "destinationAddressPrefix": "*",
+              "destinationPortRanges": [
+                "*"
+              ],
+              "direction": "Inbound",
+              "priority": 100,
+              "protocol": "*",
+              "sourceAddressPrefix": "*",
+              "sourcePortRange": "*"
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "paas_resources": [
+    {
+      "id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-spoke/providers/Microsoft.Storage/storageAccounts/stnetopsdata",
+      "name": "stnetopsdata",
+      "networkRuleSet": {
+        "defaultAction": "Allow",
+        "ipRules": [],
+        "virtualNetworkRules": []
+      },
+      "publicNetworkAccess": "Enabled",
+      "type": "Microsoft.Storage/storageAccounts"
+    },
+    {
+      "id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-spoke/providers/Microsoft.KeyVault/vaults/kv-netops",
+      "name": "kv-netops",
+      "properties": {
+        "networkAcls": {
+          "defaultAction": "Deny",
+          "ipRules": [
+            {
+              "value": "203.0.113.10/32"
+            }
+          ],
+          "virtualNetworkRules": []
+        },
+        "publicNetworkAccess": "Enabled"
+      },
+      "type": "Microsoft.KeyVault/vaults"
+    },
+    {
+      "id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-spoke/providers/Microsoft.Sql/servers/sql-netops",
+      "name": "sql-netops",
+      "publicNetworkAccess": "Disabled",
+      "type": "Microsoft.Sql/servers"
+    }
+  ],
+  "public_ips": [
+    {
+      "id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-spoke/providers/Microsoft.Network/publicIPAddresses/pip-vm-jump",
+      "name": "pip-vm-jump",
+      "properties": {
+        "ipAddress": "20.10.0.4",
+        "ipConfiguration": {
+          "id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-spoke/providers/Microsoft.Network/networkInterfaces/nic-vm-jump/ipConfigurations/ipconfig1"
+        },
+        "publicIPAllocationMethod": "Static"
+      },
+      "sku": {
+        "name": "Standard",
+        "tier": "Regional"
+      }
+    },
+    {
+      "id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-spoke/providers/Microsoft.Network/publicIPAddresses/pip-appgw",
+      "name": "pip-appgw",
+      "properties": {
+        "ipAddress": "20.10.0.5",
+        "ipConfiguration": {
+          "id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-spoke/providers/Microsoft.Network/applicationGateways/agw-netops/frontendIPConfigurations/appGwPublicFrontendIp"
+        }
+      },
+      "sku": {
+        "name": "Standard"
+      }
+    },
+    {
+      "id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-spoke/providers/Microsoft.Network/publicIPAddresses/pip-orphan",
+      "name": "pip-orphan",
+      "properties": {
+        "ipAddress": "20.10.0.6"
+      },
+      "sku": {
+        "name": "Standard"
+      }
+    }
+  ]
+}

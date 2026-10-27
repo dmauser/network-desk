@@ -1,0 +1,15 @@
+{
+  "id": "SC-03",
+  "title": "Bad spoke UDR black-holes on-premises prefix",
+  "source": "https://github.com/dmauser/azure-sre-netops",
+  "injected_fault": "Route sc03-blackhole in the spoke route table sends 10.100.0.0/16 to next hop None.",
+  "symptom": "Spoke VMs cannot reach the 10.100.0.0/16 network; effective routes on the app NIC show next hop None from a user-defined route",
+  "expected_skill": "netops-routing-analyzer",
+  "input_ref": "plugins/netops/skills/netops-routing-analyzer/examples/sc03-blackhole-input.json",
+  "expect": {
+    "finding_prefixes": [
+      "RT-BLACKHOLE:"
+    ],
+    "top_severity": "critical"
+  }
+}

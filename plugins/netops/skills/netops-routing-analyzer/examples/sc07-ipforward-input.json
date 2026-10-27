@@ -1,0 +1,110 @@
+{
+  "effective_routes": [
+    {
+      "nic_id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-onprem/providers/Microsoft.Network/networkInterfaces/nic-vm-onprem-web",
+      "value": [
+        {
+          "addressPrefix": [
+            "10.100.0.0/16"
+          ],
+          "nextHopIpAddress": [],
+          "nextHopType": "VnetLocal",
+          "source": "Default",
+          "state": "Active"
+        },
+        {
+          "addressPrefix": [
+            "0.0.0.0/0"
+          ],
+          "nextHopIpAddress": [],
+          "nextHopType": "Internet",
+          "source": "Default",
+          "state": "Active"
+        },
+        {
+          "addressPrefix": [
+            "10.0.0.0/8"
+          ],
+          "name": "azure-via-nva",
+          "nextHopIpAddress": [
+            "10.100.0.4"
+          ],
+          "nextHopType": "VirtualAppliance",
+          "source": "User",
+          "state": "Active"
+        }
+      ]
+    }
+  ],
+  "managed_scopes": [
+    "/subscriptions/00000000-0000-0000-0000-000000000001"
+  ],
+  "nics": [
+    {
+      "enableIPForwarding": false,
+      "id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-onprem/providers/Microsoft.Network/networkInterfaces/nic-vm-onprem-web",
+      "ipConfigurations": [
+        {
+          "name": "ipconfig1",
+          "privateIPAddress": "10.100.1.4",
+          "subnet": {
+            "id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-onprem/providers/Microsoft.Network/virtualNetworks/vnet-onprem/subnets/snet-workload"
+          }
+        }
+      ],
+      "name": "nic-vm-onprem-web"
+    },
+    {
+      "enableIPForwarding": true,
+      "id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-onprem/providers/Microsoft.Network/networkInterfaces/nic-nva-onprem",
+      "ipConfigurations": [
+        {
+          "name": "ipconfig1",
+          "privateIPAddress": "10.100.0.4",
+          "subnet": {
+            "id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-onprem/providers/Microsoft.Network/virtualNetworks/vnet-onprem/subnets/snet-nva"
+          }
+        }
+      ],
+      "name": "nic-nva-onprem"
+    }
+  ],
+  "path_checks": [
+    {
+      "check": "small",
+      "detail": "curl http://10.100.1.4/ from vm-app timed out; tunnel and BGP Connected",
+      "path": "spoke1-app-to-onprem-web",
+      "payload_bytes": 64,
+      "result": "timeout",
+      "via_nva": "10.100.0.4"
+    },
+    {
+      "check": "large",
+      "detail": "64 KB download timed out",
+      "path": "spoke1-app-to-onprem-web",
+      "payload_bytes": 65536,
+      "result": "timeout",
+      "via_nva": "10.100.0.4"
+    }
+  ],
+  "route_tables": [
+    {
+      "id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-onprem/providers/Microsoft.Network/routeTables/rt-onprem-workload",
+      "name": "rt-onprem-workload",
+      "routes": [
+        {
+          "addressPrefix": "10.0.0.0/8",
+          "name": "azure-via-nva",
+          "nextHopIpAddress": "10.100.0.4",
+          "nextHopType": "VirtualAppliance"
+        }
+      ],
+      "subnets": [
+        {
+          "id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-onprem/providers/Microsoft.Network/virtualNetworks/vnet-onprem/subnets/snet-workload"
+        }
+      ]
+    }
+  ],
+  "vnet_peerings": []
+}

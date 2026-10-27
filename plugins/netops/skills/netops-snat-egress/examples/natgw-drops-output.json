@@ -1,0 +1,111 @@
+{
+  "evidence_gaps": [],
+  "findings": [
+    {
+      "citations": [
+        "https://learn.microsoft.com/azure/nat-gateway/nat-metrics",
+        "https://learn.microsoft.com/azure/nat-gateway/troubleshoot-nat-connectivity"
+      ],
+      "evidence": {
+        "dimensions": {
+          "BackendIPAddress": "",
+          "BackendPort": "",
+          "FrontendIPAddress": ""
+        },
+        "metric": "DatapathAvailability",
+        "min_average_pct": 97.5
+      },
+      "id": "SNAT-NAT-DATAPATHAVAILABILITY:natgw-hub",
+      "recommendation": "Datapath availability drops that coincide with connection failures point to SNAT exhaustion, connection limits, timeouts, or removed public IPs / subnets.",
+      "remediation_script": "# Human review required. Read-only verification (the agent never runs writes):\naz monitor metrics list --resource /subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-hub/providers/Microsoft.Network/natGateways/natgw-hub --metrics DatapathAvailability --aggregation Average --interval PT1M -o json\naz resource show --ids /subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-hub/providers/Microsoft.Network/natGateways/natgw-hub --query properties.provisioningState",
+      "resource_id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-hub/providers/Microsoft.Network/natGateways/natgw-hub",
+      "severity": "high",
+      "skill": "netops-snat-egress",
+      "title": "NAT gateway datapath availability 97.5% on natgw-hub"
+    },
+    {
+      "citations": [
+        "https://learn.microsoft.com/azure/azure-monitor/reference/supported-metrics/microsoft-network-natgateways-metrics",
+        "https://learn.microsoft.com/azure/nat-gateway/nat-metrics",
+        "https://learn.microsoft.com/azure/nat-gateway/troubleshoot-nat-connectivity"
+      ],
+      "evidence": {
+        "ConnectionState": "Failed",
+        "critical_at": 1000.0,
+        "failed_connections": 126.0
+      },
+      "id": "SNAT-NAT-FAILED-CONN:natgw-hub",
+      "recommendation": "Failed connections above zero indicate SNAT port exhaustion or the NAT gateway connection limit (50,000 simultaneous connections per IP to a unique destination). Add public IPs or a prefix, reduce the idle timeout, and reuse connections.",
+      "remediation_script": "# Human review required. Read-only verification (the agent never runs writes):\naz monitor metrics list --resource /subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-hub/providers/Microsoft.Network/natGateways/natgw-hub --metrics SNATConnectionCount --aggregation Total --interval PT1M --dimension ConnectionState -o json\naz monitor metrics list --resource /subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-hub/providers/Microsoft.Network/natGateways/natgw-hub --metrics TotalConnectionCount --aggregation Total --interval PT1M -o json\naz network nat gateway show -g rg-netops-hub -n natgw-hub --query \"{ips:publicIpAddresses,prefixes:publicIpPrefixes,idle:idleTimeoutInMinutes}\"\n# Change (review before running):\n# az network nat gateway update -g rg-netops-hub -n natgw-hub --public-ip-addresses <pip1> <pip2>",
+      "resource_id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-hub/providers/Microsoft.Network/natGateways/natgw-hub",
+      "severity": "high",
+      "skill": "netops-snat-egress",
+      "title": "NAT gateway natgw-hub: 126 failed SNAT connection(s)"
+    },
+    {
+      "citations": [
+        "https://learn.microsoft.com/azure/azure-monitor/reference/supported-metrics/microsoft-network-natgateways-metrics",
+        "https://learn.microsoft.com/azure/nat-gateway/nat-metrics",
+        "https://learn.microsoft.com/azure/nat-gateway/troubleshoot-nat-connectivity"
+      ],
+      "evidence": {
+        "PacketDropCount": 341.0,
+        "failed_snat_connections_same_window": true
+      },
+      "id": "SNAT-NAT-PACKET-DROPS:natgw-hub",
+      "recommendation": "Check whether drops coincide with failed SNAT connections (exhaustion) or high connection volume. On StandardV2 NAT Gateway, drops also indicate the connection flow rate limit.",
+      "remediation_script": "# Human review required. Read-only verification (the agent never runs writes):\naz monitor metrics list --resource /subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-hub/providers/Microsoft.Network/natGateways/natgw-hub --metrics PacketDropCount --aggregation Total --interval PT1M -o json\naz monitor metrics list --resource /subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-hub/providers/Microsoft.Network/natGateways/natgw-hub --metrics SNATConnectionCount --aggregation Total --interval PT1M --dimension ConnectionState -o json",
+      "resource_id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-hub/providers/Microsoft.Network/natGateways/natgw-hub",
+      "severity": "high",
+      "skill": "netops-snat-egress",
+      "title": "NAT gateway natgw-hub: 341 dropped packet(s) coinciding with failed SNAT connections"
+    },
+    {
+      "citations": [
+        "https://learn.microsoft.com/azure/nat-gateway/nat-gateway-resource",
+        "https://learn.microsoft.com/azure/nat-gateway/troubleshoot-nat-connectivity"
+      ],
+      "evidence": {
+        "default_minutes": 4,
+        "idleTimeoutInMinutes": 30.0
+      },
+      "id": "SNAT-NAT-IDLE-TIMEOUT:natgw-hub",
+      "recommendation": "An idle timeout above the 4-minute default holds SNAT ports longer and adds pressure on the port inventory. Prefer TCP keepalives with a shorter idle timeout.",
+      "remediation_script": "# Human review required. Read-only verification (the agent never runs writes):\naz network nat gateway show -g rg-netops-hub -n natgw-hub --query idleTimeoutInMinutes\n# Change (review before running):\n# az network nat gateway update -g rg-netops-hub -n natgw-hub --idle-timeout 4",
+      "resource_id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-hub/providers/Microsoft.Network/natGateways/natgw-hub",
+      "severity": "low",
+      "skill": "netops-snat-egress",
+      "title": "NAT gateway natgw-hub: TCP idle timeout 30 min while connections fail or drop"
+    }
+  ],
+  "kpis": {},
+  "metrics": [
+    {
+      "detail": "UsedSnatPorts / AllocatedSnatPorts across 0 LB backend sample(s)",
+      "label": "Peak SNAT port utilization",
+      "tone": "neutral",
+      "value": "n/a"
+    },
+    {
+      "detail": "ConnectionState = Failed (Load Balancer + NAT Gateway)",
+      "label": "Failed SNAT connections",
+      "tone": "critical",
+      "value": "126"
+    },
+    {
+      "detail": "Public LBs with SNAT rules and NAT gateways in scope",
+      "label": "Egress resources",
+      "tone": "neutral",
+      "value": "0 LB / 1 NAT GW"
+    },
+    {
+      "detail": "VipAvailability / DipAvailability / NAT DatapathAvailability (min average)",
+      "label": "Lowest data path availability",
+      "tone": "critical",
+      "value": "97.5%"
+    }
+  ],
+  "partial": false,
+  "skill": "netops-snat-egress",
+  "warnings": []
+}

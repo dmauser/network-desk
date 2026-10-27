@@ -1,0 +1,224 @@
+{
+  "evidence_gaps": [],
+  "findings": [
+    {
+      "citations": [
+        "https://learn.microsoft.com/azure/defender-for-cloud/just-in-time-access-usage",
+        "https://learn.microsoft.com/azure/security/fundamentals/network-best-practices",
+        "https://learn.microsoft.com/azure/virtual-network/network-security-group-how-it-works",
+        "https://learn.microsoft.com/cli/azure/network/nic",
+        "https://learn.microsoft.com/cli/azure/network/nsg/rule"
+      ],
+      "evidence": {
+        "allowedBy": {
+          "nic:nsg-vm-jump": [
+            "allow-any-inbound"
+          ],
+          "subnet:nsg-netops-app": [
+            "allow-rdp-any",
+            "allow-web-and-ssh"
+          ]
+        },
+        "nsgPath": [
+          "subnet:nsg-netops-app",
+          "nic:nsg-vm-jump"
+        ],
+        "port": 22,
+        "privateIp": "10.1.1.4",
+        "publicIp": "20.10.0.4",
+        "publicIpSku": "Standard"
+      },
+      "id": "EXP-MGMT-EXPOSED:nic-vm-jump:22",
+      "recommendation": "Close management ports to the Internet: use Azure Bastion or just-in-time VM access and restrict any remaining rule to trusted source prefixes.",
+      "remediation_script": "# Human review required. Read-only verification (the agent never runs writes):\naz network nic list-effective-nsg -g rg-netops-spoke -n nic-vm-jump -o json\naz network nsg rule list -g rg-netops-spoke --nsg-name nsg-netops-app --include-default -o table\naz network nsg rule list -g rg-netops-spoke --nsg-name nsg-vm-jump --include-default -o table\n# Change (review before running):\n# az network nsg rule update -g <nsg-rg> --nsg-name <nsg> -n <allowing-rule> --access Deny",
+      "resource_id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-spoke/providers/Microsoft.Network/networkInterfaces/nic-vm-jump",
+      "severity": "critical",
+      "skill": "netops-exposure-scan",
+      "title": "SSH (TCP 22) on nic-vm-jump is reachable from the Internet via 20.10.0.4"
+    },
+    {
+      "citations": [
+        "https://learn.microsoft.com/azure/defender-for-cloud/just-in-time-access-usage",
+        "https://learn.microsoft.com/azure/security/fundamentals/network-best-practices",
+        "https://learn.microsoft.com/azure/virtual-network/network-security-group-how-it-works",
+        "https://learn.microsoft.com/cli/azure/network/nic",
+        "https://learn.microsoft.com/cli/azure/network/nsg/rule"
+      ],
+      "evidence": {
+        "allowedBy": {
+          "nic:nsg-vm-jump": [
+            "allow-any-inbound"
+          ],
+          "subnet:nsg-netops-app": [
+            "allow-rdp-any",
+            "allow-web-and-ssh"
+          ]
+        },
+        "nsgPath": [
+          "subnet:nsg-netops-app",
+          "nic:nsg-vm-jump"
+        ],
+        "port": 3389,
+        "privateIp": "10.1.1.4",
+        "publicIp": "20.10.0.4",
+        "publicIpSku": "Standard"
+      },
+      "id": "EXP-MGMT-EXPOSED:nic-vm-jump:3389",
+      "recommendation": "Close management ports to the Internet: use Azure Bastion or just-in-time VM access and restrict any remaining rule to trusted source prefixes.",
+      "remediation_script": "# Human review required. Read-only verification (the agent never runs writes):\naz network nic list-effective-nsg -g rg-netops-spoke -n nic-vm-jump -o json\naz network nsg rule list -g rg-netops-spoke --nsg-name nsg-netops-app --include-default -o table\naz network nsg rule list -g rg-netops-spoke --nsg-name nsg-vm-jump --include-default -o table\n# Change (review before running):\n# az network nsg rule update -g <nsg-rg> --nsg-name <nsg> -n <allowing-rule> --access Deny",
+      "resource_id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-spoke/providers/Microsoft.Network/networkInterfaces/nic-vm-jump",
+      "severity": "critical",
+      "skill": "netops-exposure-scan",
+      "title": "RDP (TCP 3389) on nic-vm-jump is reachable from the Internet via 20.10.0.4"
+    },
+    {
+      "citations": [
+        "https://learn.microsoft.com/cli/azure/network/application-gateway",
+        "https://learn.microsoft.com/cli/azure/network/application-gateway/waf-policy",
+        "https://learn.microsoft.com/rest/api/application-gateway/application-gateways/get"
+      ],
+      "evidence": {
+        "firewallPolicy": "",
+        "skuTier": "Standard_v2",
+        "wafConfigEnabled": null
+      },
+      "id": "EXP-APPGW-NO-WAF:agw-netops",
+      "recommendation": "Internet-facing web apps should be protected by WAF: move to the WAF_v2 tier and associate a WAF policy in Prevention mode.",
+      "remediation_script": "# Human review required. Read-only verification (the agent never runs writes):\naz network application-gateway show -g rg-netops-spoke -n agw-netops --query \"{sku:sku,firewallPolicy:firewallPolicy,waf:webApplicationFirewallConfiguration}\"\naz network application-gateway waf-policy list -g rg-netops-spoke -o table",
+      "resource_id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-spoke/providers/Microsoft.Network/applicationGateways/agw-netops",
+      "severity": "high",
+      "skill": "netops-exposure-scan",
+      "title": "Public Application Gateway agw-netops has no Web Application Firewall (tier Standard_v2)"
+    },
+    {
+      "citations": [
+        "https://learn.microsoft.com/cli/azure/storage/account",
+        "https://learn.microsoft.com/rest/api/storagerp/storage-accounts/get-properties"
+      ],
+      "evidence": {
+        "defaultAction": "Allow",
+        "ipAndVnetRules": 0,
+        "publicNetworkAccess": "Enabled",
+        "type": "Microsoft.Storage/storageAccounts"
+      },
+      "id": "EXP-PAAS-OPEN:stnetopsdata",
+      "recommendation": "The service accepts traffic from any Internet address (subject to authentication). Set the network default action to Deny with explicit IP/VNet rules, or disable public network access and use private endpoints.",
+      "remediation_script": "# Human review required. Read-only verification (the agent never runs writes):\naz storage account show -g rg-netops-spoke -n stnetopsdata --query \"{pna:publicNetworkAccess,acl:networkRuleSet}\"\n# Change (review before running):\n# az storage account update -g rg-netops-spoke -n stnetopsdata --public-network-access Disabled",
+      "resource_id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-spoke/providers/Microsoft.Storage/storageAccounts/stnetopsdata",
+      "severity": "high",
+      "skill": "netops-exposure-scan",
+      "title": "stnetopsdata: public network access enabled with default action Allow"
+    },
+    {
+      "citations": [
+        "https://learn.microsoft.com/azure/virtual-network/ip-services/public-ip-addresses",
+        "https://learn.microsoft.com/azure/virtual-network/network-security-group-how-it-works",
+        "https://learn.microsoft.com/cli/azure/network/nic"
+      ],
+      "evidence": {
+        "allowedBy": {
+          "TCP": {
+            "nic:nsg-vm-jump": [
+              "allow-any-inbound"
+            ],
+            "subnet:nsg-netops-app": [
+              "allow-rdp-any",
+              "allow-web-and-ssh"
+            ]
+          }
+        },
+        "nsgPath": [
+          "subnet:nsg-netops-app",
+          "nic:nsg-vm-jump"
+        ],
+        "openPorts": {
+          "TCP": "443"
+        },
+        "privateIp": "10.1.1.4",
+        "publicIp": "20.10.0.4",
+        "publicIpSku": "Standard"
+      },
+      "id": "EXP-PORT-EXPOSED:nic-vm-jump",
+      "recommendation": "Confirm each open port is an intended public service; prefer publishing through a load balancer or Application Gateway with WAF instead of an instance-level public IP.",
+      "remediation_script": "# Human review required. Read-only verification (the agent never runs writes):\naz network nic list-effective-nsg -g rg-netops-spoke -n nic-vm-jump -o json",
+      "resource_id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-spoke/providers/Microsoft.Network/networkInterfaces/nic-vm-jump",
+      "severity": "medium",
+      "skill": "netops-exposure-scan",
+      "title": "nic-vm-jump exposes TCP 443 to the Internet via 20.10.0.4"
+    },
+    {
+      "citations": [
+        "https://learn.microsoft.com/cli/azure/keyvault",
+        "https://learn.microsoft.com/rest/api/keyvault/keyvault/vaults/get"
+      ],
+      "evidence": {
+        "defaultAction": "Deny",
+        "ipAndVnetRules": 1,
+        "publicNetworkAccess": "Enabled",
+        "type": "Microsoft.KeyVault/vaults"
+      },
+      "id": "EXP-PAAS-FIREWALLED:kv-netops",
+      "recommendation": "Public access is limited to the listed IP/VNet rules. If clients use private endpoints only, disable public network access.",
+      "remediation_script": "# Human review required. Read-only verification (the agent never runs writes):\naz keyvault show -g rg-netops-spoke -n kv-netops --query \"{pna:properties.publicNetworkAccess,acl:properties.networkAcls}\"\n# Change (review before running):\n# az keyvault update -g rg-netops-spoke -n kv-netops --public-network-access Disabled",
+      "resource_id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-spoke/providers/Microsoft.KeyVault/vaults/kv-netops",
+      "severity": "low",
+      "skill": "netops-exposure-scan",
+      "title": "kv-netops: public endpoint enabled but default action Deny with 1 IP/VNet rule(s)"
+    },
+    {
+      "citations": [
+        "https://learn.microsoft.com/azure/virtual-network/ip-services/public-ip-addresses",
+        "https://learn.microsoft.com/cli/azure/network/public-ip"
+      ],
+      "evidence": {
+        "ipAddress": "20.10.0.6",
+        "sku": "Standard"
+      },
+      "id": "EXP-PIP-UNATTACHED:pip-orphan",
+      "recommendation": "Unattached public IPs add attack surface if re-attached by mistake and incur cost; delete it if no workload owns it.",
+      "remediation_script": "# Human review required. Read-only verification (the agent never runs writes):\naz network public-ip show -g rg-netops-spoke -n pip-orphan -o json\n# Change (review before running):\n# az network public-ip delete -g rg-netops-spoke -n pip-orphan",
+      "resource_id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-spoke/providers/Microsoft.Network/publicIPAddresses/pip-orphan",
+      "severity": "low",
+      "skill": "netops-exposure-scan",
+      "title": "Public IP pip-orphan (20.10.0.6) is not attached to any resource"
+    }
+  ],
+  "kpis": {
+    "risky_mgmt_exposures": 2
+  },
+  "metrics": [
+    {
+      "detail": "TCP 22 / 3389 / 5985 / 5986 on public-IP NICs (subnet + NIC NSG)",
+      "label": "Mgmt ports open to Internet",
+      "tone": "critical",
+      "value": "2"
+    },
+    {
+      "detail": "1 NIC IP configuration(s) with a public IP",
+      "label": "Public-IP NICs with other open ports",
+      "tone": "warning",
+      "value": "1"
+    },
+    {
+      "detail": "1 on load balancers / gateways / other services (not port-evaluated)",
+      "label": "Public IPs",
+      "tone": "neutral",
+      "value": "3"
+    },
+    {
+      "detail": "frontend with a public IP",
+      "label": "Public Application Gateways",
+      "tone": "neutral",
+      "value": "1"
+    },
+    {
+      "detail": "storage, key vault, SQL server",
+      "label": "PaaS with public access",
+      "tone": "warning",
+      "value": "2/3"
+    }
+  ],
+  "partial": false,
+  "skill": "netops-exposure-scan",
+  "warnings": []
+}

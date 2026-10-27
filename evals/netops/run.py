@@ -32,6 +32,12 @@ SEVERITIES = ("critical", "high", "medium", "low", "info")
 ENGINES = {
     "netops-hybrid-health": "hybrid.py",
     "netops-private-endpoint-dns": "pedns.py",
+    "netops-routing-analyzer": "routing.py",
+    "netops-nsg-firewall-audit": "ruleaudit.py",
+    "netops-exposure-scan": "exposure.py",
+    "netops-snat-egress": "snat.py",
+    "netops-ip-capacity": "capacity.py",
+    "netops-flow-insights": "flows.py",
 }
 
 

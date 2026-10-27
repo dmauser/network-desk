@@ -1,0 +1,118 @@
+{
+  "load_balancers": [
+    {
+      "backendAddressPools": [
+        {
+          "backendIPConfigurations": [
+            {
+              "id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-spoke/providers/Microsoft.Network/networkInterfaces/nic-app-vm1/ipConfigurations/ipconfig1"
+            },
+            {
+              "id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-spoke/providers/Microsoft.Network/networkInterfaces/nic-app-vm2/ipConfigurations/ipconfig1"
+            }
+          ],
+          "id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-spoke/providers/Microsoft.Network/loadBalancers/lb-spoke1-egress/backendAddressPools/bp-app",
+          "name": "bp-app"
+        }
+      ],
+      "frontendIPConfigurations": [
+        {
+          "id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-spoke/providers/Microsoft.Network/loadBalancers/lb-spoke1-egress/frontendIPConfigurations/fe-egress",
+          "name": "fe-egress",
+          "publicIPAddress": {
+            "id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-spoke/providers/Microsoft.Network/publicIPAddresses/pip-lb-egress"
+          }
+        }
+      ],
+      "id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-spoke/providers/Microsoft.Network/loadBalancers/lb-spoke1-egress",
+      "loadBalancingRules": [],
+      "name": "lb-spoke1-egress",
+      "outboundRules": [
+        {
+          "allocatedOutboundPorts": 1024,
+          "backendAddressPool": {
+            "id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-spoke/providers/Microsoft.Network/loadBalancers/lb-spoke1-egress/backendAddressPools/bp-app"
+          },
+          "enableTcpReset": true,
+          "frontendIPConfigurations": [
+            {
+              "id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-spoke/providers/Microsoft.Network/loadBalancers/lb-spoke1-egress/frontendIPConfigurations/fe-egress"
+            }
+          ],
+          "id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-spoke/providers/Microsoft.Network/loadBalancers/lb-spoke1-egress/outboundRules/or-egress",
+          "idleTimeoutInMinutes": 4,
+          "name": "or-egress",
+          "protocol": "All"
+        }
+      ],
+      "sku": {
+        "name": "Standard"
+      }
+    }
+  ],
+  "managed_scopes": [
+    "/subscriptions/00000000-0000-0000-0000-000000000001"
+  ],
+  "metrics": [
+    {
+      "aggregation": "Average",
+      "dimensions": {
+        "BackendIPAddress": "10.1.0.4"
+      },
+      "metric": "AllocatedSnatPorts",
+      "resource_id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-spoke/providers/Microsoft.Network/loadBalancers/lb-spoke1-egress",
+      "value": 1024
+    },
+    {
+      "aggregation": "Average",
+      "dimensions": {
+        "BackendIPAddress": "10.1.0.4"
+      },
+      "metric": "UsedSnatPorts",
+      "resource_id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-spoke/providers/Microsoft.Network/loadBalancers/lb-spoke1-egress",
+      "value": 1001
+    },
+    {
+      "aggregation": "Average",
+      "dimensions": {
+        "BackendIPAddress": "10.1.0.5"
+      },
+      "metric": "AllocatedSnatPorts",
+      "resource_id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-spoke/providers/Microsoft.Network/loadBalancers/lb-spoke1-egress",
+      "value": 1024
+    },
+    {
+      "aggregation": "Average",
+      "dimensions": {
+        "BackendIPAddress": "10.1.0.5"
+      },
+      "metric": "UsedSnatPorts",
+      "resource_id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-spoke/providers/Microsoft.Network/loadBalancers/lb-spoke1-egress",
+      "value": 612
+    },
+    {
+      "aggregation": "Total",
+      "dimensions": {
+        "BackendIPAddress": "10.1.0.4",
+        "ConnectionState": "Failed"
+      },
+      "metric": "SnatConnectionCount",
+      "resource_id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-spoke/providers/Microsoft.Network/loadBalancers/lb-spoke1-egress",
+      "value": 2417
+    },
+    {
+      "aggregation": "Average",
+      "dimensions": {
+        "FrontendIPAddress": "20.10.0.4"
+      },
+      "metric": "VipAvailability",
+      "resource_id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-spoke/providers/Microsoft.Network/loadBalancers/lb-spoke1-egress",
+      "value": 100
+    }
+  ],
+  "nat_gateways": [],
+  "thresholds": {
+    "snat_crit_pct": 85,
+    "snat_warn_pct": 70
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "id": "SC-07",
+  "title": "NVA guest OS IP forwarding off",
+  "source": "https://github.com/dmauser/azure-sre-netops",
+  "injected_fault": "net.ipv4.ip_forward=0 on the simulated on-premises Linux NVA; NIC IP forwarding, routes and BGP stay healthy.",
+  "symptom": "Traffic through the NVA fails although the route table, effective routes and next hop all look correct",
+  "expected_skill": "netops-routing-analyzer",
+  "input_ref": "plugins/netops/skills/netops-routing-analyzer/examples/sc07-ipforward-input.json",
+  "expect": {
+    "finding_prefixes": [
+      "RT-NVA-DATAPLANE:"
+    ],
+    "top_severity": "high"
+  }
+}

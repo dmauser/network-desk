@@ -1,0 +1,97 @@
+{
+  "evidence_gaps": [
+    "rule_hits not collected (Traffic Analytics NTANetAnalytics AclGroup/AclRule flow counts); unused-rule analysis skipped; no rule is reported as unused without evidence."
+  ],
+  "findings": [
+    {
+      "citations": [
+        "https://learn.microsoft.com/azure/virtual-network/network-security-group-how-it-works",
+        "https://learn.microsoft.com/azure/virtual-network/network-security-groups-overview",
+        "https://learn.microsoft.com/cli/azure/network/nsg/rule"
+      ],
+      "evidence": {
+        "associatedNics": [],
+        "associatedSubnets": [
+          "snet-app"
+        ],
+        "denyRule": {
+          "access": "Deny",
+          "destination": [
+            "*"
+          ],
+          "destinationPorts": "*",
+          "direction": "Inbound",
+          "name": "sc04-deny-inbound",
+          "priority": 100,
+          "protocol": "*",
+          "source": [
+            "*"
+          ]
+        },
+        "shadowedAllowRules": [
+          {
+            "access": "Allow",
+            "destination": [
+              "*"
+            ],
+            "destinationPorts": "*",
+            "direction": "Inbound",
+            "name": "allow-intra-lab-inbound",
+            "priority": 1000,
+            "protocol": "*",
+            "source": [
+              "10.0.0.0/16",
+              "10.1.0.0/16",
+              "10.100.0.0/16"
+            ]
+          }
+        ]
+      },
+      "id": "NSG-DENY-ALL-SHADOWS:nsg-netops-app:sc04-deny-inbound",
+      "recommendation": "Rule sc04-deny-inbound matches all inbound traffic before any allow rule, so every workload behind this NSG is cut off. If this was not an intentional lockdown, remove it or move it below the allow rules (higher priority number).",
+      "remediation_script": "# Human review required. Read-only verification (the agent never runs writes):\naz network nsg rule list -g rg-netops-spoke --nsg-name nsg-netops-app --include-default -o table\naz network nsg rule show -g rg-netops-spoke --nsg-name nsg-netops-app -n sc04-deny-inbound -o json\n# Change (review before running):\n# az network nsg rule delete -g rg-netops-spoke --nsg-name nsg-netops-app -n sc04-deny-inbound",
+      "resource_id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-spoke/providers/Microsoft.Network/networkSecurityGroups/nsg-netops-app",
+      "severity": "critical",
+      "skill": "netops-nsg-firewall-audit",
+      "title": "NSG nsg-netops-app: inbound deny-all rule sc04-deny-inbound (priority 100) shadows 1 allow rule(s)"
+    }
+  ],
+  "kpis": {
+    "broad_rules": 0
+  },
+  "metrics": [
+    {
+      "detail": "2 custom rules",
+      "label": "NSGs audited",
+      "tone": "neutral",
+      "value": "1"
+    },
+    {
+      "detail": "Internet/any source with >= 1024 ports, or Azure Firewall wildcard allow",
+      "label": "Overly broad allow rules",
+      "tone": "good",
+      "value": "0"
+    },
+    {
+      "detail": "22 / 3389 / 5985 / 5986 allowed from Internet or *",
+      "label": "Management ports from Internet",
+      "tone": "good",
+      "value": "0"
+    },
+    {
+      "detail": "fully covered by a higher-priority rule",
+      "label": "Shadowed / redundant rules",
+      "tone": "warning",
+      "value": "1"
+    },
+    {
+      "detail": "filter rule collections (Allow)",
+      "label": "Azure Firewall allow rules audited",
+      "tone": "neutral",
+      "value": "0"
+    }
+  ],
+  "partial": true,
+  "skill": "netops-nsg-firewall-audit",
+  "warnings": []
+}

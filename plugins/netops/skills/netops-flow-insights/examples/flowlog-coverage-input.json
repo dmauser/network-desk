@@ -1,0 +1,232 @@
+{
+  "flow_logs": [
+    {
+      "enabled": true,
+      "flowAnalyticsConfiguration": {
+        "networkWatcherFlowAnalyticsConfiguration": {
+          "enabled": true,
+          "trafficAnalyticsInterval": 10,
+          "workspaceResourceId": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-hub/providers/Microsoft.OperationalInsights/workspaces/law-netops"
+        }
+      },
+      "id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/NetworkWatcherRG/providers/Microsoft.Network/networkWatchers/NetworkWatcher_eastus/flowLogs/fl-vnet-hub",
+      "location": "eastus",
+      "name": "fl-vnet-hub",
+      "provisioningState": "Succeeded",
+      "retentionPolicy": {
+        "days": 30,
+        "enabled": true
+      },
+      "storageId": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-hub/providers/Microsoft.Storage/storageAccounts/stnetopsflowlogs",
+      "targetResourceId": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-hub/providers/Microsoft.Network/virtualNetworks/vnet-hub"
+    },
+    {
+      "enabled": false,
+      "flowAnalyticsConfiguration": {
+        "networkWatcherFlowAnalyticsConfiguration": {
+          "enabled": false,
+          "trafficAnalyticsInterval": null,
+          "workspaceResourceId": null
+        }
+      },
+      "id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/NetworkWatcherRG/providers/Microsoft.Network/networkWatchers/NetworkWatcher_eastus/flowLogs/fl-vnet-spoke2",
+      "location": "eastus",
+      "name": "fl-vnet-spoke2",
+      "provisioningState": "Succeeded",
+      "retentionPolicy": {
+        "days": 30,
+        "enabled": true
+      },
+      "storageId": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-hub/providers/Microsoft.Storage/storageAccounts/stnetopsflowlogs",
+      "targetResourceId": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-spoke/providers/Microsoft.Network/virtualNetworks/vnet-spoke2"
+    },
+    {
+      "enabled": true,
+      "flowAnalyticsConfiguration": {
+        "networkWatcherFlowAnalyticsConfiguration": {
+          "enabled": false,
+          "trafficAnalyticsInterval": null,
+          "workspaceResourceId": null
+        }
+      },
+      "id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/NetworkWatcherRG/providers/Microsoft.Network/networkWatchers/NetworkWatcher_eastus/flowLogs/fl-nsg-spoke1-app",
+      "location": "eastus",
+      "name": "fl-nsg-spoke1-app",
+      "provisioningState": "Succeeded",
+      "retentionPolicy": {
+        "days": 30,
+        "enabled": true
+      },
+      "storageId": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-hub/providers/Microsoft.Storage/storageAccounts/stnetopsflowlogs",
+      "targetResourceId": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-spoke/providers/Microsoft.Network/networkSecurityGroups/nsg-spoke1-app"
+    },
+    {
+      "enabled": true,
+      "flowAnalyticsConfiguration": {
+        "networkWatcherFlowAnalyticsConfiguration": {
+          "enabled": true,
+          "trafficAnalyticsInterval": 10,
+          "workspaceResourceId": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-hub/providers/Microsoft.OperationalInsights/workspaces/law-netops"
+        }
+      },
+      "id": "/subscriptions/00000000-0000-0000-0000-000000000009/resourceGroups/NetworkWatcherRG/providers/Microsoft.Network/networkWatchers/NetworkWatcher_eastus/flowLogs/fl-vnet-foreign",
+      "location": "eastus",
+      "name": "fl-vnet-foreign",
+      "provisioningState": "Succeeded",
+      "retentionPolicy": {
+        "days": 30,
+        "enabled": true
+      },
+      "storageId": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-hub/providers/Microsoft.Storage/storageAccounts/stnetopsflowlogs",
+      "targetResourceId": "/subscriptions/00000000-0000-0000-0000-000000000009/resourceGroups/rg-other/providers/Microsoft.Network/virtualNetworks/vnet-foreign"
+    }
+  ],
+  "flow_rows": [
+    {
+      "AclGroup": "",
+      "AclRule": "DenyAllInBound",
+      "AllowedInFlows": 0,
+      "AllowedOutFlows": 0,
+      "BytesDestToSrc": 0,
+      "BytesSrcToDest": 0,
+      "DeniedInFlows": 210,
+      "DeniedOutFlows": 0,
+      "DestIp": "10.1.1.4",
+      "DestPort": 1433,
+      "FlowType": "InterVNet",
+      "L4Protocol": "T",
+      "SrcIp": "10.0.1.4",
+      "TargetResourceId": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-hub/providers/Microsoft.Network/virtualNetworks/vnet-hub"
+    },
+    {
+      "AclGroup": "",
+      "AclRule": "DenyAllInBound",
+      "AllowedInFlows": 0,
+      "AllowedOutFlows": 0,
+      "BytesDestToSrc": 0,
+      "BytesSrcToDest": 0,
+      "DeniedInFlows": 130,
+      "DeniedOutFlows": 0,
+      "DestIp": "10.1.1.4",
+      "DestPort": 1433,
+      "FlowType": "InterVNet",
+      "L4Protocol": "T",
+      "SrcIp": "10.0.1.5",
+      "TargetResourceId": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-hub/providers/Microsoft.Network/virtualNetworks/vnet-hub"
+    },
+    {
+      "AclGroup": "",
+      "AclRule": "DenyAllInBound",
+      "AllowedInFlows": 0,
+      "AllowedOutFlows": 0,
+      "BytesDestToSrc": 0,
+      "BytesSrcToDest": 0,
+      "DeniedInFlows": 12,
+      "DeniedOutFlows": 0,
+      "DestIp": "10.1.2.10",
+      "DestPort": 443,
+      "FlowType": "InterVNet",
+      "L4Protocol": "T",
+      "SrcIp": "10.0.1.4",
+      "TargetResourceId": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-hub/providers/Microsoft.Network/virtualNetworks/vnet-hub"
+    },
+    {
+      "AclGroup": "",
+      "AclRule": "",
+      "AllowedInFlows": 900,
+      "AllowedOutFlows": 0,
+      "BytesDestToSrc": 410000000,
+      "BytesSrcToDest": 52000000,
+      "DeniedInFlows": 0,
+      "DeniedOutFlows": 0,
+      "DestIp": "10.0.2.4",
+      "DestPort": 443,
+      "FlowType": "IntraVNet",
+      "L4Protocol": "T",
+      "SrcIp": "10.0.1.4",
+      "TargetResourceId": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-hub/providers/Microsoft.Network/virtualNetworks/vnet-hub"
+    },
+    {
+      "AclGroup": "",
+      "AclRule": "",
+      "AllowedInFlows": 300,
+      "AllowedOutFlows": 0,
+      "BytesDestToSrc": 96000000,
+      "BytesSrcToDest": 8000000,
+      "DeniedInFlows": 0,
+      "DeniedOutFlows": 0,
+      "DestIp": "10.0.3.8",
+      "DestPort": 5432,
+      "FlowType": "IntraVNet",
+      "L4Protocol": "T",
+      "SrcIp": "10.0.2.4",
+      "TargetResourceId": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-hub/providers/Microsoft.Network/virtualNetworks/vnet-hub"
+    },
+    {
+      "AclGroup": "",
+      "AclRule": "",
+      "AllowedInFlows": 4,
+      "AllowedOutFlows": 0,
+      "BytesDestToSrc": 9000,
+      "BytesSrcToDest": 12000,
+      "DeniedInFlows": 0,
+      "DeniedOutFlows": 0,
+      "DestIp": "10.0.1.4",
+      "DestPort": 22,
+      "FlowType": "IntraVNet",
+      "L4Protocol": "T",
+      "SrcIp": "10.0.3.8",
+      "TargetResourceId": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-hub/providers/Microsoft.Network/virtualNetworks/vnet-hub"
+    },
+    {
+      "AllowedInFlows": 3,
+      "AllowedOutFlows": 0,
+      "DeniedInFlows": 41,
+      "DeniedOutFlows": 0,
+      "DestPort": 22,
+      "FlowDirection": "I",
+      "FlowType": "MaliciousFlow",
+      "PublicIp": "203.0.113.50",
+      "Query": "malicious",
+      "TargetResourceId": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-hub/providers/Microsoft.Network/virtualNetworks/vnet-hub"
+    }
+  ],
+  "ip_details": [
+    {
+      "FlowType": "MaliciousFlow",
+      "Ip": "203.0.113.50",
+      "Location": "XX",
+      "ThreatDescription": "Indicator of botnet activity",
+      "ThreatType": "Botnet"
+    }
+  ],
+  "managed_scopes": [
+    "/subscriptions/00000000-0000-0000-0000-000000000001"
+  ],
+  "thresholds": {
+    "denied_flows": 100,
+    "top_talkers": 3
+  },
+  "vnets": [
+    {
+      "id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-hub/providers/Microsoft.Network/virtualNetworks/vnet-hub",
+      "location": "eastus",
+      "name": "vnet-hub"
+    },
+    {
+      "id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-spoke/providers/Microsoft.Network/virtualNetworks/vnet-spoke1",
+      "location": "eastus",
+      "name": "vnet-spoke1"
+    },
+    {
+      "id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-spoke/providers/Microsoft.Network/virtualNetworks/vnet-spoke2",
+      "location": "eastus",
+      "name": "vnet-spoke2"
+    },
+    {
+      "id": "/subscriptions/00000000-0000-0000-0000-000000000009/resourceGroups/rg-other/providers/Microsoft.Network/virtualNetworks/vnet-foreign",
+      "location": "eastus",
+      "name": "vnet-foreign"
+    }
+  ]
+}

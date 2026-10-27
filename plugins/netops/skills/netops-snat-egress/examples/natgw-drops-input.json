@@ -1,0 +1,72 @@
+{
+  "load_balancers": [],
+  "managed_scopes": [
+    "/subscriptions/00000000-0000-0000-0000-000000000001"
+  ],
+  "metrics": [
+    {
+      "aggregation": "Total",
+      "dimensions": {
+        "ConnectionState": "Attempted",
+        "Protocol": "TCP"
+      },
+      "metric": "SNATConnectionCount",
+      "resource_id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-hub/providers/Microsoft.Network/natGateways/natgw-hub",
+      "value": 48210
+    },
+    {
+      "aggregation": "Total",
+      "dimensions": {
+        "ConnectionState": "Failed",
+        "Protocol": "TCP"
+      },
+      "metric": "SNATConnectionCount",
+      "resource_id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-hub/providers/Microsoft.Network/natGateways/natgw-hub",
+      "value": 126
+    },
+    {
+      "aggregation": "Total",
+      "dimensions": {},
+      "metric": "PacketDropCount",
+      "resource_id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-hub/providers/Microsoft.Network/natGateways/natgw-hub",
+      "value": 341
+    },
+    {
+      "aggregation": "Average",
+      "dimensions": {},
+      "metric": "DatapathAvailability",
+      "resource_id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-hub/providers/Microsoft.Network/natGateways/natgw-hub",
+      "value": 97.5
+    },
+    {
+      "aggregation": "Total",
+      "dimensions": {
+        "Protocol": "TCP"
+      },
+      "metric": "TotalConnectionCount",
+      "resource_id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-hub/providers/Microsoft.Network/natGateways/natgw-hub",
+      "value": 61200
+    }
+  ],
+  "nat_gateways": [
+    {
+      "id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-hub/providers/Microsoft.Network/natGateways/natgw-hub",
+      "idleTimeoutInMinutes": 30,
+      "name": "natgw-hub",
+      "publicIpAddresses": [
+        {
+          "id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-hub/providers/Microsoft.Network/publicIPAddresses/pip-natgw-hub"
+        }
+      ],
+      "publicIpPrefixes": [],
+      "sku": {
+        "name": "Standard"
+      },
+      "subnets": [
+        {
+          "id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-spoke/providers/Microsoft.Network/virtualNetworks/vnet-spoke1/subnets/snet-app"
+        }
+      ]
+    }
+  ]
+}

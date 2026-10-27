@@ -1,0 +1,19 @@
+{
+  "id": "EXP-01",
+  "title": "Management ports and PaaS exposed to the internet",
+  "source": "https://github.com/dmauser/azure-sre-netops",
+  "injected_fault": "Jump VM NIC with public IP allows 22/3389 from Internet; Application Gateway without WAF; storage account with public network access and default action Allow.",
+  "symptom": "Security review: which VMs have RDP or SSH exposed to the internet through a public IP, and which storage accounts still allow public network access?",
+  "expected_skill": "netops-exposure-scan",
+  "input_ref": "plugins/netops/skills/netops-exposure-scan/examples/internet-exposure-input.json",
+  "expect": {
+    "finding_prefixes": [
+      "EXP-MGMT-EXPOSED:nic-vm-jump:22",
+      "EXP-MGMT-EXPOSED:nic-vm-jump:3389",
+      "EXP-APPGW-NO-WAF:agw-netops",
+      "EXP-PAAS-OPEN:stnetopsdata"
+    ],
+    "top_severity": "critical",
+    "partial": false
+  }
+}

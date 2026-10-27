@@ -1,0 +1,148 @@
+{
+  "evidence_gaps": [],
+  "findings": [
+    {
+      "citations": [
+        "https://learn.microsoft.com/azure/virtual-network/virtual-network-manage-peering",
+        "https://learn.microsoft.com/rest/api/virtualnetwork/virtual-network-peerings/get"
+      ],
+      "evidence": {
+        "allowForwardedTraffic": false,
+        "allowGatewayTransit": false,
+        "allowVirtualNetworkAccess": false,
+        "one_way": true,
+        "peering": "spoke1-to-hub",
+        "peeringState": "Connected",
+        "remote_side": {
+          "allowForwardedTraffic": true,
+          "allowGatewayTransit": true,
+          "allowVirtualNetworkAccess": true,
+          "peeringState": "Connected"
+        },
+        "remote_vnet": "vnet-hub",
+        "useRemoteGateways": true,
+        "vnet": "vnet-spoke1"
+      },
+      "id": "RT-PEERING-ACCESS-DISABLED:vnet-spoke1:spoke1-to-hub",
+      "recommendation": "VMs in this VNet cannot access the remote VNet over the peering even though the peering state can still show Connected. Re-enable virtual network access on this side (compare both sides: the break often looks one-way).",
+      "remediation_script": "# Human review required. Read-only verification (the agent never runs writes):\naz network vnet peering show -g rg-netops-spoke --vnet-name vnet-spoke1 -n spoke1-to-hub --query \"{state:peeringState,sync:peeringSyncLevel,access:allowVirtualNetworkAccess,fwd:allowForwardedTraffic,gwTransit:allowGatewayTransit,remoteGw:useRemoteGateways}\"\n# Change (review before running):\n# az network vnet peering update -g rg-netops-spoke --vnet-name vnet-spoke1 -n spoke1-to-hub --set allowVirtualNetworkAccess=true",
+      "resource_id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-spoke/providers/Microsoft.Network/virtualNetworks/vnet-spoke1/virtualNetworkPeerings/spoke1-to-hub",
+      "severity": "critical",
+      "skill": "netops-routing-analyzer",
+      "title": "Peering spoke1-to-hub (vnet-spoke1 -> vnet-hub) has allowVirtualNetworkAccess=false (one-way: the remote side allows access)"
+    },
+    {
+      "citations": [
+        "https://learn.microsoft.com/azure/virtual-network/virtual-network-manage-peering",
+        "https://learn.microsoft.com/rest/api/virtualnetwork/virtual-network-peerings/get"
+      ],
+      "evidence": {
+        "allowForwardedTraffic": false,
+        "allowGatewayTransit": false,
+        "allowVirtualNetworkAccess": false,
+        "nva_next_hops": [
+          "10.0.1.4"
+        ],
+        "peering": "spoke1-to-hub",
+        "peeringState": "Connected",
+        "reasons": [
+          "NVA/firewall next hop(s) 10.0.1.4 are in vnet-hub",
+          "this side uses the remote gateway",
+          "vnet-hub offers gateway transit"
+        ],
+        "remote_side": {
+          "allowForwardedTraffic": true,
+          "allowGatewayTransit": true,
+          "allowVirtualNetworkAccess": true,
+          "peeringState": "Connected"
+        },
+        "remote_vnet": "vnet-hub",
+        "useRemoteGateways": true,
+        "vnet": "vnet-spoke1"
+      },
+      "id": "RT-PEERING-FORWARDED-DISABLED:vnet-spoke1:spoke1-to-hub",
+      "recommendation": "Traffic forwarded by an NVA / firewall or gateway in the remote VNet (not originating there) is not accepted over this peering. Enable allowForwardedTraffic on this side.",
+      "remediation_script": "# Human review required. Read-only verification (the agent never runs writes):\naz network vnet peering show -g rg-netops-spoke --vnet-name vnet-spoke1 -n spoke1-to-hub --query \"{state:peeringState,sync:peeringSyncLevel,access:allowVirtualNetworkAccess,fwd:allowForwardedTraffic,gwTransit:allowGatewayTransit,remoteGw:useRemoteGateways}\"\n# Change (review before running):\n# az network vnet peering update -g rg-netops-spoke --vnet-name vnet-spoke1 -n spoke1-to-hub --set allowForwardedTraffic=true",
+      "resource_id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-spoke/providers/Microsoft.Network/virtualNetworks/vnet-spoke1/virtualNetworkPeerings/spoke1-to-hub",
+      "severity": "high",
+      "skill": "netops-routing-analyzer",
+      "title": "Peering spoke1-to-hub (vnet-spoke1 -> vnet-hub) blocks forwarded traffic while vnet-hub forwards traffic"
+    },
+    {
+      "citations": [
+        "https://learn.microsoft.com/azure/network-watcher/connection-monitor-overview",
+        "https://learn.microsoft.com/azure/virtual-network/virtual-networks-udr-overview"
+      ],
+      "evidence": {
+        "checks": [
+          {
+            "check": "large",
+            "detail": "curl of a 64 KB object timed out",
+            "payload_bytes": 65536,
+            "result": "timeout",
+            "size": "large"
+          },
+          {
+            "check": "small",
+            "detail": "curl http://10.0.2.10/ from vm-app timed out",
+            "payload_bytes": 64,
+            "result": "timeout",
+            "size": "small"
+          }
+        ],
+        "path": "spoke1-app-to-hub-shared",
+        "related_findings": [
+          "RT-PEERING-ACCESS-DISABLED:vnet-spoke1:spoke1-to-hub"
+        ],
+        "via_nva": [
+          "10.0.1.4"
+        ]
+      },
+      "id": "RT-PATH-FAIL:spoke1-app-to-hub-shared",
+      "recommendation": "Fix the related control-plane findings first, then re-run the probe. If none are listed, check NSGs / firewall rules on the path (netops-nsg-firewall-audit).",
+      "remediation_script": "# Human review required. Read-only verification (the agent never runs writes):\n# Re-run the client probe after addressing the related findings.",
+      "resource_id": "",
+      "severity": "medium",
+      "skill": "netops-routing-analyzer",
+      "title": "Path spoke1-app-to-hub-shared fails on every check (consistent with control-plane findings)"
+    }
+  ],
+  "kpis": {
+    "asymmetric_paths": 1
+  },
+  "metrics": [
+    {
+      "detail": "UDR/next-hop None, peering down, asymmetric NVA path, NVA forwarding or MTU black hole",
+      "label": "Black-holed / asymmetric paths",
+      "tone": "critical",
+      "value": "1"
+    },
+    {
+      "detail": "peeringState == Connected",
+      "label": "Peerings connected",
+      "tone": "good",
+      "value": "2/2"
+    },
+    {
+      "detail": "1 NVA / firewall next hop IP(s) referenced",
+      "label": "UDRs analyzed",
+      "tone": "neutral",
+      "value": "1"
+    },
+    {
+      "detail": "enableIPForwarding on NICs that own a VirtualAppliance next hop IP",
+      "label": "NVA NICs with IP forwarding off",
+      "tone": "good",
+      "value": "0"
+    },
+    {
+      "detail": "client probes / Connection Monitor results",
+      "label": "Data-plane checks passed",
+      "tone": "warning",
+      "value": "0/2"
+    }
+  ],
+  "partial": false,
+  "skill": "netops-routing-analyzer",
+  "warnings": []
+}

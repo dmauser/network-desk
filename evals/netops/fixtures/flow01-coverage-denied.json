@@ -1,0 +1,16 @@
+{
+  "id": "FLOW-01",
+  "title": "Flow-log coverage gap and denied traffic",
+  "source": "https://github.com/dmauser/azure-sre-netops",
+  "injected_fault": "vnet-spoke1 has only an NSG flow log, vnet-spoke2 flow log disabled; 340 denied flows to 10.1.1.4:1433",
+  "symptom": "Flow logs are missing for vnet-spoke1 (telemetry gap) and Traffic Analytics shows a spike of denied flows to 10.1.1.4:1433 plus unknown top talkers.",
+  "expected_skill": "netops-flow-insights",
+  "input_ref": "plugins/netops/skills/netops-flow-insights/examples/flowlog-coverage-input.json",
+  "expect": {
+    "finding_prefixes": [
+      "FLOW-VNET-NO-FLOWLOG:",
+      "FLOW-DENIED-HIGH:"
+    ],
+    "top_severity": "high"
+  }
+}

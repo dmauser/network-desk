@@ -1,0 +1,83 @@
+{
+  "evidence_gaps": [],
+  "findings": [
+    {
+      "citations": [
+        "https://learn.microsoft.com/azure/azure-monitor/reference/supported-metrics/microsoft-network-loadbalancers-metrics",
+        "https://learn.microsoft.com/azure/load-balancer/load-balancer-standard-diagnostics",
+        "https://learn.microsoft.com/azure/load-balancer/troubleshoot-outbound-connection"
+      ],
+      "evidence": {
+        "BackendIPAddress": "10.1.0.4",
+        "ConnectionState": "Failed",
+        "critical_at": 1000.0,
+        "failed_connections": 2417.0
+      },
+      "id": "SNAT-LB-FAILED-CONN:lb-spoke1-egress:10.1.0.4",
+      "recommendation": "Outbound flows failed to get a SNAT port. Correlate with UsedSnatPorts vs AllocatedSnatPorts for the same backend and apply the SNAT exhaustion mitigations.",
+      "remediation_script": "# Human review required. Read-only verification (the agent never runs writes):\naz monitor metrics list --resource /subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-spoke/providers/Microsoft.Network/loadBalancers/lb-spoke1-egress --metrics SnatConnectionCount --aggregation Total --interval PT1M --dimension ConnectionState BackendIPAddress -o json\naz monitor metrics list --resource /subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-spoke/providers/Microsoft.Network/loadBalancers/lb-spoke1-egress --metrics UsedSnatPorts AllocatedSnatPorts --aggregation Average --interval PT1M --dimension BackendIPAddress -o json",
+      "resource_id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-spoke/providers/Microsoft.Network/loadBalancers/lb-spoke1-egress",
+      "severity": "critical",
+      "skill": "netops-snat-egress",
+      "title": "lb-spoke1-egress: 2417 failed SNAT connection(s) from backend 10.1.0.4"
+    },
+    {
+      "citations": [
+        "https://learn.microsoft.com/azure/azure-monitor/reference/supported-metrics/microsoft-network-loadbalancers-metrics",
+        "https://learn.microsoft.com/azure/load-balancer/load-balancer-outbound-connections",
+        "https://learn.microsoft.com/azure/load-balancer/load-balancer-standard-diagnostics",
+        "https://learn.microsoft.com/azure/load-balancer/troubleshoot-outbound-connection"
+      ],
+      "evidence": {
+        "AllocatedSnatPorts": 1024.0,
+        "BackendIPAddress": "10.1.0.4",
+        "FrontendIPAddress": "",
+        "ProtocolType": "",
+        "UsedSnatPorts_peak": 1001.0,
+        "crit_pct": 85.0,
+        "public_frontend_ips": 1,
+        "utilization_pct": 97.8,
+        "warn_pct": 70.0
+      },
+      "id": "SNAT-LB-PORT-UTIL:lb-spoke1-egress:10.1.0.4",
+      "recommendation": "New outbound flows fail when a backend runs out of SNAT ports. Reuse connections (pooling, keep-alive), use Private Link for Azure PaaS, raise allocatedOutboundPorts or add frontend IPs, or move egress to NAT Gateway.",
+      "remediation_script": "# Human review required. Read-only verification (the agent never runs writes):\naz monitor metrics list --resource /subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-spoke/providers/Microsoft.Network/loadBalancers/lb-spoke1-egress --metrics UsedSnatPorts AllocatedSnatPorts --aggregation Average --interval PT1M --dimension BackendIPAddress -o json\naz network lb outbound-rule list -g rg-netops-spoke --lb-name lb-spoke1-egress -o table\n# Change (review before running):\n# az network lb outbound-rule update -g rg-netops-spoke --lb-name lb-spoke1-egress -n <rule> --allocated-outbound-ports <ports-per-instance>",
+      "resource_id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-spoke/providers/Microsoft.Network/loadBalancers/lb-spoke1-egress",
+      "severity": "critical",
+      "skill": "netops-snat-egress",
+      "title": "SNAT port utilization 97.8% on lb-spoke1-egress backend 10.1.0.4"
+    }
+  ],
+  "kpis": {
+    "snat_peak_util_pct": 97.8
+  },
+  "metrics": [
+    {
+      "detail": "UsedSnatPorts / AllocatedSnatPorts across 2 LB backend sample(s)",
+      "label": "Peak SNAT port utilization",
+      "tone": "critical",
+      "value": "97.8%"
+    },
+    {
+      "detail": "ConnectionState = Failed (Load Balancer + NAT Gateway)",
+      "label": "Failed SNAT connections",
+      "tone": "critical",
+      "value": "2417"
+    },
+    {
+      "detail": "Public LBs with SNAT rules and NAT gateways in scope",
+      "label": "Egress resources",
+      "tone": "neutral",
+      "value": "1 LB / 0 NAT GW"
+    },
+    {
+      "detail": "VipAvailability / DipAvailability / NAT DatapathAvailability (min average)",
+      "label": "Lowest data path availability",
+      "tone": "good",
+      "value": "100%"
+    }
+  ],
+  "partial": false,
+  "skill": "netops-snat-egress",
+  "warnings": []
+}

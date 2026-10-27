@@ -1,0 +1,126 @@
+{
+  "evidence_gaps": [
+    "rule_hits not collected (Traffic Analytics NTANetAnalytics AclGroup/AclRule flow counts); unused-rule analysis skipped; no rule is reported as unused without evidence."
+  ],
+  "findings": [
+    {
+      "citations": [
+        "https://learn.microsoft.com/azure/virtual-network/network-security-groups-overview",
+        "https://learn.microsoft.com/azure/vpn-gateway/vpn-gateway-vpn-faq",
+        "https://learn.microsoft.com/cli/azure/network/nsg/rule"
+      ],
+      "evidence": {
+        "associatedSubnets": [
+          "snet-outside"
+        ],
+        "blockedPorts": [
+          500,
+          4500
+        ],
+        "rule": {
+          "access": "Deny",
+          "destination": [
+            "*"
+          ],
+          "destinationPorts": "500,4500",
+          "direction": "Inbound",
+          "name": "sc02-block-ike",
+          "priority": 100,
+          "protocol": "Udp",
+          "source": [
+            "*"
+          ]
+        }
+      },
+      "id": "NSG-IKE-BLOCKED:nsg-netops-onprem-outside:sc02-block-ike",
+      "recommendation": "Site-to-site IPsec needs UDP 500 (IKE) and UDP 4500 (NAT traversal) between the VPN peers; the tunnel drops at the next rekey. Remove the deny or scope it away from the VPN peer addresses, then confirm with netops-hybrid-health.",
+      "remediation_script": "# Human review required. Read-only verification (the agent never runs writes):\naz network nsg rule list -g rg-netops-onprem --nsg-name nsg-netops-onprem-outside --include-default -o table\naz network nsg rule show -g rg-netops-onprem --nsg-name nsg-netops-onprem-outside -n sc02-block-ike -o json\n# Change (review before running):\n# az network nsg rule delete -g rg-netops-onprem --nsg-name nsg-netops-onprem-outside -n sc02-block-ike",
+      "resource_id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-onprem/providers/Microsoft.Network/networkSecurityGroups/nsg-netops-onprem-outside",
+      "severity": "high",
+      "skill": "netops-nsg-firewall-audit",
+      "title": "NSG nsg-netops-onprem-outside: rule sc02-block-ike blocks IKE/IPsec (UDP 500/4500) inbound"
+    },
+    {
+      "citations": [
+        "https://learn.microsoft.com/azure/virtual-network/network-security-group-how-it-works",
+        "https://learn.microsoft.com/azure/virtual-network/network-security-groups-overview",
+        "https://learn.microsoft.com/cli/azure/network/nsg/rule"
+      ],
+      "evidence": {
+        "shadowed": {
+          "access": "Allow",
+          "destination": [
+            "*"
+          ],
+          "destinationPorts": "500,4500",
+          "direction": "Inbound",
+          "name": "allow-ipsec-inbound",
+          "priority": 1000,
+          "protocol": "Udp",
+          "source": [
+            "internet"
+          ]
+        },
+        "shadowedBy": {
+          "access": "Deny",
+          "destination": [
+            "*"
+          ],
+          "destinationPorts": "500,4500",
+          "direction": "Inbound",
+          "name": "sc02-block-ike",
+          "priority": 100,
+          "protocol": "Udp",
+          "source": [
+            "*"
+          ]
+        }
+      },
+      "id": "NSG-SHADOWED:nsg-netops-onprem-outside:allow-ipsec-inbound",
+      "recommendation": "NSG rules are processed in priority order and processing stops at the first match. Re-order or narrow the higher-priority rule if the lower one is still intended; otherwise remove the dead rule.",
+      "remediation_script": "# Human review required. Read-only verification (the agent never runs writes):\naz network nsg rule list -g rg-netops-onprem --nsg-name nsg-netops-onprem-outside --include-default -o table\naz network nsg rule show -g rg-netops-onprem --nsg-name nsg-netops-onprem-outside -n allow-ipsec-inbound -o json\n# Change (review before running):\n# az network nsg rule delete -g rg-netops-onprem --nsg-name nsg-netops-onprem-outside -n allow-ipsec-inbound",
+      "resource_id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-onprem/providers/Microsoft.Network/networkSecurityGroups/nsg-netops-onprem-outside",
+      "severity": "medium",
+      "skill": "netops-nsg-firewall-audit",
+      "title": "NSG nsg-netops-onprem-outside: Allow rule allow-ipsec-inbound (1000) never matches; Deny rule sc02-block-ike (100) is evaluated first and covers it"
+    }
+  ],
+  "kpis": {
+    "broad_rules": 0
+  },
+  "metrics": [
+    {
+      "detail": "3 custom rules",
+      "label": "NSGs audited",
+      "tone": "neutral",
+      "value": "1"
+    },
+    {
+      "detail": "Internet/any source with >= 1024 ports, or Azure Firewall wildcard allow",
+      "label": "Overly broad allow rules",
+      "tone": "good",
+      "value": "0"
+    },
+    {
+      "detail": "22 / 3389 / 5985 / 5986 allowed from Internet or *",
+      "label": "Management ports from Internet",
+      "tone": "good",
+      "value": "0"
+    },
+    {
+      "detail": "fully covered by a higher-priority rule",
+      "label": "Shadowed / redundant rules",
+      "tone": "warning",
+      "value": "1"
+    },
+    {
+      "detail": "filter rule collections (Allow)",
+      "label": "Azure Firewall allow rules audited",
+      "tone": "neutral",
+      "value": "0"
+    }
+  ],
+  "partial": true,
+  "skill": "netops-nsg-firewall-audit",
+  "warnings": []
+}

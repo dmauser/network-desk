@@ -1,0 +1,16 @@
+{
+  "id": "LAT-01",
+  "title": "SNAT port exhaustion on outbound rule",
+  "source": "https://github.com/dmauser/azure-sre-netops",
+  "injected_fault": "Outbound rule allocatedOutboundPorts too low for app burst; backend 10.1.0.4 exhausts SNAT ports",
+  "symptom": "Outbound HTTPS calls from the app VMs behind the public load balancer fail intermittently with timeouts; suspect SNAT port exhaustion on the outbound rule.",
+  "expected_skill": "netops-snat-egress",
+  "input_ref": "plugins/netops/skills/netops-snat-egress/examples/snat-exhaustion-input.json",
+  "expect": {
+    "finding_prefixes": [
+      "SNAT-LB-PORT-UTIL:",
+      "SNAT-LB-FAILED-CONN:"
+    ],
+    "top_severity": "critical"
+  }
+}

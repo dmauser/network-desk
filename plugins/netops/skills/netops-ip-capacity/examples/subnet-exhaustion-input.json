@@ -1,0 +1,198 @@
+{
+  "as_of": "2025-01-14",
+  "gateway_metrics": [
+    {
+      "dimensions": {
+        "roleInstance": "IN_0"
+      },
+      "metric": "ExpressRouteGatewayCpuUtilization",
+      "resource_id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-hub/providers/Microsoft.Network/virtualNetworkGateways/ergw-hub",
+      "value": 91
+    },
+    {
+      "dimensions": {
+        "roleInstance": "IN_1"
+      },
+      "metric": "ExpressRouteGatewayCpuUtilization",
+      "resource_id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-hub/providers/Microsoft.Network/virtualNetworkGateways/ergw-hub",
+      "value": 35
+    }
+  ],
+  "history": [
+    {
+      "as_of": "2024-12-15",
+      "subnet_id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-spoke/providers/Microsoft.Network/virtualNetworks/vnet-spoke1/subnets/snet-data",
+      "used": 38
+    },
+    {
+      "as_of": "2024-12-30",
+      "subnet_id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-spoke/providers/Microsoft.Network/virtualNetworks/vnet-spoke1/subnets/snet-data",
+      "used": 44
+    },
+    {
+      "as_of": "2024-12-15",
+      "subnet_id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-spoke/providers/Microsoft.Network/virtualNetworks/vnet-spoke1/subnets/snet-pe",
+      "used": 12
+    }
+  ],
+  "managed_scopes": [
+    "/subscriptions/00000000-0000-0000-0000-000000000001"
+  ],
+  "thresholds": {
+    "forecast_days": 90,
+    "subnet_crit_pct": 95,
+    "subnet_warn_pct": 80
+  },
+  "usages": [
+    {
+      "value": [
+        {
+          "currentValue": -1,
+          "id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-hub/providers/Microsoft.Network/virtualNetworks/vnet-hub/subnets/GatewaySubnet",
+          "limit": -1,
+          "name": {
+            "localizedValue": "Subnet size and usage",
+            "value": "SubnetSpace"
+          },
+          "unit": "Count"
+        },
+        {
+          "currentValue": 4,
+          "id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-hub/providers/Microsoft.Network/virtualNetworks/vnet-hub/subnets/AzureFirewallSubnet",
+          "limit": 59,
+          "name": {
+            "localizedValue": "Subnet size and usage",
+            "value": "SubnetSpace"
+          },
+          "unit": "Count"
+        },
+        {
+          "currentValue": 2,
+          "id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-hub/providers/Microsoft.Network/virtualNetworks/vnet-hub/subnets/AzureBastionSubnet",
+          "limit": 59,
+          "name": {
+            "localizedValue": "Subnet size and usage",
+            "value": "SubnetSpace"
+          },
+          "unit": "Count"
+        }
+      ],
+      "vnet_id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-hub/providers/Microsoft.Network/virtualNetworks/vnet-hub"
+    },
+    {
+      "value": [
+        {
+          "currentValue": 118,
+          "id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-spoke/providers/Microsoft.Network/virtualNetworks/vnet-spoke1/subnets/snet-app",
+          "limit": 123,
+          "name": {
+            "localizedValue": "Subnet size and usage",
+            "value": "SubnetSpace"
+          },
+          "unit": "Count"
+        },
+        {
+          "currentValue": 50,
+          "id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-spoke/providers/Microsoft.Network/virtualNetworks/vnet-spoke1/subnets/snet-data",
+          "limit": 59,
+          "name": {
+            "localizedValue": "Subnet size and usage",
+            "value": "SubnetSpace"
+          },
+          "unit": "Count"
+        },
+        {
+          "currentValue": 12,
+          "id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-spoke/providers/Microsoft.Network/virtualNetworks/vnet-spoke1/subnets/snet-pe",
+          "limit": 59,
+          "name": {
+            "localizedValue": "Subnet size and usage",
+            "value": "SubnetSpace"
+          },
+          "unit": "Count"
+        }
+      ],
+      "vnet_id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-spoke/providers/Microsoft.Network/virtualNetworks/vnet-spoke1"
+    }
+  ],
+  "vnets": [
+    {
+      "addressSpace": {
+        "addressPrefixes": [
+          "10.0.0.0/24"
+        ]
+      },
+      "id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-hub/providers/Microsoft.Network/virtualNetworks/vnet-hub",
+      "location": "eastus",
+      "name": "vnet-hub",
+      "subnets": [
+        {
+          "addressPrefix": "10.0.0.0/28",
+          "delegations": [],
+          "id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-hub/providers/Microsoft.Network/virtualNetworks/vnet-hub/subnets/GatewaySubnet",
+          "name": "GatewaySubnet"
+        },
+        {
+          "addressPrefix": "10.0.0.64/26",
+          "delegations": [],
+          "id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-hub/providers/Microsoft.Network/virtualNetworks/vnet-hub/subnets/AzureFirewallSubnet",
+          "name": "AzureFirewallSubnet"
+        },
+        {
+          "addressPrefix": "10.0.0.128/26",
+          "delegations": [],
+          "id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-hub/providers/Microsoft.Network/virtualNetworks/vnet-hub/subnets/AzureBastionSubnet",
+          "name": "AzureBastionSubnet"
+        }
+      ]
+    },
+    {
+      "addressSpace": {
+        "addressPrefixes": [
+          "10.1.0.0/24"
+        ]
+      },
+      "id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-spoke/providers/Microsoft.Network/virtualNetworks/vnet-spoke1",
+      "location": "eastus",
+      "name": "vnet-spoke1",
+      "subnets": [
+        {
+          "addressPrefix": "10.1.0.0/25",
+          "delegations": [],
+          "id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-spoke/providers/Microsoft.Network/virtualNetworks/vnet-spoke1/subnets/snet-app",
+          "name": "snet-app"
+        },
+        {
+          "addressPrefix": "10.1.0.128/26",
+          "delegations": [],
+          "id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-spoke/providers/Microsoft.Network/virtualNetworks/vnet-spoke1/subnets/snet-data",
+          "name": "snet-data"
+        },
+        {
+          "addressPrefix": "10.1.0.192/26",
+          "delegations": [],
+          "id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-spoke/providers/Microsoft.Network/virtualNetworks/vnet-spoke1/subnets/snet-pe",
+          "name": "snet-pe"
+        }
+      ]
+    },
+    {
+      "addressSpace": {
+        "addressPrefixes": [
+          "10.9.0.0/24"
+        ]
+      },
+      "id": "/subscriptions/00000000-0000-0000-0000-000000000009/resourceGroups/rg-other/providers/Microsoft.Network/virtualNetworks/vnet-foreign",
+      "location": "eastus",
+      "name": "vnet-foreign",
+      "subnets": [
+        {
+          "addressPrefix": "10.9.0.0/24",
+          "delegations": [],
+          "id": "/subscriptions/00000000-0000-0000-0000-000000000009/resourceGroups/rg-other/providers/Microsoft.Network/virtualNetworks/vnet-foreign/subnets/snet-x",
+          "name": "snet-x"
+        }
+      ]
+    }
+  ]
+}

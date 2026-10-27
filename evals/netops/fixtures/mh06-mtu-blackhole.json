@@ -1,0 +1,15 @@
+{
+  "id": "MH-06",
+  "title": "The invisible fault (mtu-blackhole)",
+  "source": "https://github.com/dmauser/az-srenetops-microhack",
+  "injected_fault": "mtu-blackhole: small requests succeed, large responses hang; all monitors green, nothing in AzureActivity.",
+  "symptom": "Every monitor is green and small requests succeed, but large API responses hang through the hub NVA; nothing in AzureActivity",
+  "expected_skill": "netops-routing-analyzer",
+  "input_ref": "plugins/netops/skills/netops-routing-analyzer/examples/mh06-mtu-input.json",
+  "expect": {
+    "finding_prefixes": [
+      "RT-MTU-BLACKHOLE:"
+    ],
+    "top_severity": "high"
+  }
+}

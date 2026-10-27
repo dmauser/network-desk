@@ -1,0 +1,78 @@
+{
+  "evidence_gaps": [],
+  "findings": [
+    {
+      "citations": [
+        "https://learn.microsoft.com/azure/virtual-network/how-to-virtual-machine-mtu",
+        "https://learn.microsoft.com/azure/virtual-network/virtual-network-tcpip-performance-tuning"
+      ],
+      "evidence": {
+        "checks": [
+          {
+            "check": "large",
+            "detail": "GET /api/report?size=large hung until client timeout",
+            "payload_bytes": 262144,
+            "result": "timeout",
+            "size": "large"
+          },
+          {
+            "check": "small",
+            "detail": "availability probe HTTP 200 in 40 ms",
+            "payload_bytes": 512,
+            "result": "ok",
+            "size": "small"
+          }
+        ],
+        "path": "client-to-api",
+        "via_nva": [
+          "10.0.1.4"
+        ]
+      },
+      "id": "RT-MTU-BLACKHOLE:client-to-api",
+      "recommendation": "Small requests (and availability probes) succeed while large responses hang: a hop on the path drops packets above its MTU and the ICMP Fragmentation Needed reply does not reach the sender (PMTUD broken). Azure's default MTU is 1,500 bytes and larger MTUs are not supported through gateways, global peering or the internet; for VPN tunnels Learn recommends TCP MSS clamping to 1,350 bytes and tunnel MTU 1,400. Check guest/NVA MTU settings, MSS clamping on the NVA / VPN device and ICMP filtering.",
+      "remediation_script": "# Human review required. Read-only verification (the agent never runs writes):\n# From the source VM (guest OS, run by a human): ping <destination> -c 10 -M do -s 1472\n#   (1472 = 1500 MTU - 28 bytes of IP/ICMP headers; lower -s until it succeeds to find the path MTU)\n# No Azure control-plane change is implied; review guest/NVA MTU and MSS clamping.",
+      "resource_id": "",
+      "severity": "high",
+      "skill": "netops-routing-analyzer",
+      "title": "Path client-to-api: large payloads fail while small succeed \u2014 suspect MTU/MSS black-hole"
+    }
+  ],
+  "kpis": {
+    "asymmetric_paths": 1
+  },
+  "metrics": [
+    {
+      "detail": "UDR/next-hop None, peering down, asymmetric NVA path, NVA forwarding or MTU black hole",
+      "label": "Black-holed / asymmetric paths",
+      "tone": "critical",
+      "value": "1"
+    },
+    {
+      "detail": "peeringState == Connected",
+      "label": "Peerings connected",
+      "tone": "good",
+      "value": "2/2"
+    },
+    {
+      "detail": "1 NVA / firewall next hop IP(s) referenced",
+      "label": "UDRs analyzed",
+      "tone": "neutral",
+      "value": "1"
+    },
+    {
+      "detail": "enableIPForwarding on NICs that own a VirtualAppliance next hop IP",
+      "label": "NVA NICs with IP forwarding off",
+      "tone": "good",
+      "value": "0"
+    },
+    {
+      "detail": "client probes / Connection Monitor results",
+      "label": "Data-plane checks passed",
+      "tone": "warning",
+      "value": "1/2"
+    }
+  ],
+  "partial": false,
+  "skill": "netops-routing-analyzer",
+  "warnings": []
+}

@@ -1,0 +1,207 @@
+{
+  "evidence_gaps": [],
+  "findings": [
+    {
+      "citations": [
+        "https://learn.microsoft.com/azure/azure-monitor/reference/tables/ntaipdetails",
+        "https://learn.microsoft.com/azure/azure-monitor/reference/tables/ntanetanalytics",
+        "https://learn.microsoft.com/azure/network-watcher/traffic-analytics-schema"
+      ],
+      "evidence": {
+        "allowed_flows": 3.0,
+        "denied_flows": 41.0,
+        "dest_ports": [
+          "22"
+        ],
+        "flow_directions": [
+          "I"
+        ],
+        "flow_targets": [
+          "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-hub/providers/Microsoft.Network/virtualNetworks/vnet-hub"
+        ],
+        "public_ip": "203.0.113.50",
+        "threat": {
+          "Location": "XX",
+          "ThreatDescription": "Indicator of botnet activity",
+          "ThreatType": "Botnet"
+        }
+      },
+      "id": "FLOW-MALICIOUS:203.0.113.50",
+      "recommendation": "Traffic Analytics classified flows with this IP as MaliciousFlow. Allowed flows mean the path is open: confirm with security operations, block the IP / tighten the rule and review the affected workloads.",
+      "remediation_script": "# Human review required. Read-only verification (the agent never runs writes):\n# KQL (Log Analytics):\nNTAIpDetails | where Ip == \"203.0.113.50\" | project TimeGenerated, FlowType, ThreatType, ThreatDescription, Location, Url",
+      "resource_id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-hub/providers/Microsoft.Network/virtualNetworks/vnet-hub",
+      "severity": "high",
+      "skill": "netops-flow-insights",
+      "title": "Traffic Analytics MaliciousFlow with 203.0.113.50 (3 allowed, 41 denied)"
+    },
+    {
+      "citations": [
+        "https://learn.microsoft.com/azure/azure-monitor/reference/tables/ntanetanalytics",
+        "https://learn.microsoft.com/azure/network-watcher/traffic-analytics-schema"
+      ],
+      "evidence": {
+        "acl_rules": [
+          "DenyAllInBound"
+        ],
+        "denied_flows": 340.0,
+        "dest_ip": "10.1.1.4",
+        "dest_port": "1433",
+        "flow_targets": [
+          "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-hub/providers/Microsoft.Network/virtualNetworks/vnet-hub"
+        ],
+        "l4_protocol": "T",
+        "threshold": 100.0,
+        "top_sources": [
+          {
+            "denied_flows": 210.0,
+            "src_ip": "10.0.1.4"
+          },
+          {
+            "denied_flows": 130.0,
+            "src_ip": "10.0.1.5"
+          }
+        ]
+      },
+      "id": "FLOW-DENIED-HIGH:10.1.1.4:1433/T",
+      "recommendation": "Investigate blocked traffic (possible SC-04 style deny): confirm whether the deny is intended. If legitimate traffic is being dropped, review the listed NSG / security admin rule with netops-nsg-firewall-audit; if unexpected sources, treat as scanning.",
+      "remediation_script": "# Human review required. Read-only verification (the agent never runs writes):\n# KQL (Log Analytics):\nNTANetAnalytics | where SubType == \"FlowLog\" | where DestIp == \"10.1.1.4\" and DestPort == 1433 | where DeniedInFlows > 0 or DeniedOutFlows > 0 | summarize Denied = sum(DeniedInFlows + DeniedOutFlows) by SrcIp, AclGroup, AclRule | order by Denied desc",
+      "resource_id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-hub/providers/Microsoft.Network/virtualNetworks/vnet-hub",
+      "severity": "medium",
+      "skill": "netops-flow-insights",
+      "title": "340 denied flows to 10.1.1.4:1433/T"
+    },
+    {
+      "citations": [
+        "https://learn.microsoft.com/azure/network-watcher/nsg-flow-logs-overview",
+        "https://learn.microsoft.com/azure/network-watcher/vnet-flow-logs-overview",
+        "https://learn.microsoft.com/cli/azure/network/watcher/flow-log"
+      ],
+      "evidence": {
+        "enabled": true,
+        "flow_log": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/NetworkWatcherRG/providers/Microsoft.Network/networkWatchers/NetworkWatcher_eastus/flowLogs/fl-nsg-spoke1-app",
+        "note": "New NSG flow logs can no longer be created; after retirement Azure deletes existing NSG flow log resources and Traffic Analytics stops for them.",
+        "retirement_date": "2027-09-30",
+        "targetResourceId": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-spoke/providers/Microsoft.Network/networkSecurityGroups/nsg-spoke1-app"
+      },
+      "id": "FLOW-NSG-FLOWLOG-RETIRING:fl-nsg-spoke1-app",
+      "recommendation": "Migrate to virtual network flow logs on the parent VNet (or subnet/NIC). Avoid enabling both on the same workload to prevent duplicate logging and cost.",
+      "remediation_script": "# Human review required. Read-only verification (the agent never runs writes):\naz network watcher flow-log show --location eastus --name fl-nsg-spoke1-app\n# Change (review before running):\n# az network watcher flow-log create --location eastus --name <vnet-flow-log-name> --vnet <vnet-id> --storage-account <storage-account-id> --workspace <workspace-id>",
+      "resource_id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-spoke/providers/Microsoft.Network/networkSecurityGroups/nsg-spoke1-app",
+      "severity": "medium",
+      "skill": "netops-flow-insights",
+      "title": "NSG flow log fl-nsg-spoke1-app on nsg-spoke1-app (NSG flow logs retire on 2027-09-30)"
+    },
+    {
+      "citations": [
+        "https://learn.microsoft.com/azure/network-watcher/vnet-flow-logs-overview",
+        "https://learn.microsoft.com/cli/azure/network/watcher/flow-log"
+      ],
+      "evidence": {
+        "note": "Coverage counts an enabled flow log whose targetResourceId is the VNet.",
+        "subnet_flow_logs": [],
+        "vnet": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-spoke/providers/Microsoft.Network/virtualNetworks/vnet-spoke1"
+      },
+      "id": "FLOW-VNET-NO-FLOWLOG:vnet-spoke1",
+      "recommendation": "Without flow logs there is no record of allowed/denied traffic for incident triage. Enable a virtual network flow log (optionally with Traffic Analytics).",
+      "remediation_script": "# Human review required. Read-only verification (the agent never runs writes):\naz network watcher flow-log list --location eastus --query \"[?targetResourceId=='/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-spoke/providers/Microsoft.Network/virtualNetworks/vnet-spoke1']\"\n# Change (review before running):\n# az network watcher flow-log create --location eastus --name <flow-log-name> --vnet /subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-spoke/providers/Microsoft.Network/virtualNetworks/vnet-spoke1 --storage-account <storage-account-id> --workspace <workspace-id>",
+      "resource_id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-spoke/providers/Microsoft.Network/virtualNetworks/vnet-spoke1",
+      "severity": "medium",
+      "skill": "netops-flow-insights",
+      "title": "VNet vnet-spoke1 has no enabled virtual network flow log"
+    },
+    {
+      "citations": [
+        "https://learn.microsoft.com/azure/network-watcher/vnet-flow-logs-overview",
+        "https://learn.microsoft.com/cli/azure/network/watcher/flow-log"
+      ],
+      "evidence": {
+        "enabled": false,
+        "flow_log": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/NetworkWatcherRG/providers/Microsoft.Network/networkWatchers/NetworkWatcher_eastus/flowLogs/fl-vnet-spoke2",
+        "targetResourceId": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-spoke/providers/Microsoft.Network/virtualNetworks/vnet-spoke2",
+        "target_type": "vnet"
+      },
+      "id": "FLOW-LOG-DISABLED:fl-vnet-spoke2",
+      "recommendation": "No flow records are being written for this target. Re-enable it (or, for an NSG flow log, replace it with a virtual network flow log).",
+      "remediation_script": "# Human review required. Read-only verification (the agent never runs writes):\naz network watcher flow-log show --location eastus --name fl-vnet-spoke2\n# Change (review before running):\n# az network watcher flow-log update --location eastus --name fl-vnet-spoke2 --enabled true",
+      "resource_id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-spoke/providers/Microsoft.Network/virtualNetworks/vnet-spoke2",
+      "severity": "medium",
+      "skill": "netops-flow-insights",
+      "title": "Flow log fl-vnet-spoke2 on VNET vnet-spoke2 is disabled"
+    },
+    {
+      "citations": [
+        "https://learn.microsoft.com/cli/azure/network/watcher/flow-log",
+        "https://learn.microsoft.com/rest/api/network-watcher/flow-logs/get"
+      ],
+      "evidence": {
+        "flow_log": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/NetworkWatcherRG/providers/Microsoft.Network/networkWatchers/NetworkWatcher_eastus/flowLogs/fl-nsg-spoke1-app",
+        "networkWatcherFlowAnalyticsConfiguration": {
+          "enabled": false,
+          "trafficAnalyticsInterval": null,
+          "workspaceResourceId": null
+        },
+        "targetResourceId": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-spoke/providers/Microsoft.Network/networkSecurityGroups/nsg-spoke1-app"
+      },
+      "id": "FLOW-TA-DISABLED:fl-nsg-spoke1-app",
+      "recommendation": "Flow records only land in storage. Enable Traffic Analytics to a Log Analytics workspace so NTANetAnalytics can be queried (denied flows, top talkers, malicious flows).",
+      "remediation_script": "# Human review required. Read-only verification (the agent never runs writes):\naz network watcher flow-log show --location eastus --name fl-nsg-spoke1-app\n# Change (review before running):\n# az network watcher flow-log update --location eastus --name fl-nsg-spoke1-app --traffic-analytics true --workspace <workspace-id> --interval 10",
+      "resource_id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-spoke/providers/Microsoft.Network/networkSecurityGroups/nsg-spoke1-app",
+      "severity": "low",
+      "skill": "netops-flow-insights",
+      "title": "Traffic Analytics is not enabled on flow log fl-nsg-spoke1-app"
+    }
+  ],
+  "kpis": {
+    "flow_log_coverage_pct": 33.3
+  },
+  "metrics": [
+    {
+      "detail": "enabled virtual network flow log targeting the VNet",
+      "label": "VNets with flow logs",
+      "tone": "critical",
+      "value": "1/3"
+    },
+    {
+      "detail": "DeniedInFlows + DeniedOutFlows (NTANetAnalytics)",
+      "label": "Denied flows",
+      "tone": "neutral",
+      "value": "352"
+    },
+    {
+      "detail": "AllowedInFlows + AllowedOutFlows (NTANetAnalytics)",
+      "label": "Allowed flows",
+      "tone": "neutral",
+      "value": "1,204"
+    },
+    {
+      "detail": "FlowType == MaliciousFlow",
+      "label": "Malicious flow IPs",
+      "tone": "critical",
+      "value": "1"
+    },
+    {
+      "detail": "462,000,000 bytes (BytesSrcToDest + BytesDestToSrc)",
+      "label": "Top talker #1",
+      "tone": "neutral",
+      "value": "10.0.1.4 -> 10.0.2.4"
+    },
+    {
+      "detail": "104,000,000 bytes (BytesSrcToDest + BytesDestToSrc)",
+      "label": "Top talker #2",
+      "tone": "neutral",
+      "value": "10.0.2.4 -> 10.0.3.8"
+    },
+    {
+      "detail": "21,000 bytes (BytesSrcToDest + BytesDestToSrc)",
+      "label": "Top talker #3",
+      "tone": "neutral",
+      "value": "10.0.3.8 -> 10.0.1.4"
+    }
+  ],
+  "partial": false,
+  "skill": "netops-flow-insights",
+  "warnings": [
+    "1 flow_logs item(s) outside the managed scope were excluded.",
+    "1 vnets item(s) outside the managed scope were excluded."
+  ]
+}

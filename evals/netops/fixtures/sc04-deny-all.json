@@ -1,0 +1,22 @@
+{
+  "id": "SC-04",
+  "title": "Deny-all NSG rule shadows app allows",
+  "source": "https://github.com/dmauser/azure-sre-netops",
+  "injected_fault": "High-priority any-any inbound deny rule sc04-deny-inbound added to nsg-netops-app above the existing allow rules.",
+  "symptom": "After a change, every inbound connection to the app VMs in the spoke workload subnet is blocked; a new deny rule on the NSG appears to override the existing security rules.",
+  "expected_skill": "netops-nsg-firewall-audit",
+  "input_ref": "plugins/netops/skills/netops-nsg-firewall-audit/examples/sc04-deny-all-input.json",
+  "expect": {
+    "finding_prefixes": [
+      "NSG-DENY-ALL-SHADOWS:nsg-netops-app:sc04-deny-inbound"
+    ],
+    "absent_prefixes": [
+      "NSG-SHADOWED:"
+    ],
+    "top_severity": "critical",
+    "evidence_gap_contains": [
+      "rule_hits"
+    ],
+    "partial": true
+  }
+}

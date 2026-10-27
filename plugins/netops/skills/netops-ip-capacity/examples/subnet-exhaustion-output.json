@@ -1,0 +1,178 @@
+{
+  "evidence_gaps": [],
+  "findings": [
+    {
+      "citations": [
+        "https://learn.microsoft.com/azure/virtual-network/virtual-networks-faq",
+        "https://learn.microsoft.com/cli/azure/network/vnet/subnet",
+        "https://learn.microsoft.com/rest/api/virtualnetwork/virtual-networks/list-usage"
+      ],
+      "evidence": {
+        "crit_pct": 95.0,
+        "currentValue": 118,
+        "free": 5,
+        "limit": 123,
+        "utilization_pct": 95.9,
+        "warn_pct": 80.0
+      },
+      "id": "CAP-SUBNET-UTIL:vnet-spoke1:snet-app",
+      "recommendation": "New NICs, private endpoints, scale-out instances or service injections in this subnet will fail once it is full. Azure reserves 5 IPs in every subnet. Add an address prefix / larger subnet or move workloads to a new subnet.",
+      "remediation_script": "# Human review required. Read-only verification (the agent never runs writes):\naz rest --method get --url \"https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-spoke/providers/Microsoft.Network/virtualNetworks/vnet-spoke1/usages?api-version=2026-01-01\"\naz network vnet subnet show -g rg-netops-spoke --vnet-name vnet-spoke1 -n snet-app --query \"{prefix:addressPrefix,prefixes:addressPrefixes,delegations:delegations[].serviceName}\"\n# Change (review before running):\n# az network vnet subnet update -g rg-netops-spoke --vnet-name vnet-spoke1 -n snet-app --address-prefixes <current-prefix> <additional-prefix>",
+      "resource_id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-spoke/providers/Microsoft.Network/virtualNetworks/vnet-spoke1/subnets/snet-app",
+      "severity": "critical",
+      "skill": "netops-ip-capacity",
+      "title": "Subnet vnet-spoke1/snet-app is 95.9% utilized (118/123 IPs)"
+    },
+    {
+      "citations": [
+        "https://learn.microsoft.com/azure/azure-monitor/reference/supported-metrics/microsoft-network-virtualnetworkgateways-metrics",
+        "https://learn.microsoft.com/azure/expressroute/expressroute-monitoring-metrics-alerts"
+      ],
+      "evidence": {
+        "dimensions": {
+          "roleInstance": "IN_0"
+        },
+        "limit": null,
+        "metric": "ExpressRouteGatewayCpuUtilization",
+        "threshold_pct": 80.0,
+        "utilization_pct": 91.0,
+        "value": 91.0
+      },
+      "id": "CAP-GW-METRIC:ergw-hub:ExpressRouteGatewayCpuUtilization:roleInstance=IN_0",
+      "recommendation": "Sustained high ExpressRoute gateway CPU / throughput degrades forwarding; consider a larger gateway SKU or scale units and review flows and learned routes.",
+      "remediation_script": "# Human review required. Read-only verification (the agent never runs writes):\naz monitor metrics list --resource /subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-hub/providers/Microsoft.Network/virtualNetworkGateways/ergw-hub --metric ExpressRouteGatewayCpuUtilization --aggregation Average --interval PT5M\naz network vnet-gateway show -g rg-netops-hub -n ergw-hub --query \"sku\"",
+      "resource_id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-hub/providers/Microsoft.Network/virtualNetworkGateways/ergw-hub",
+      "severity": "high",
+      "skill": "netops-ip-capacity",
+      "title": "Gateway ergw-hub: ExpressRouteGatewayCpuUtilization at 91% of capacity (threshold 80%)"
+    },
+    {
+      "citations": [
+        "https://learn.microsoft.com/azure/virtual-network/virtual-networks-faq",
+        "https://learn.microsoft.com/cli/azure/network/vnet/subnet",
+        "https://learn.microsoft.com/rest/api/virtualnetwork/virtual-networks/list-usage"
+      ],
+      "evidence": {
+        "crit_pct": 95.0,
+        "currentValue": 50,
+        "free": 9,
+        "limit": 59,
+        "utilization_pct": 84.7,
+        "warn_pct": 80.0
+      },
+      "id": "CAP-SUBNET-UTIL:vnet-spoke1:snet-data",
+      "recommendation": "New NICs, private endpoints, scale-out instances or service injections in this subnet will fail once it is full. Azure reserves 5 IPs in every subnet. Add an address prefix / larger subnet or move workloads to a new subnet.",
+      "remediation_script": "# Human review required. Read-only verification (the agent never runs writes):\naz rest --method get --url \"https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-spoke/providers/Microsoft.Network/virtualNetworks/vnet-spoke1/usages?api-version=2026-01-01\"\naz network vnet subnet show -g rg-netops-spoke --vnet-name vnet-spoke1 -n snet-data --query \"{prefix:addressPrefix,prefixes:addressPrefixes,delegations:delegations[].serviceName}\"\n# Change (review before running):\n# az network vnet subnet update -g rg-netops-spoke --vnet-name vnet-spoke1 -n snet-data --address-prefixes <current-prefix> <additional-prefix>",
+      "resource_id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-spoke/providers/Microsoft.Network/virtualNetworks/vnet-spoke1/subnets/snet-data",
+      "severity": "high",
+      "skill": "netops-ip-capacity",
+      "title": "Subnet vnet-spoke1/snet-data is 84.7% utilized (50/59 IPs)"
+    },
+    {
+      "citations": [
+        "https://learn.microsoft.com/azure/vpn-gateway/vpn-gateway-about-vpn-gateway-settings",
+        "https://learn.microsoft.com/cli/azure/network/vnet/subnet"
+      ],
+      "evidence": {
+        "prefixes": [
+          "10.0.0.0/28"
+        ],
+        "required_min": "/27",
+        "rule": "All VPN/ExpressRoute gateway SKUs except Basic require GatewaySubnet /27 or larger (/29 is possible for the Basic SKU only)."
+      },
+      "id": "CAP-SPECIAL-SUBNET-UNDERSIZED:vnet-hub:GatewaySubnet",
+      "recommendation": "All VPN/ExpressRoute gateway SKUs except Basic require GatewaySubnet /27 or larger (/29 is possible for the Basic SKU only). Resize before deploying or scaling the service (the subnet may need to be empty, or an additional prefix added).",
+      "remediation_script": "# Human review required. Read-only verification (the agent never runs writes):\naz network vnet subnet show -g rg-netops-hub --vnet-name vnet-hub -n GatewaySubnet --query \"{prefix:addressPrefix,prefixes:addressPrefixes}\"\n# Change (review before running):\n# az network vnet subnet update -g rg-netops-hub --vnet-name vnet-hub -n GatewaySubnet --address-prefixes <new-/27-or-larger-prefix>",
+      "resource_id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-hub/providers/Microsoft.Network/virtualNetworks/vnet-hub/subnets/GatewaySubnet",
+      "severity": "medium",
+      "skill": "netops-ip-capacity",
+      "title": "GatewaySubnet in vnet-hub is /28; /27 or larger is required/recommended"
+    },
+    {
+      "citations": [
+        "https://learn.microsoft.com/rest/api/virtualnetwork/virtual-networks/list-usage"
+      ],
+      "evidence": {
+        "as_of": "2025-01-14",
+        "currentValue": 50,
+        "days_to_exhaustion": 23,
+        "forecast_days": 90,
+        "growth_ips_per_day": 0.4,
+        "limit": 59,
+        "method": "least-squares linear fit of history + current usage",
+        "projected_exhaustion": "2025-02-06",
+        "samples": 3
+      },
+      "id": "CAP-SUBNET-FORECAST:vnet-spoke1:snet-data",
+      "recommendation": "Linear growth from the usage history exhausts this subnet inside the forecast window. Plan an additional prefix or new subnet before the projected date.",
+      "remediation_script": "# Human review required. Read-only verification (the agent never runs writes):\naz rest --method get --url \"https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-spoke/providers/Microsoft.Network/virtualNetworks/vnet-spoke1/usages?api-version=2026-01-01\"",
+      "resource_id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-spoke/providers/Microsoft.Network/virtualNetworks/vnet-spoke1/subnets/snet-data",
+      "severity": "medium",
+      "skill": "netops-ip-capacity",
+      "title": "Subnet vnet-spoke1/snet-data projected to exhaust on 2025-02-06 (23 days)"
+    },
+    {
+      "citations": [
+        "https://learn.microsoft.com/azure/virtual-network/virtual-networks-faq",
+        "https://learn.microsoft.com/cli/azure/network/vnet"
+      ],
+      "evidence": {
+        "address_prefixes": [
+          "10.1.0.0/24"
+        ],
+        "allocated_addresses": 256,
+        "largest_free_prefix": null,
+        "min_free_prefix": "/29",
+        "total_addresses": 256
+      },
+      "id": "CAP-VNET-SPACE-FULL:vnet-spoke1",
+      "recommendation": "Every address prefix is allocated to subnets (the smallest supported IPv4 subnet is /29). Add a non-overlapping address prefix to the VNet (update peerings afterwards) before the next subnet is needed.",
+      "remediation_script": "# Human review required. Read-only verification (the agent never runs writes):\naz network vnet show -g rg-netops-spoke -n vnet-spoke1 --query \"{space:addressSpace.addressPrefixes,subnets:subnets[].addressPrefix}\"\n# Change (review before running):\n# az network vnet update -g rg-netops-spoke -n vnet-spoke1 --address-prefixes <existing-prefixes> <new-prefix>",
+      "resource_id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-spoke/providers/Microsoft.Network/virtualNetworks/vnet-spoke1",
+      "severity": "low",
+      "skill": "netops-ip-capacity",
+      "title": "VNet vnet-spoke1 has no free block of /29 or larger for new subnets"
+    }
+  ],
+  "kpis": {
+    "subnets_over_threshold": 2
+  },
+  "metrics": [
+    {
+      "detail": "subnets with usage (currentValue / limit)",
+      "label": "Subnets analyzed",
+      "tone": "neutral",
+      "value": "5"
+    },
+    {
+      "detail": "critical at >= 95%",
+      "label": "Subnets >= 80% utilized",
+      "tone": "critical",
+      "value": "2"
+    },
+    {
+      "detail": "highest currentValue / limit",
+      "label": "Peak subnet utilization",
+      "tone": "critical",
+      "value": "95.9%"
+    },
+    {
+      "detail": "within 90 days",
+      "label": "Forecast exhaustions",
+      "tone": "warning",
+      "value": "1"
+    },
+    {
+      "detail": "verified gateway capacity metrics",
+      "label": "Gateway metrics over threshold",
+      "tone": "critical",
+      "value": "1"
+    }
+  ],
+  "partial": false,
+  "skill": "netops-ip-capacity",
+  "warnings": [
+    "Subnet usage without a size (limit <= 0) was skipped for: GatewaySubnet.",
+    "1 vnets item(s) outside the managed scope were excluded."
+  ]
+}

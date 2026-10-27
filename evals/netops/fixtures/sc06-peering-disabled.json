@@ -1,0 +1,16 @@
+{
+  "id": "SC-06",
+  "title": "Spoke peering access and forwarding disabled",
+  "source": "https://github.com/dmauser/azure-sre-netops",
+  "injected_fault": "Spoke-side peering set to allowVirtualNetworkAccess=false and allowForwardedTraffic=false; state stays Connected.",
+  "symptom": "Spoke-to-hub traffic stopped although the VNet peering still shows Connected; the break looks one-way and forwarded traffic through the hub firewall is dropped",
+  "expected_skill": "netops-routing-analyzer",
+  "input_ref": "plugins/netops/skills/netops-routing-analyzer/examples/sc06-peering-input.json",
+  "expect": {
+    "finding_prefixes": [
+      "RT-PEERING-ACCESS-DISABLED:",
+      "RT-PEERING-FORWARDED-DISABLED:"
+    ],
+    "top_severity": "critical"
+  }
+}

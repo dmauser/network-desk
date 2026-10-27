@@ -1,0 +1,134 @@
+{
+  "effective_routes": [
+    {
+      "nic_id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-spoke/providers/Microsoft.Network/networkInterfaces/nic-vm-app",
+      "value": [
+        {
+          "addressPrefix": [
+            "10.1.0.0/16"
+          ],
+          "nextHopIpAddress": [],
+          "nextHopType": "VnetLocal",
+          "source": "Default",
+          "state": "Active"
+        },
+        {
+          "addressPrefix": [
+            "0.0.0.0/0"
+          ],
+          "name": "default-via-fw",
+          "nextHopIpAddress": [
+            "10.0.1.4"
+          ],
+          "nextHopType": "VirtualAppliance",
+          "source": "User",
+          "state": "Active"
+        }
+      ]
+    }
+  ],
+  "managed_scopes": [
+    "/subscriptions/00000000-0000-0000-0000-000000000001"
+  ],
+  "nics": [
+    {
+      "enableIPForwarding": false,
+      "id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-spoke/providers/Microsoft.Network/networkInterfaces/nic-vm-app",
+      "ipConfigurations": [
+        {
+          "name": "ipconfig1",
+          "privateIPAddress": "10.1.1.4",
+          "subnet": {
+            "id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-spoke/providers/Microsoft.Network/virtualNetworks/vnet-spoke1/subnets/snet-app"
+          }
+        }
+      ],
+      "name": "nic-vm-app"
+    }
+  ],
+  "path_checks": [
+    {
+      "check": "small",
+      "detail": "availability probe HTTP 200 in 40 ms",
+      "path": "client-to-api",
+      "payload_bytes": 512,
+      "result": "ok",
+      "via_nva": "10.0.1.4"
+    },
+    {
+      "check": "large",
+      "detail": "GET /api/report?size=large hung until client timeout",
+      "path": "client-to-api",
+      "payload_bytes": 262144,
+      "result": "timeout",
+      "via_nva": "10.0.1.4"
+    }
+  ],
+  "route_tables": [
+    {
+      "id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-spoke/providers/Microsoft.Network/routeTables/rt-spoke1",
+      "name": "rt-spoke1",
+      "routes": [
+        {
+          "addressPrefix": "0.0.0.0/0",
+          "name": "default-via-fw",
+          "nextHopIpAddress": "10.0.1.4",
+          "nextHopType": "VirtualAppliance"
+        }
+      ],
+      "subnets": [
+        {
+          "id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-spoke/providers/Microsoft.Network/virtualNetworks/vnet-spoke1/subnets/snet-app"
+        }
+      ]
+    }
+  ],
+  "vnet_peerings": [
+    {
+      "value": [
+        {
+          "allowForwardedTraffic": true,
+          "allowGatewayTransit": true,
+          "allowVirtualNetworkAccess": true,
+          "id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-hub/providers/Microsoft.Network/virtualNetworks/vnet-hub/virtualNetworkPeerings/hub-to-spoke1",
+          "name": "hub-to-spoke1",
+          "peeringState": "Connected",
+          "peeringSyncLevel": "FullyInSync",
+          "remoteAddressSpace": {
+            "addressPrefixes": [
+              "10.1.0.0/16"
+            ]
+          },
+          "remoteVirtualNetwork": {
+            "id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-spoke/providers/Microsoft.Network/virtualNetworks/vnet-spoke1"
+          },
+          "useRemoteGateways": false
+        }
+      ],
+      "vnet_id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-hub/providers/Microsoft.Network/virtualNetworks/vnet-hub"
+    },
+    {
+      "value": [
+        {
+          "allowForwardedTraffic": true,
+          "allowGatewayTransit": false,
+          "allowVirtualNetworkAccess": true,
+          "id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-spoke/providers/Microsoft.Network/virtualNetworks/vnet-spoke1/virtualNetworkPeerings/spoke1-to-hub",
+          "name": "spoke1-to-hub",
+          "peeringState": "Connected",
+          "peeringSyncLevel": "FullyInSync",
+          "remoteAddressSpace": {
+            "addressPrefixes": [
+              "10.0.0.0/16"
+            ]
+          },
+          "remoteVirtualNetwork": {
+            "id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-hub/providers/Microsoft.Network/virtualNetworks/vnet-hub"
+          },
+          "useRemoteGateways": true
+        }
+      ],
+      "vnet_id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-spoke/providers/Microsoft.Network/virtualNetworks/vnet-spoke1"
+    }
+  ]
+}

@@ -1,0 +1,164 @@
+{
+  "firewall_rule_collection_groups": [],
+  "managed_scopes": [
+    "/subscriptions/00000000-0000-0000-0000-000000000001"
+  ],
+  "nsgs": [
+    {
+      "id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-onprem/providers/Microsoft.Network/networkSecurityGroups/nsg-netops-onprem-outside",
+      "location": "eastus2",
+      "name": "nsg-netops-onprem-outside",
+      "properties": {
+        "defaultSecurityRules": [
+          {
+            "id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-onprem/providers/Microsoft.Network/networkSecurityGroups/nsg-netops-onprem-outside/defaultSecurityRules/AllowVnetInBound",
+            "name": "AllowVnetInBound",
+            "properties": {
+              "access": "Allow",
+              "destinationAddressPrefix": "VirtualNetwork",
+              "destinationPortRange": "*",
+              "direction": "Inbound",
+              "priority": 65000,
+              "protocol": "*",
+              "sourceAddressPrefix": "VirtualNetwork",
+              "sourcePortRange": "*"
+            }
+          },
+          {
+            "id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-onprem/providers/Microsoft.Network/networkSecurityGroups/nsg-netops-onprem-outside/defaultSecurityRules/AllowAzureLoadBalancerInBound",
+            "name": "AllowAzureLoadBalancerInBound",
+            "properties": {
+              "access": "Allow",
+              "destinationAddressPrefix": "*",
+              "destinationPortRange": "*",
+              "direction": "Inbound",
+              "priority": 65001,
+              "protocol": "*",
+              "sourceAddressPrefix": "AzureLoadBalancer",
+              "sourcePortRange": "*"
+            }
+          },
+          {
+            "id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-onprem/providers/Microsoft.Network/networkSecurityGroups/nsg-netops-onprem-outside/defaultSecurityRules/DenyAllInBound",
+            "name": "DenyAllInBound",
+            "properties": {
+              "access": "Deny",
+              "destinationAddressPrefix": "*",
+              "destinationPortRange": "*",
+              "direction": "Inbound",
+              "priority": 65500,
+              "protocol": "*",
+              "sourceAddressPrefix": "*",
+              "sourcePortRange": "*"
+            }
+          },
+          {
+            "id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-onprem/providers/Microsoft.Network/networkSecurityGroups/nsg-netops-onprem-outside/defaultSecurityRules/AllowVnetOutBound",
+            "name": "AllowVnetOutBound",
+            "properties": {
+              "access": "Allow",
+              "destinationAddressPrefix": "VirtualNetwork",
+              "destinationPortRange": "*",
+              "direction": "Outbound",
+              "priority": 65000,
+              "protocol": "*",
+              "sourceAddressPrefix": "VirtualNetwork",
+              "sourcePortRange": "*"
+            }
+          },
+          {
+            "id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-onprem/providers/Microsoft.Network/networkSecurityGroups/nsg-netops-onprem-outside/defaultSecurityRules/AllowInternetOutBound",
+            "name": "AllowInternetOutBound",
+            "properties": {
+              "access": "Allow",
+              "destinationAddressPrefix": "Internet",
+              "destinationPortRange": "*",
+              "direction": "Outbound",
+              "priority": 65001,
+              "protocol": "*",
+              "sourceAddressPrefix": "*",
+              "sourcePortRange": "*"
+            }
+          },
+          {
+            "id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-onprem/providers/Microsoft.Network/networkSecurityGroups/nsg-netops-onprem-outside/defaultSecurityRules/DenyAllOutBound",
+            "name": "DenyAllOutBound",
+            "properties": {
+              "access": "Deny",
+              "destinationAddressPrefix": "*",
+              "destinationPortRange": "*",
+              "direction": "Outbound",
+              "priority": 65500,
+              "protocol": "*",
+              "sourceAddressPrefix": "*",
+              "sourcePortRange": "*"
+            }
+          }
+        ],
+        "securityRules": [
+          {
+            "id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-onprem/providers/Microsoft.Network/networkSecurityGroups/nsg-netops-onprem-outside/securityRules/sc02-block-ike",
+            "name": "sc02-block-ike",
+            "properties": {
+              "access": "Deny",
+              "destinationAddressPrefix": "*",
+              "destinationPortRanges": [
+                "500",
+                "4500"
+              ],
+              "direction": "Inbound",
+              "priority": 100,
+              "protocol": "Udp",
+              "sourceAddressPrefix": "*",
+              "sourceAddressPrefixes": [],
+              "sourcePortRange": "*"
+            }
+          },
+          {
+            "id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-onprem/providers/Microsoft.Network/networkSecurityGroups/nsg-netops-onprem-outside/securityRules/allow-ipsec-inbound",
+            "name": "allow-ipsec-inbound",
+            "properties": {
+              "access": "Allow",
+              "destinationAddressPrefix": "*",
+              "destinationPortRanges": [
+                "500",
+                "4500"
+              ],
+              "direction": "Inbound",
+              "priority": 1000,
+              "protocol": "Udp",
+              "sourceAddressPrefix": "Internet",
+              "sourceAddressPrefixes": [],
+              "sourcePortRange": "*"
+            }
+          },
+          {
+            "id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-onprem/providers/Microsoft.Network/networkSecurityGroups/nsg-netops-onprem-outside/securityRules/allow-intra-lab-inbound",
+            "name": "allow-intra-lab-inbound",
+            "properties": {
+              "access": "Allow",
+              "destinationAddressPrefix": "*",
+              "destinationPortRange": "*",
+              "destinationPortRanges": [],
+              "direction": "Inbound",
+              "priority": 1010,
+              "protocol": "*",
+              "sourceAddressPrefixes": [
+                "10.0.0.0/16",
+                "10.1.0.0/16",
+                "10.100.0.0/16"
+              ],
+              "sourcePortRange": "*"
+            }
+          }
+        ],
+        "subnets": [
+          {
+            "id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-onprem/providers/Microsoft.Network/virtualNetworks/vnet-onprem/subnets/snet-outside"
+          }
+        ]
+      },
+      "type": "Microsoft.Network/networkSecurityGroups"
+    }
+  ]
+}

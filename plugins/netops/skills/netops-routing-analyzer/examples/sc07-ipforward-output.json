@@ -1,0 +1,80 @@
+{
+  "evidence_gaps": [],
+  "findings": [
+    {
+      "citations": [
+        "https://learn.microsoft.com/azure/virtual-network/virtual-network-network-interface",
+        "https://learn.microsoft.com/azure/virtual-network/virtual-networks-udr-overview",
+        "https://learn.microsoft.com/troubleshoot/azure/virtual-network/virtual-network-troubleshoot-nva"
+      ],
+      "evidence": {
+        "checks": [
+          {
+            "check": "large",
+            "detail": "64 KB download timed out",
+            "payload_bytes": 65536,
+            "result": "timeout",
+            "size": "large"
+          },
+          {
+            "check": "small",
+            "detail": "curl http://10.100.1.4/ from vm-app timed out; tunnel and BGP Connected",
+            "payload_bytes": 64,
+            "result": "timeout",
+            "size": "small"
+          }
+        ],
+        "control_plane": "no black hole, peering, asymmetry or NIC IP forwarding fault found",
+        "path": "spoke1-app-to-onprem-web",
+        "via_nva": [
+          "10.100.0.4"
+        ]
+      },
+      "id": "RT-NVA-DATAPLANE:spoke1-app-to-onprem-web",
+      "recommendation": "Azure-side routing and NIC IP forwarding look correct, but traffic through the NVA fails. The control plane cannot see the appliance OS: confirm IP forwarding is enabled inside the guest operating system and that the NVA's own firewall / routing allows the flow.",
+      "remediation_script": "# Human review required. Read-only verification (the agent never runs writes):\naz network nic list -g <nva-resource-group> --query \"[?ipConfigurations[?privateIPAddress=='10.100.0.4']].{name:name,ipForwarding:enableIPForwarding}\"\n# Guest OS (run by a human on the NVA): confirm IP forwarding is enabled in the operating system and the NVA firewall permits the flow.",
+      "resource_id": "",
+      "severity": "high",
+      "skill": "netops-routing-analyzer",
+      "title": "Path spoke1-app-to-onprem-web via NVA 10.100.0.4: data plane fails, control plane healthy \u2014 check guest OS IP forwarding / NVA firewall"
+    }
+  ],
+  "kpis": {
+    "asymmetric_paths": 1
+  },
+  "metrics": [
+    {
+      "detail": "UDR/next-hop None, peering down, asymmetric NVA path, NVA forwarding or MTU black hole",
+      "label": "Black-holed / asymmetric paths",
+      "tone": "critical",
+      "value": "1"
+    },
+    {
+      "detail": "peeringState == Connected",
+      "label": "Peerings connected",
+      "tone": "neutral",
+      "value": "0/0"
+    },
+    {
+      "detail": "1 NVA / firewall next hop IP(s) referenced",
+      "label": "UDRs analyzed",
+      "tone": "neutral",
+      "value": "1"
+    },
+    {
+      "detail": "enableIPForwarding on NICs that own a VirtualAppliance next hop IP",
+      "label": "NVA NICs with IP forwarding off",
+      "tone": "good",
+      "value": "0"
+    },
+    {
+      "detail": "client probes / Connection Monitor results",
+      "label": "Data-plane checks passed",
+      "tone": "warning",
+      "value": "0/2"
+    }
+  ],
+  "partial": false,
+  "skill": "netops-routing-analyzer",
+  "warnings": []
+}

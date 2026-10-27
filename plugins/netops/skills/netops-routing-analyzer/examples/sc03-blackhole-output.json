@@ -1,0 +1,75 @@
+{
+  "evidence_gaps": [
+    "path_checks not collected (client probe results or NWConnectionMonitorTestResult); data-plane checks skipped."
+  ],
+  "findings": [
+    {
+      "citations": [
+        "https://learn.microsoft.com/azure/virtual-network/virtual-networks-udr-overview",
+        "https://learn.microsoft.com/rest/api/virtualnetwork/route-tables/get"
+      ],
+      "evidence": {
+        "addressPrefix": "10.100.0.0/16",
+        "associated_subnets": [
+          "snet-app"
+        ],
+        "nextHopType": "None",
+        "observed_on": [
+          {
+            "addressPrefix": "10.100.0.0/16",
+            "nic": "nic-vm-app",
+            "route": "sc03-blackhole",
+            "source": "User",
+            "state": "Active"
+          }
+        ],
+        "route": "sc03-blackhole"
+      },
+      "id": "RT-BLACKHOLE:rt-spoke1:sc03-blackhole",
+      "recommendation": "Traffic routed to the None next hop type is dropped. Confirm whether this route is intentional; if not, point it at the correct next hop (VirtualAppliance / VirtualNetworkGateway) or remove it so the system or BGP route applies.",
+      "remediation_script": "# Human review required. Read-only verification (the agent never runs writes):\naz network route-table route show -g rg-netops-spoke --route-table-name rt-spoke1 -n sc03-blackhole\naz network route-table show -g rg-netops-spoke -n rt-spoke1 --query \"subnets[].id\"\n# Change (review before running):\n# az network route-table route delete -g rg-netops-spoke --route-table-name rt-spoke1 -n sc03-blackhole",
+      "resource_id": "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg-netops-spoke/providers/Microsoft.Network/routeTables/rt-spoke1",
+      "severity": "critical",
+      "skill": "netops-routing-analyzer",
+      "title": "UDR sc03-blackhole in rt-spoke1 black-holes 10.100.0.0/16 (next hop None)"
+    }
+  ],
+  "kpis": {
+    "asymmetric_paths": 1
+  },
+  "metrics": [
+    {
+      "detail": "UDR/next-hop None, peering down, asymmetric NVA path, NVA forwarding or MTU black hole",
+      "label": "Black-holed / asymmetric paths",
+      "tone": "critical",
+      "value": "1"
+    },
+    {
+      "detail": "peeringState == Connected",
+      "label": "Peerings connected",
+      "tone": "good",
+      "value": "2/2"
+    },
+    {
+      "detail": "0 NVA / firewall next hop IP(s) referenced",
+      "label": "UDRs analyzed",
+      "tone": "neutral",
+      "value": "1"
+    },
+    {
+      "detail": "enableIPForwarding on NICs that own a VirtualAppliance next hop IP",
+      "label": "NVA NICs with IP forwarding off",
+      "tone": "good",
+      "value": "0"
+    },
+    {
+      "detail": "client probes / Connection Monitor results",
+      "label": "Data-plane checks passed",
+      "tone": "neutral",
+      "value": "0/0"
+    }
+  ],
+  "partial": true,
+  "skill": "netops-routing-analyzer",
+  "warnings": []
+}
