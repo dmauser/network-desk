@@ -43,5 +43,16 @@ jobs:
         run: node scripts/netops/build-netops.mjs --check
       - name: Install test dependencies
         run: pip install -r requirements-dev.txt
+      - name: Rendered artifacts drift check
+        run: |
+          python plugins/netops/scheduled-tasks/render_tasks.py check
+          python plugins/netops/agents/render_agent_yaml.py check
+          python plugins/netops/response-plans/validate_plans.py check
+      - name: Installer syntax check
+        run: |
+          bash -n plugins/netops/install-api.sh
+          bash -n plugins/netops/deploy/deploy.sh
       - name: NetOps tests
         run: python -m pytest -q tests/netops $(test -d evals/netops && echo evals/netops)
+      - name: NetOps fault-scenario evals
+        run: python evals/netops/run.py
