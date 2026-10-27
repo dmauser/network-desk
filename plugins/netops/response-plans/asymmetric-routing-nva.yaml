@@ -1,0 +1,55 @@
+# NetOps incident response plan spec (documentation + validation input, NOT an import format).
+# Azure SRE Agent response plans are created in the portal (Builder > Incident response plans)
+# or by a human with `azmcp sreagent incidents plans create`. See README.md.
+apiVersion: netops.network-desk/v1
+kind: IncidentResponsePlanSpec
+metadata:
+  name: netops-asymmetric-routing-nva
+  displayName: Asymmetric routing through NVA / firewall
+  description: >-
+    One-way traffic, stateful drops or session resets through a network virtual appliance or
+    Azure Firewall caused by mismatched forward/return paths. Routes the alert to netops-investigator.
+filter:
+  platform: AzureMonitor
+  severities: [Sev1, Sev2]
+  titleContains: netops-routing
+handler:
+  customAgent: netops-investigator
+  autonomy: Review
+  reinvestigationCooldown:
+    enabled: true
+    hours: 3
+alertSignals:
+  - resourceType: Microsoft.Network/loadBalancers
+    metric: DipAvailability
+    hint: Health probe status of NVA instances behind an internal load balancer.
+  - resourceType: Microsoft.Network/loadBalancers
+    metric: VipAvailability
+    hint: Data path availability of the NVA load balancer frontend.
+  - resourceType: Microsoft.Network/azureFirewalls
+    metric: FirewallHealth
+    hint: Firewall health state.
+investigation:
+  primarySkill: netops-routing-analyzer
+  followupSkills: [netops-flow-insights, netops-nsg-firewall-audit]
+  steps:
+    - Resolve the managed scope (netops-managed-scope) and stop if the affected route tables, NICs or NVAs are outside it.
+    - Run netops-routing-analyzer for both directions (source and destination NIC effective routes, UDR next hops, gateway route propagation, peering flags).
+    - Chain netops-flow-insights to confirm one-way flows in VNet/NSG flow logs.
+    - Chain netops-nsg-firewall-audit when the return path crosses a firewall or NSG that might deny it.
+    - Record in-guest NVA state (IP forwarding inside the OS, appliance routing table) as an evidence gap unless the operator provides it.
+    - Render the triage report with netops-report-renderer and propose UDR changes as a script for human review.
+remediation:
+  mode: human-review-only
+  note: Route table and UDR changes are written as commented-out scripts; the agent never runs them.
+azureMcp:
+  severity: high
+  services: [routing]
+  triggerCondition: One-way traffic or stateful drops through an NVA or Azure Firewall
+  agentMode: review
+citations:
+  - https://learn.microsoft.com/azure/sre-agent/incident-response-plans
+  - https://learn.microsoft.com/azure/sre-agent/response-plan
+  - https://learn.microsoft.com/azure/azure-monitor/reference/supported-metrics/microsoft-network-loadbalancers-metrics
+  - https://learn.microsoft.com/azure/azure-monitor/reference/supported-metrics/microsoft-network-azurefirewalls-metrics
+  - https://learn.microsoft.com/azure/virtual-network/virtual-networks-udr-overview

@@ -1,0 +1,50 @@
+# NetOps incident response plan spec (documentation + validation input, NOT an import format).
+# Azure SRE Agent response plans are created in the portal (Builder > Incident response plans)
+# or by a human with `azmcp sreagent incidents plans create`. See README.md.
+apiVersion: netops.network-desk/v1
+kind: IncidentResponsePlanSpec
+metadata:
+  name: netops-paas-unreachable-private-endpoint
+  displayName: PaaS unreachable via private endpoint
+  description: >-
+    A PaaS service (Storage, SQL, Key Vault, ...) is unreachable or resolves to a public IP from a
+    VNet that should use its private endpoint. Routes the alert to netops-investigator.
+filter:
+  platform: AzureMonitor
+  severities: [Sev1, Sev2]
+  titleContains: netops-pe
+handler:
+  customAgent: netops-investigator
+  autonomy: Review
+  reinvestigationCooldown:
+    enabled: true
+    hours: 3
+alertSignals:
+  - resourceType: Microsoft.Network/privateEndpoints
+    metric: PEBytesIn
+    hint: Bytes into the private endpoint drop to 0 while clients are active.
+  - resourceType: Microsoft.Network/privateEndpoints
+    metric: PEBytesOut
+    hint: Bytes out of the private endpoint drop to 0 while clients are active.
+investigation:
+  primarySkill: netops-private-endpoint-dns
+  followupSkills: [netops-routing-analyzer, netops-nsg-firewall-audit]
+  steps:
+    - Resolve the managed scope (netops-managed-scope) and stop if the private endpoint or its DNS zones are outside it.
+    - Run netops-private-endpoint-dns (connection approval state, private DNS zone, VNet links, A records versus PE IPs, client-side resolution evidence).
+    - If DNS is correct, chain netops-routing-analyzer (UDR forcing PE traffic through an NVA or firewall) and netops-nsg-firewall-audit (rules denying the PE subnet).
+    - Record unresolvable client-side data (custom DNS servers, on-premises forwarders) as an evidence gap.
+    - Render the triage report with netops-report-renderer and propose record/link fixes as a script for human review.
+remediation:
+  mode: human-review-only
+  note: DNS record or VNet-link fixes are written as commented-out az commands; the agent never runs them.
+azureMcp:
+  severity: high
+  services: [private-endpoint]
+  triggerCondition: PaaS service unreachable through its private endpoint or resolving to a public IP
+  agentMode: review
+citations:
+  - https://learn.microsoft.com/azure/sre-agent/incident-response-plans
+  - https://learn.microsoft.com/azure/sre-agent/response-plan
+  - https://learn.microsoft.com/azure/azure-monitor/reference/supported-metrics/microsoft-network-privateendpoints-metrics
+  - https://learn.microsoft.com/azure/private-link/private-endpoint-dns

@@ -1,0 +1,67 @@
+# NetOps incident response plan spec (documentation + validation input, NOT an import format).
+# Azure SRE Agent response plans are created in the portal (Builder > Incident response plans)
+# or by a human with `azmcp sreagent incidents plans create`. See README.md.
+apiVersion: netops.network-desk/v1
+kind: IncidentResponsePlanSpec
+metadata:
+  name: netops-latency-drops-snat
+  displayName: Latency, packet drops or SNAT exhaustion
+  description: >-
+    Outbound connection failures, intermittent timeouts, rising latency or dropped packets on
+    load balancer, NAT gateway or Azure Firewall egress. Routes the alert to netops-investigator.
+filter:
+  platform: AzureMonitor
+  severities: [Sev1, Sev2]
+  titleContains: netops-egress
+handler:
+  customAgent: netops-investigator
+  autonomy: Review
+  reinvestigationCooldown:
+    enabled: true
+    hours: 3
+alertSignals:
+  - resourceType: Microsoft.Network/loadBalancers
+    metric: UsedSnatPorts
+    hint: Compare with AllocatedSnatPorts per backend instance.
+  - resourceType: Microsoft.Network/loadBalancers
+    metric: SnatConnectionCount
+    hint: Split by the ConnectionState dimension to find failed SNAT connections.
+  - resourceType: Microsoft.Network/natGateways
+    metric: PacketDropCount
+    hint: Dropped packets on the NAT gateway.
+  - resourceType: Microsoft.Network/natGateways
+    metric: SNATConnectionCount
+    hint: Split by the ConnectionState dimension.
+  - resourceType: Microsoft.Network/azureFirewalls
+    metric: SNATPortUtilization
+    hint: Percentage of outbound SNAT ports in use.
+  - resourceType: Microsoft.Network/azureFirewalls
+    metric: FirewallLatencyPng
+    hint: Firewall latency probe.
+  - resourceType: Microsoft.Network/virtualNetworkGateways
+    metric: TunnelEgressPacketDropCount
+    hint: Packet drops on hybrid tunnels (chain netops-hybrid-health).
+investigation:
+  primarySkill: netops-snat-egress
+  followupSkills: [netops-flow-insights, netops-routing-analyzer]
+  steps:
+    - Resolve the managed scope (netops-managed-scope) and stop if the alerted resource is outside it.
+    - Run netops-snat-egress (SNAT utilization and failed connections per LB/NAT gateway/firewall, outbound rule allocation).
+    - Chain netops-flow-insights for denied or dropped flows in VNet/NSG flow logs and Traffic Analytics over the alert window.
+    - If drops are path-dependent, chain netops-routing-analyzer (asymmetric next hops, MTU black-hole indicators).
+    - Render the triage report with netops-report-renderer and propose NAT gateway or outbound-rule changes as a script for human review.
+remediation:
+  mode: human-review-only
+  note: Scaling, outbound-rule or NAT gateway changes are written as commented-out scripts; the agent never runs them.
+azureMcp:
+  severity: high
+  services: [egress]
+  triggerCondition: Outbound connection failures, latency or packet drops on load balancer, NAT gateway or firewall
+  agentMode: review
+citations:
+  - https://learn.microsoft.com/azure/sre-agent/incident-response-plans
+  - https://learn.microsoft.com/azure/sre-agent/response-plan
+  - https://learn.microsoft.com/azure/azure-monitor/reference/supported-metrics/microsoft-network-loadbalancers-metrics
+  - https://learn.microsoft.com/azure/azure-monitor/reference/supported-metrics/microsoft-network-natgateways-metrics
+  - https://learn.microsoft.com/azure/azure-monitor/reference/supported-metrics/microsoft-network-azurefirewalls-metrics
+  - https://learn.microsoft.com/azure/azure-monitor/reference/supported-metrics/microsoft-network-virtualnetworkgateways-metrics

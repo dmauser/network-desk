@@ -1,0 +1,59 @@
+# NetOps incident response plan spec (documentation + validation input, NOT an import format).
+# Azure SRE Agent response plans are created in the portal (Builder > Incident response plans)
+# or by a human with `azmcp sreagent incidents plans create`. See README.md.
+apiVersion: netops.network-desk/v1
+kind: IncidentResponsePlanSpec
+metadata:
+  name: netops-hybrid-connectivity-down
+  displayName: Hybrid connectivity down (VPN / ExpressRoute)
+  description: >-
+    Site-to-site VPN tunnel or ExpressRoute circuit/connection down, BGP peer lost, or learned
+    route count collapsed. Routes the alert to netops-investigator for read-only triage.
+filter:
+  platform: AzureMonitor
+  severities: [Sev0, Sev1]
+  titleContains: netops-hybrid
+handler:
+  customAgent: netops-investigator
+  autonomy: Review
+  reinvestigationCooldown:
+    enabled: true
+    hours: 3
+alertSignals:
+  - resourceType: Microsoft.Network/virtualNetworkGateways
+    metric: BgpPeerStatus
+    hint: BGP peer status per BgpPeerAddress; alert when a peer drops to 0.
+  - resourceType: Microsoft.Network/virtualNetworkGateways
+    metric: TunnelAverageBandwidth
+    hint: Tunnel bandwidth per ConnectionName; sustained 0 on an expected-active tunnel.
+  - resourceType: Microsoft.Network/virtualNetworkGateways
+    metric: BgpRoutesLearned
+    hint: Sharp drop in learned routes (withdrawn prefixes / partial outage).
+  - resourceType: Microsoft.Network/expressRouteCircuits
+    metric: BgpAvailability
+    hint: BGP availability per peer (primary/secondary MSEE).
+  - resourceType: Microsoft.Network/expressRouteCircuits
+    metric: ArpAvailability
+    hint: Layer-2 ARP availability per peer.
+investigation:
+  primarySkill: netops-hybrid-health
+  followupSkills: [netops-routing-analyzer]
+  steps:
+    - Resolve the managed scope (netops-managed-scope) and stop if the alerted gateway/circuit is outside it.
+    - Run netops-hybrid-health for the alerted gateway/circuit (connection status, BGP peer status, learned/advertised routes, circuit provisioning state).
+    - If the control plane is healthy but traffic still fails, chain netops-routing-analyzer on the affected spoke NICs (effective routes, UDR next hops, peering flags).
+    - Record any data the agent could not collect (for example on-premises device state) as an evidence gap, never as a finding.
+    - Render the triage report with netops-report-renderer and propose remediation as a script for human review.
+remediation:
+  mode: human-review-only
+  note: Reset-connection or gateway changes are written as commented-out scripts; the agent never runs them.
+azureMcp:
+  severity: critical
+  services: [hybrid-connectivity]
+  triggerCondition: VPN tunnel, ExpressRoute circuit or BGP peer down
+  agentMode: review
+citations:
+  - https://learn.microsoft.com/azure/sre-agent/incident-response-plans
+  - https://learn.microsoft.com/azure/sre-agent/response-plan
+  - https://learn.microsoft.com/azure/azure-monitor/reference/supported-metrics/microsoft-network-virtualnetworkgateways-metrics
+  - https://learn.microsoft.com/azure/azure-monitor/reference/supported-metrics/microsoft-network-expressroutecircuits-metrics
